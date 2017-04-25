@@ -12,7 +12,3 @@
 {$IFDEF VER260} {$DEFINE XE3UP} {$ENDIF} // XE.5
 {$IFDEF VER250} {$DEFINE XE3UP} {$ENDIF} // XE.4
 {$IFDEF VER240} {$DEFINE XE3UP} {$ENDIF} // XE.3
-
-// Quando ativo, as propriedades do TRpTextToSpeech são exibidas em uma lista,
-// caso contrario em uma janela de seleção
-{$DEFINE SPEECH_LIST}

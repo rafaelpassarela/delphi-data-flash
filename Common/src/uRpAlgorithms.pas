@@ -1,4 +1,4 @@
-unit uRpAlgoritmos;
+unit uRpAlgorithms;
 
 {$I RpInc.inc}
 
@@ -13,7 +13,7 @@ uses
   ZLib, IdCoderMIME, IdHashMessageDigest, IdHash;
 
 type
-  Algoritimos = class
+  Algorithms = class
   public
     class procedure StreamCompression(const AInStream : TStream; const AOutStream : TStream);
     class procedure StreamDecompression(const AInStream : TStream; const AOutStream : TStream);
@@ -29,9 +29,9 @@ type
 
 implementation
 
-{ Algorithm }
+{ Algorithms }
 
-class function Algoritimos.Base64CompressedString(const AString: string): string;
+class function Algorithms.Base64CompressedString(const AString: string): string;
 var
   lInputStream: TStringStream;
   lOutputStream: TStringStream;
@@ -39,15 +39,15 @@ begin
   lInputStream := TStringStream.Create(AString);
   lOutputStream := TStringStream.Create('');
   try
-    Algoritimos.StreamCompression(lInputStream, lOutputStream);
-    Algoritimos.Base64Encode(lOutputStream, Result);
+    Algorithms.StreamCompression(lInputStream, lOutputStream);
+    Algorithms.Base64Encode(lOutputStream, Result);
   finally
     lInputStream.Free;
     lOutputStream.Free;
   end;
 end;
 
-class procedure Algoritimos.Base64Decode(const ABase64String: string; const OutStream: TStream);
+class procedure Algorithms.Base64Decode(const ABase64String: string; const OutStream: TStream);
 var
   lDecode: TIdDecoderMIME;
 begin
@@ -66,7 +66,7 @@ begin
   end;
 end;
 
-class procedure Algoritimos.Base64Decode(const ABase64String: string; var OutString: string);
+class procedure Algorithms.Base64Decode(const ABase64String: string; var OutString: string);
 var
   lStrStream: TStringStream;
 begin
@@ -80,7 +80,7 @@ begin
   end;
 end;
 
-class function Algoritimos.Base64DecompressedString(const AString: string): string;
+class function Algorithms.Base64DecompressedString(const AString: string): string;
 var
   lInputStream: TStringStream;
   lOutputStream: TStringStream;
@@ -88,8 +88,8 @@ begin
   lInputStream := TStringStream.Create('');
   lOutputStream := TStringStream.Create('');
   try
-    Algoritimos.Base64Decode(AString, lInputStream);
-    Algoritimos.StreamDecompression(lInputStream, lOutputStream);
+    Algorithms.Base64Decode(AString, lInputStream);
+    Algorithms.StreamDecompression(lInputStream, lOutputStream);
     Result := lOutputStream.DataString;
   finally
     lInputStream.Free;
@@ -97,7 +97,7 @@ begin
   end;
 end;
 
-class procedure Algoritimos.Base64Encode(const AInString: string; var OutString: string);
+class procedure Algorithms.Base64Encode(const AInString: string; var OutString: string);
 var
   lStrStream: TStringStream;
 begin
@@ -110,7 +110,7 @@ begin
   end;
 end;
 
-class procedure Algoritimos.Base64Encode(const AInStream: TStream; var OutString: string);
+class procedure Algorithms.Base64Encode(const AInStream: TStream; var OutString: string);
 var
   lEncode: TIdEncoderMIME;
 begin
@@ -125,7 +125,7 @@ begin
   end;
 end;
 
-class function Algoritimos.MD5FromFile(const AFileName: TFileName): string;
+class function Algorithms.MD5FromFile(const AFileName: TFileName): string;
 var
   lIdMD5 : TIdHashMessageDigest5;
   lFileStream : TFileStream;
@@ -152,7 +152,7 @@ begin
   end;
 end;
 
-class function Algoritimos.MD5FromString(const AString: string): string;
+class function Algorithms.MD5FromString(const AString: string): string;
 var
   lIdMD5 : TIdHashMessageDigest5;
 begin
@@ -169,7 +169,7 @@ begin
   end;
 end;
 
-class procedure Algoritimos.StreamCompression(const AInStream, AOutStream: TStream);
+class procedure Algorithms.StreamCompression(const AInStream, AOutStream: TStream);
 var
   lSourceStream: TCompressionStream;
 begin
@@ -188,7 +188,7 @@ begin
   AOutStream.Position := 0;
 end;
 
-class procedure Algoritimos.StreamDecompression(const AInStream, AOutStream: TStream);
+class procedure Algorithms.StreamDecompression(const AInStream, AOutStream: TStream);
 const
   BufferSize = 4096;
 var

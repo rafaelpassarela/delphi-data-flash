@@ -1,31 +1,28 @@
-package RpCriptografia;
+package RpEncryption;
 
 {$R *.res}
-{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
-{$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'RafaPack - Pacote de Criptografia Runtime'}
+{$DESCRIPTION 'DataFlash - Runtime Encryption Package - Rafael Passarela'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
@@ -33,11 +30,10 @@ requires
   rtl,
   IndySystem,
   IndyProtocols,
-  IndyCore,
-  RpRegister;
+  IndyCore;
 
 contains
-  uRpAlgoritmos in 'src\uRpAlgoritmos.pas',
-  uRpCriptografia in 'src\uRpCriptografia.pas';
+  uRpAlgorithms in 'src\uRpAlgorithms.pas',
+  uRpEncryption in 'src\uRpEncryption.pas';
 
 end.

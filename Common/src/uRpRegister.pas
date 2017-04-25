@@ -21,11 +21,11 @@ var
   AboutBoxIndex: Integer = 0;
 
 resourcestring
-  resPackageName = 'RafaPack 2015';
+  resPackageName = 'Delphi Data Flash';
   resLicense = 'rafaelpassarela@gmail.com';
   resAboutCopyright = 'Rafael Passarela';
-  resAboutTitle = 'Delphi Components - RafaPack';
-  resAboutDescription = 'www.rafaelpassarela.com.br ;)';
+  resAboutTitle = 'Delphi Data Flash - Rafael Passarela';
+  resAboutDescription = 'www.mrrafael.ca ;)';
 
 procedure RegisterSplashScreen;
 var
@@ -109,4 +109,5 @@ initialization
 //    BitmapFromResource('BDSSPLASHDEMO').Handle, true, 'Some licencing info',
 //    '[Text appended after caption]');
   *)
+
 end.

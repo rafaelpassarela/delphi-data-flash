@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{0E32C357-5BC0-45B1-A236-EB584FC45F0B}</ProjectGuid>
-			<MainSource>RpRegister.dpk</MainSource>
+			<ProjectGuid>{0F81BF7F-2BAC-472D-9AF5-70D5F4077001}</ProjectGuid>
+			<MainSource>RpEncryption.dpk</MainSource>
 			<ProjectVersion>18.0</ProjectVersion>
 			<FrameworkType>None</FrameworkType>
 			<Base>True</Base>
@@ -20,22 +20,29 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Platform)'=='Win32' and '$(Cfg_1)'=='true' or '$(Cfg_1_Win32)'!=''">
+			<Cfg_1_Win32>true</Cfg_1_Win32>
+			<CfgParent>Cfg_1</CfgParent>
+			<Cfg_1>true</Cfg_1>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
 			<Cfg_2>true</Cfg_2>
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<SanitizedProjectName>RpRegister</SanitizedProjectName>
+			<SanitizedProjectName>RpCriptografia</SanitizedProjectName>
+			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_Description>DataFlash - Registration Package - Rafael Passarela</DCC_Description>
+			<DCC_Description>DataFlash - Runtime Encryption Package - Rafael Passarela</DCC_Description>
 			<DCC_DcpOutput>..\Bin\Dcp</DCC_DcpOutput>
+			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
+			<DCC_CBuilderOutput>All</DCC_CBuilderOutput>
+			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
 			<GenPackage>true</GenPackage>
 			<GenDll>true</GenDll>
-			<DCC_CBuilderOutput>All</DCC_CBuilderOutput>
-			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
-			<DesignOnlyPackage>true</DesignOnlyPackage>
-			<DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
+			<BRCC_OutputDir>$(BDSCOMMONDIR)\Dcu\$(Platform)</BRCC_OutputDir>
 			<DCC_DcuOutput>..\Bin\Dcu</DCC_DcuOutput>
 			<DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_E>false</DCC_E>
@@ -52,6 +59,9 @@
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
 			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
@@ -59,13 +69,15 @@
 			<DCC_DebugInformation>0</DCC_DebugInformation>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="RpRegister.dpk">
+			<DelphiCompile Include="RpEncryption.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="rtl.dcp"/>
-			<DCCReference Include="designide.dcp"/>
-			<DCCReference Include="src\uRpRegister.pas"/>
-			<None Include="src\RpInc.inc"/>
+			<DCCReference Include="IndySystem.dcp"/>
+			<DCCReference Include="IndyProtocols.dcp"/>
+			<DCCReference Include="IndyCore.dcp"/>
+			<DCCReference Include="src\uRpAlgorithms.pas"/>
+			<DCCReference Include="src\uRpEncryption.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -85,9 +97,6 @@
 			<Borland.ProjectType>Package</Borland.ProjectType>
 			<BorlandProject>
 				<Delphi.Personality>
-					<Source>
-						<Source Name="MainSource">RpRegister.dpk</Source>
-					</Source>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
@@ -128,6 +137,9 @@
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k150.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp150.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
+					<Source>
+						<Source Name="MainSource">RpEncryption.dpk</Source>
+					</Source>
 				</Delphi.Personality>
 				<Deployment Version="2">
 					<DeployFile Class="DependencyModule" LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib">
@@ -150,28 +162,7 @@
 							<Overwrite>true</Overwrite>
 						</Platform>
 					</DeployFile>
-					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="C:\Users\Public\Documents\Embarcadero\Studio\16.0\Bpl\RpRegister.rsm">
-						<Platform Name="Win32">
-							<RemoteName>RpRegister.rsm</RemoteName>
-							<Overwrite>true</Overwrite>
-						</Platform>
-					</DeployFile>
-					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="C:\Users\Public\Documents\Embarcadero\Studio\16.0\Bpl\RpRegister.bpl">
-						<Platform Name="Win32">
-							<RemoteName>RpRegister.bpl</RemoteName>
-							<Overwrite>true</Overwrite>
-						</Platform>
-					</DeployFile>
-					<DeployClass Name="DependencyModule">
-						<Platform Name="Win32">
-							<Operation>0</Operation>
-							<Extensions>.dll;.bpl</Extensions>
-						</Platform>
-						<Platform Name="OSX32">
-							<Operation>1</Operation>
-							<Extensions>.dylib</Extensions>
-						</Platform>
-					</DeployClass>
+					<DeployClass Name="ProjectiOSDeviceResourceRules"/>
 					<DeployClass Name="ProjectOSXResource">
 						<Platform Name="OSX32">
 							<RemoteDir>Contents\Resources</RemoteDir>
@@ -485,7 +476,16 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
-					<DeployClass Name="ProjectiOSDeviceResourceRules"/>
+					<DeployClass Name="DependencyModule">
+						<Platform Name="Win32">
+							<Operation>0</Operation>
+							<Extensions>.dll;.bpl</Extensions>
+						</Platform>
+						<Platform Name="OSX32">
+							<Operation>1</Operation>
+							<Extensions>.dylib</Extensions>
+						</Platform>
+					</DeployClass>
 					<ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
 					<ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
 					<ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
@@ -495,6 +495,7 @@
 					<ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
 				</Deployment>
 				<Platforms>
+					<Platform value="Android">False</Platform>
 					<Platform value="Win64">False</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
