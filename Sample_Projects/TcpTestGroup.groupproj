@@ -1,0 +1,96 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{690F71C7-EFBE-4BD8-A160-D9B2D357177F}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="Client\Client.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Server\Server.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\Common\RpCriptografia.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\..\Functions\RpCommonFunctions.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\LRDataFlashTCPcomm.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\LRDataFlashTCPdcomm.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="Client">
+			<MSBuild Projects="Client\Client.dproj"/>
+		</Target>
+		<Target Name="Client:Clean">
+			<MSBuild Projects="Client\Client.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="Client:Make">
+			<MSBuild Projects="Client\Client.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Server">
+			<MSBuild Projects="Server\Server.dproj"/>
+		</Target>
+		<Target Name="Server:Clean">
+			<MSBuild Projects="Server\Server.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="Server:Make">
+			<MSBuild Projects="Server\Server.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="RpCriptografia">
+			<MSBuild Projects="..\..\Common\RpCriptografia.dproj"/>
+		</Target>
+		<Target Name="RpCriptografia:Clean">
+			<MSBuild Projects="..\..\Common\RpCriptografia.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="RpCriptografia:Make">
+			<MSBuild Projects="..\..\Common\RpCriptografia.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="RpCommonFunctions">
+			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj"/>
+		</Target>
+		<Target Name="RpCommonFunctions:Clean">
+			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="RpCommonFunctions:Make">
+			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="LRDataFlashTCPcomm">
+			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj"/>
+		</Target>
+		<Target Name="LRDataFlashTCPcomm:Clean">
+			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="LRDataFlashTCPcomm:Make">
+			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="LRDataFlashTCPdcomm">
+			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj"/>
+		</Target>
+		<Target Name="LRDataFlashTCPdcomm:Clean">
+			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="LRDataFlashTCPdcomm:Make">
+			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="Client;Server;RpCriptografia;RpCommonFunctions;LRDataFlashTCPcomm;LRDataFlashTCPdcomm"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="Client:Clean;Server:Clean;RpCriptografia:Clean;RpCommonFunctions:Clean;LRDataFlashTCPcomm:Clean;LRDataFlashTCPdcomm:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="Client:Make;Server:Make;RpCriptografia:Make;RpCommonFunctions:Make;LRDataFlashTCPcomm:Make;LRDataFlashTCPdcomm:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>

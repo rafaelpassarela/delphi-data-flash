@@ -1,0 +1,57 @@
+package RpCommonFunctions;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'RafaPack - Pacote de Funções Comuns Runtime'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  rtl,
+  vclimg,
+  IndySystem,
+  IndyProtocols,
+  IndyCore,
+  dbrtl,
+  RpCriptografia;
+
+contains
+  uRpStringFunctions in 'src\uRpStringFunctions.pas',
+  uRpWindowsFunctions in 'src\uRpWindowsFunctions.pas',
+  uRpMessageFunctions in 'src\uRpMessageFunctions.pas',
+  uRpTypes in 'src\uRpTypes.pas',
+  uRpFileHelper in 'src\uRpFileHelper.pas',
+  uRpFields in 'src\uRpFields.pas',
+  uRpColumnsDefs in 'src\uRpColumnsDefs.pas',
+  uRpSystem in 'src\uRpSystem.pas',
+  uRpJSONCommonResStrs in 'src\uRpJSONCommonResStrs.pas',
+  uRpJSONBase in 'src\uRpJSONBase.pas',
+  uRpJSONPlatform in 'src\uRpJSONPlatform.pas',
+  uRpDateTimeFunctions in 'src\uRpDateTimeFunctions.pas',
+  uRpJSONRequest in 'src\uRpJSONRequest.pas',
+  uRpApplicationUtil in 'src\uRpApplicationUtil.pas';
+
+end.

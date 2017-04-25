@@ -1,0 +1,67 @@
+package LRDataFlashTCPcomm;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'LRDataFlash - Pacote de Comunicação TCP Runtime'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  IndySystem,
+  IndyProtocols,
+  IndyCore,
+  designide,
+  dsnap,
+  RpCommonFunctions,
+  RpCriptografia;
+
+contains
+  uLRDF.Component in 'src\uLRDF.Component.pas',
+  uLRDF.Protocolo in 'src\uLRDF.Protocolo.pas',
+  fLRDF.DefinirConexao in 'src\fLRDF.DefinirConexao.pas' {frmLRDF.DefinirConexao},
+  uLRDF.Comando in 'src\uLRDF.Comando.pas',
+  uLRDF.ProxyGenerator in 'src\uLRDF.ProxyGenerator.pas',
+  uLRDF.ProxyBase in 'src\uLRDF.ProxyBase.pas',
+  uLRDF.ComandoPing in 'src\uLRDF.ComandoPing.pas',
+  uLRDF.Types in 'src\uLRDF.Types.pas',
+  uLRDF.ThreadConexao in 'src\uLRDF.ThreadConexao.pas',
+  uLRDF.Conexao in 'src\uLRDF.Conexao.pas',
+  fLRDF.ComandoView in 'src\fLRDF.ComandoView.pas' {frmComandoView},
+  fLRDF.ComandosControllerView in 'src\fLRDF.ComandosControllerView.pas' {frmComandosControllerView},
+  uLRDF.ComandController in 'src\uLRDF.ComandController.pas',
+  uLRDF.ManipuladorXML in 'src\uLRDF.ManipuladorXML.pas',
+  uLRDF.DataSet in 'src\uLRDF.DataSet.pas',
+  uLRDF.FieldFormatter in 'src\uLRDF.FieldFormatter.pas',
+  uLRDF.DataSetProvider in 'src\uLRDF.DataSetProvider.pas',
+  fLRDF.EditorComandosProvider in 'src\fLRDF.EditorComandosProvider.pas' {frmEditorComandosProvider},
+  uLRDF.ComandoAutenticar in 'src\uLRDF.ComandoAutenticar.pas',
+  uLRDF.ExecutorComandos in 'src\uLRDF.ExecutorComandos.pas',
+  uLRDF.ComandoGetCommandList in 'src\uLRDF.ComandoGetCommandList.pas',
+  uLRDF.ConvertUtils in 'src\uLRDF.ConvertUtils.pas',
+  uLRDF.ObjectReg in 'src\uLRDF.ObjectReg.pas',
+  uLRDF.ComandoHelper in 'src\uLRDF.ComandoHelper.pas';
+
+end.

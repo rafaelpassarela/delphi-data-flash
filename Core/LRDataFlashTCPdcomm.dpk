@@ -1,0 +1,50 @@
+// JCL_DEBUG_EXPERT_GENERATEJDBG OFF
+// JCL_DEBUG_EXPERT_INSERTJDBG OFF
+// JCL_DEBUG_EXPERT_DELETEMAPFILE OFF
+package LRDataFlashTCPdcomm;
+
+{$R *.res}
+{$R 'LRDataFlashTCPcommIcons.dcr'}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'LRDataFlash - Pacote de Comunicação TCP Designtime'}
+{$DESIGNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  LRDataFlashTCPcomm,
+  vcldb;
+
+contains
+  uLRDF.ComponentRegister in 'src\Editors\uLRDF.ComponentRegister.pas',
+  uLRDF.ConexaoClienteEditor in 'src\Editors\uLRDF.ConexaoClienteEditor.pas',
+  uLRDF.ComandControllerEditor in 'src\Editors\uLRDF.ComandControllerEditor.pas',
+  uLRDF.DataSetProviderList in 'src\Editors\uLRDF.DataSetProviderList.pas',
+  uLRDF.EditorComandosProvider in 'src\Editors\uLRDF.EditorComandosProvider.pas' {frmEditorComandosProvider},
+  fLRDF.EditorComandosSemAutenticacao in 'src\Editors\fLRDF.EditorComandosSemAutenticacao.pas' {FormComandosSemAutenticacao},
+  uLRDF.ExecutorComandoList in 'src\Editors\uLRDF.ExecutorComandoList.pas',
+  fLRDF.ProxyFactory.CmdSelector in 'src\Editors\fLRDF.ProxyFactory.CmdSelector.pas' {FormLRDataFlashProxyGenerator};
+
+end.
