@@ -37,9 +37,9 @@ type
   private const
     PRIVATE_KEY = 'Rp_SWORDFISH_MD5';
   public
-    class function Gerar(const AValue: string; const AMaxLength : Integer = -1): string; // -1 = All
-    class function GerarF(const pArquivo: string): string;
-    class function Validar(const AValue, AValueMD5: string): Boolean;
+    class function Generate(const AValue: string; const AMaxLength : Integer = -1): string; // -1 = All
+    class function GenerateFromFile(const AFileName: string): string;
+    class function Validate(const AValue, AValueMD5: string): Boolean;
   end;
 
   TRpEncryptionCiffer = class(TRpEncryption)
@@ -65,7 +65,7 @@ type
 
   TMyEncryption = class(TRpEncryption)
   public
-    class function Hex2Dec(const S: string): Longint;
+    class function Hex2Dec(const AValue: string): Longint;
     class function HexToString(const AValue: string): string;
     class function StringToHex(const AValue: string): string;
     class function HexToBin(const AValue : String) : String;
@@ -112,14 +112,14 @@ end;
 
 function TRpEncryptionCiffer.Encrypt(const AValue: string): string;
 var
-  lStreamValor : TStringStream;
+  lStreamValue : TStringStream;
 begin
   Result := EmptyStr;
-  lStreamValor := TStringStream.Create(AValue);
+  lStreamValue := TStringStream.Create(AValue);
   try
-    Result := FEncoder.Encode(lStreamValor);
+    Result := FEncoder.Encode(lStreamValue);
   finally
-    lStreamValor.Free;
+    lStreamValue.Free;
   end;
 end;
 
@@ -155,30 +155,30 @@ end;
 
 function TRpEncryptionCiffer.Decrypt(const AValue: string): string;
 var
-  lStreamValor : TStringStream;
+  lStreamValue : TStringStream;
 begin
   Result := EmptyStr;
-  lStreamValor := TStringStream.Create(EmptyStr);
+  lStreamValue := TStringStream.Create(EmptyStr);
   try
-    FDecoder.DecodeBegin(lStreamValor);
+    FDecoder.DecodeBegin(lStreamValue);
     FDecoder.Decode(AValue);
     FDecoder.DecodeEnd;
-    Result := lStreamValor.DataString;
+    Result := lStreamValue.DataString;
   finally
-    lStreamValor.Free;
+    lStreamValue.Free;
   end;
 end;
 
 destructor TRpEncryptionCiffer.Destroy;
 begin
-  FEncoder.Free;
-  FDecoder.Free;
+  FreeAndNil(FEncoder);
+  FreeAndNil(FDecoder);
   inherited;
 end;
 
 function TRpEncryptionCiffer.GetMD5(const AValue : string): string;
 begin
-  Result := TRpEncryptionMD5.Gerar(AValue);
+  Result := TRpEncryptionMD5.Generate(AValue);
 end;
 
 { TRpEncryption }
@@ -200,21 +200,21 @@ end;
 
 { TRpEncryptionMD5 }
 
-class function TRpEncryptionMD5.Gerar(const AValue: string; const AMaxLength : Integer): string;
+class function TRpEncryptionMD5.Generate(const AValue: string; const AMaxLength : Integer): string;
 var
   lDegestMd5: TIdHashMessageDigest5;
-  lValorDigest: string;
+  lDigestValue: string;
   lStream: TStringStream;
 begin
   lStream := TStringStream.Create('');
   lDegestMd5 := TIdHashMessageDigest5.Create;
   try
-    lValorDigest := AValue + PRIVATE_KEY;
-    lStream.WriteString(lValorDigest);
+    lDigestValue := AValue + PRIVATE_KEY;
+    lStream.WriteString(lDigestValue);
     {$IFDEF UNICODE}
-      Result := lDegestMd5.HashStringAsHex(lValorDigest);
+      Result := lDegestMd5.HashStringAsHex(lDigestValue);
     {$ELSE}
-      Result := lDegestMd5.AsHex(lDegestMd5.HashValue(lValorDigest));
+      Result := lDegestMd5.AsHex(lDegestMd5.HashValue(lDigestValue));
     {$ENDIF}
     if AMaxLength <> -1 then
       Result := Copy(Result, 1 , AMaxLength);
@@ -225,18 +225,18 @@ begin
   end;
 end;
 
-class function TRpEncryptionMD5.GerarF(const pArquivo: string): string;
+class function TRpEncryptionMD5.GenerateFromFile(const AFileName: string): string;
 var
   lDegestMd5: TIdHashMessageDigest5;
   lStream: TFileStream;
-  lValoresRandom : array[1..2048] of char;
+  lRandomValues : array[1..2048] of char;
 begin
   Randomize;
-  Result := Gerar(lValoresRandom[Random(Length(lValoresRandom))]);
+  Result := Generate(lRandomValues[Random(Length(lRandomValues))]);
 
-  if FileExists(pArquivo) then
+  if FileExists(AFileName) then
   begin
-    lStream := TFileStream.Create(pArquivo, fmOpenRead);
+    lStream := TFileStream.Create(AFileName, fmOpenRead);
     try
       lDegestMd5 := TIdHashMessageDigest5.Create;
       try
@@ -254,11 +254,11 @@ begin
   end;
 end;
 
-class function TRpEncryptionMD5.Validar(const AValue, AValueMD5: string): Boolean;
+class function TRpEncryptionMD5.Validate(const AValue, AValueMD5: string): Boolean;
 var
   lMd5Local : string;
 begin
-  lMd5Local := TRpEncryptionMD5.Gerar(AValue);
+  lMd5Local := TRpEncryptionMD5.Generate(AValue);
   Result := CompareStr(lMd5Local,AValueMD5) = 0;
 end;
 
@@ -266,111 +266,74 @@ end;
 
 class function TMyEncryption.BinToHex(const AValue: string): String;
 var
-  LStr1, LStr2: WideString;
+  lStr1, lStr2: WideString;
 begin
   {$IFDEF UNICODE}
     { Store the text in the memo to a String variable. }
-    LStr1 := AValue;
-    LStr2 := AValue;
+    lStr1 := AValue;
+    lStr2 := AValue;
     { Set the length of the String to hold the conversion. }
-    SetLength(LStr2, Length(LStr1) * 4);
+    SetLength(lStr2, Length(lStr1) * 4);
     { Call the binary to hexadecimal conversion procedure. }
-  //  BinToHex(PChar(LStr1[1]), PChar(LStr2), Length(LStr1) * SizeOf(Char));
-    Classes.BinToHex(LStr1[1], PWideChar(LStr2), Length(LStr1) * SizeOf(Char));
+    Classes.BinToHex(lStr1[1], PWideChar(lStr2), Length(lStr1) * SizeOf(Char));
     { Put the results in Memo2. }
-    Result := LStr2;
+    Result := lStr2;
   {$ELSE}
-    LStr1 := AValue;
-    LStr2 := AValue;
+    lStr1 := AValue;
+    lStr2 := AValue;
     { Set the length of the String to hold the conversion. }
-    SetLength(LStr2, Length(LStr1));
+    SetLength(lStr2, Length(lStr1));
     { Call the binary to hexadecimal conversion procedure. }
-//    HexToBin(@LStr1, PChar(LStr2), Length(LStr1) * SizeOf(LStr2) - 1);
-    Classes.HexToBin(@LStr1, @LStr2, Length(LStr1) * SizeOf(Char));
+    Classes.HexToBin(@lStr1, @lStr2, Length(lStr1) * SizeOf(Char));
     { Put the results in Memo2. }
-    Result := LStr2;
+    Result := lStr2;
   {$ENDIF}
-
-
-
-//    LStr1 := AValue;
-//    LStr2 := AValue;
-//    { Set the length of the String to hold the conversion. }
-//    SetLength(LStr2, Length(LStr1) * 4);
-//    { Call the binary to hexadecimal conversion procedure. }
-//    HexToBin(pChar(LStr1), @LStr2, SizeOf(LStr2) - 1);
-//    { Put the results in Memo2. }
-//    Result := LStr2;
-
 end;
 
 class function TMyEncryption.Encrypting(const AValue: string): string;
 begin
-//    {$IFDEF VER220}
-//      Result := lDegestMd5.HashStringAsHex(lValorDigest);
-//    {$ELSE}
-//      Result := lDegestMd5.AsHex(lDegestMd5.HashValue(lValorDigest));
-//    {$ENDIF}
-
   Result := HexToBin(StringToHex(TRpEncryptionCiffer.Encrypting(AValue)));
 end;
 
 class function TMyEncryption.Decrypting(const AValue : String): string;
 begin
   Result := TRpEncryptionCiffer.Decrypting(HexToString(BinToHex(AValue)));
-
-//  Result := TRpCriptografiaCifrada.Descriptografa(HexToString(BinToHexa(AValue)));
 end;
 
-class function TMyEncryption.Hex2Dec(const S: string): Longint;
+class function TMyEncryption.Hex2Dec(const AValue: string): Longint;
 var
-  HexStr: string;
+  lHexStr: string;
 begin
-  if Pos('$', S) = 0 then
-		HexStr := '$' + S
+  if Pos('$', AValue) = 0 then
+		lHexStr := '$' + AValue
   else
-		HexStr := S;
-  Result := StrToIntDef(HexStr, 0);
+		lHexStr := AValue;
+  Result := StrToIntDef(lHexStr, 0);
 end;
 
 class function TMyEncryption.HexToBin(const AValue: String): String;
 var
-  LStr1, LStr2: WideString;
+  lStr1, lStr2: WideString;
 begin
   {$IFDEF UNICODE}
     { Store the text in the memo to a String variable. }
-    LStr1 := AValue;
-    LStr2 := AValue;
+    lStr1 := AValue;
+    lStr2 := AValue;
     { Set the length of the String to hold the conversion. }
-    SetLength(LStr2, Length(LStr1) div 4);
+    SetLength(lStr2, Length(lStr1) div 4);
     { Call the hexadecimal to binary conversion procedure. }
-    Classes.HexToBin(PWideChar(LStr1), LStr2[1], Length(LStr1) div SizeOf(Char));
-  //  HexToBin(PChar(LStr1), PChar(LStr2[1]), Length(LStr1) div SizeOf(Char));
+    Classes.HexToBin(PWideChar(lStr1), lStr2[1], Length(lStr1) div SizeOf(Char));
     { Output the results to Memo1. }
-    Result := LStr2;
+    Result := lStr2;
   {$ELSE}
-    LStr1 := AValue;
-    LStr2 := AValue;
+    lStr1 := AValue;
+    lStr2 := AValue;
     { Set the length of the String to hold the conversion. }
-    SetLength(LStr2, Length(LStr1));
+    SetLength(lStr2, Length(lStr1));
     { Call the hexadecimal to binary conversion procedure. }
-//    HexToBin(pChar(LStr1), @LStr2, Length(LStr1) * SizeOf(LStr1));
-    Classes.HexToBin(@LStr1, @LStr2, Length(LStr1) div SizeOf(Char));
-//    LStr1[SizeOf(LStr1) - 1] := #0;
-    { Output the results to Memo1. }
-    Result := LStr2;
+    Classes.HexToBin(@lStr1, @lStr2, Length(lStr1) div SizeOf(Char));
+    Result := lStr2;
   {$ENDIF}
-
-//    LStr1 := AValue;
-//    LStr2 := AValue;
-//    { Set the length of the String to hold the conversion. }
-//    SetLength(LStr2, Length(LStr1) div 4);
-//    { Call the hexadecimal to binary conversion procedure. }
-//    HexToBin(pChar(LStr1), @LStr2, SizeOf(LStr1));
-//    LStr1[SizeOf(LStr1) - 1] := #0;
-//    { Output the results to Memo1. }
-//    Result := LStr2;
-
 end;
 
 class function TMyEncryption.HexToString(const AValue: string): string;
@@ -378,17 +341,17 @@ const
 	HEX_STR = '0123456789ABCDEF';
 var
 	I: Integer;
-	bt, cStr: string;
-  lValor: string;
+	lBase, cStr: string;
+  lValue: string;
 begin
 	cStr := '';
-	lValor := UpperCase(AValue);
+	lValue := UpperCase(AValue);
 
 	// Limpa string
-	for I := 1 to Length(lValor) do begin
-		bt := Copy(lValor, I, 1);
-		if Pos(bt , HEX_STR) > 0 then
-			cStr := cStr + bt;
+	for I := 1 to Length(lValue) do begin
+		lBase := Copy(lValue, I, 1);
+		if Pos(lBase , HEX_STR) > 0 then
+			cStr := cStr + lBase;
 	end;
 
 	if (Length(cStr) mod 4) = 1 then
