@@ -1779,7 +1779,7 @@ end;
 procedure TCustomSerializableList.LoadFromJSONString(const AJSONString: string);
 var
   i: Integer;
-  lObjeto: TCustomSerializableObject;
+  lObject: TCustomSerializableObject;
   lPair: TJSONPair;
   lJsonList: TJSONArray;
   lTempStr: string;
@@ -1790,7 +1790,7 @@ begin
     FJSonObject := nil;
 
   lTempStr := AJSONString;
-  // espera-se que AJSONString seja uma array: iniciando com '[', terminando com ']'
+  // AJSONString must be an array: starting with '[', and ending with ']'
   if Pos('ClassName', lTempStr) = 3 then
     System.Delete(lTempStr, 1, Pos(',', lTempStr));
 
@@ -1809,18 +1809,18 @@ begin
   FJSonObject := TJSONObject.Create;
   FJSonObject.Parse(BytesOf(lTempStr), 0);
 
-  // se o parse deu certo
+  // if parse goes ok
   if (FJSonObject <> nil) then
   begin
-    // lista
+    // list
     lPair := FJSonObject.Get('Itens');
     if lPair <> nil then
     begin
       lJsonList := lPair.JsonValue as TJSONArray;
       for i := 0 to lJsonList.Size - 1 do
       begin
-        lObjeto := TCustomSerializableObject.CreateFromJson(lJsonList.Get(i) as TJSONObject, Self);
-        Add(lObjeto);
+        lObject := TCustomSerializableObject.CreateFromJson(lJsonList.Get(i) as TJSONObject, Self);
+        Add(lObject);
       end;
     end;
   end;
@@ -1829,7 +1829,7 @@ end;
 procedure TCustomSerializableList.LoadFromNode(const ANode: IXMLNode);
 var
   I: Integer;
-  lObjeto: TCustomSerializableObject;
+  lObject: TCustomSerializableObject;
 begin
   Clear;
 
@@ -1838,8 +1838,8 @@ begin
   begin
     for I := 0 to FXMLNode.ChildNodes.Count - 1 do
     begin
-      lObjeto := TCustomSerializableObject.CreateFromNode(FXMLNode.ChildNodes[I], Self);
-      Add(lObjeto);
+      lObject := TCustomSerializableObject.CreateFromNode(FXMLNode.ChildNodes[I], Self);
+      Add(lObject);
     end;
   end;
 end;
