@@ -84,6 +84,7 @@
 			<DCCReference Include="src\uRpSystem.pas"/>
 			<DCCReference Include="src\uRpDateTimeFunctions.pas"/>
 			<DCCReference Include="src\uRpApplicationUtil.pas"/>
+			<DCCReference Include="src\uRpResourceString.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

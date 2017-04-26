@@ -6,16 +6,11 @@ interface
 
 uses
   {$IFDEF XE3UP}
-  Winapi.Windows, Vcl.Forms, System.SysUtils;
+  Winapi.Windows, Vcl.Forms, System.SysUtils,
   {$ELSE}
-  Windows, Forms, SysUtils;
+  Windows, Forms, SysUtils,
   {$ENDIF}
-
-resourcestring
-  R_MSG_ERROR = 'Error';
-  R_MSG_WARNING = 'Warning';
-  R_MSG_INFO = 'Information';
-  R_MSG_QUESTION = 'Question';
+  uRpResourceString;
 
 type
   TRpMessageFunctions = class

@@ -42,6 +42,7 @@ contains
   uRpTypes in 'src\uRpTypes.pas',
   uRpSystem in 'src\uRpSystem.pas',
   uRpDateTimeFunctions in 'src\uRpDateTimeFunctions.pas',
-  uRpApplicationUtil in 'src\uRpApplicationUtil.pas';
+  uRpApplicationUtil in 'src\uRpApplicationUtil.pas',
+  uRpResourceString in 'src\uRpResourceString.pas';
 
 end.

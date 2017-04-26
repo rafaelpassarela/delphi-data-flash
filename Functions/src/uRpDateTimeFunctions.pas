@@ -11,10 +11,7 @@ uses
   {$ELSE}
   TypInfo, Graphics, Types, Controls, SysUtils, Windows, Classes, Forms, DateUtils,
   {$ENDIF}
-  StrUtils;
-
-resourcestring
-  R_DATE_FORMAT = 'dd/mm/yyyy';
+  StrUtils, uRpResourceString;
 
 type
   TRpDateTime = class

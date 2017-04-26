@@ -5,7 +5,7 @@ unit uRpStringFunctions;
 interface
 
 uses
-  TypInfo, StrUtils,
+  TypInfo, StrUtils, uRpResourceString,
   {$IFDEF XE3UP}
     {$IFDEF ANDROID}
 
@@ -16,9 +16,6 @@ uses
   {$ELSE}
   Graphics, Types, Controls, SysUtils, Windows, Classes, Forms;
   {$ENDIF}
-
-resourcestring
-  R_FIRST_UPPER_EXCPTION = 'de da das do dos a as o os na nas no nos e em para todo todos toda todas';
 
 type
   TRpStrings = class

@@ -13,11 +13,7 @@ uses
   SysUtils, Windows, Messages, Controls, Graphics, Forms, Dialogs, Classes,
   StdCtrls, ExtCtrls, WinSock, jpeg, XMLIntf, WinInet,
   {$ENDIF}
-  uRpStringFunctions, uRpTypes, IdHTTP;
-
-resourcestring
-  R_NO_INTERNET_CONNECTION = 'Could not find an internet connection.';
-  R_NO_INTERNET_QUERY = 'The query could not be performed.';
+  uRpStringFunctions, uRpTypes, IdHTTP, uRpResourceString;
 
 const
   cUtilWindowExClass: TWndClass = (
