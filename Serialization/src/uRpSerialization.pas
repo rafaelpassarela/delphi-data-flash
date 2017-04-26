@@ -20,6 +20,8 @@ uses
   TypInfo, uRpFields, uRpJSONBase, uRpAlgorithms, DB, StrUtils, uRpResourceString;
 
 type
+  IXMLNode = XMLIntf.IXMLNode;
+
   TSerializationFormat = (sfXML, sfJSON, sfUnknown);
 
   EBaseSerializationTypeUnknown = Exception;
@@ -1420,11 +1422,11 @@ begin
       begin
         lItensPair := AList.FJSonObject.Get('Itens');
         if lItensPair <> nil then
-        {$IFDEF XE8UP}
+//        {$IFDEF XE8UP}
           FJSonObject.AddPair(TJSONPair.Create(AList.FNodeName, lItensPair.JsonValue.Clone as TJSONValue));
-        {$ELSE}
-          FJSonObject.AddPair(TJSONPair.Create(AList.FNodeName, lItensPair.JsonValue.Clone as TJSONObject));
-        {$ENDIF}
+//        {$ELSE}
+//          FJSonObject.AddPair(TJSONPair.Create(AList.FNodeName, lItensPair.JsonValue.Clone as TJSONObject));
+//        {$ENDIF}
       end;
     end;
 end;
