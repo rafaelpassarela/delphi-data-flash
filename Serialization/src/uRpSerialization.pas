@@ -261,7 +261,7 @@ type
     property ItemClassName : string read GetItemClassName;
   end;
 
-  TFileCustomObjectEx = class(TCustomSerializableObject, ISerializableBaseHelper)
+  TCustomSerializableObjectEx = class(TCustomSerializableObject, ISerializableBaseHelper)
   protected
     function DoDelete(const ADataComponent: TComponent): Boolean; virtual;
     function DoSave(const ADataComponent: TComponent): Boolean; virtual;
@@ -269,37 +269,36 @@ type
     function DoLoad(const ADataComponent: TComponent): Boolean; virtual;
   end;
 
-  TFileClassRegisterItem = class
+  TSerializationClassRegisterItem = class
   private
-    FFileClass: TCustomSerializableObjectClass;
-    FFileClassName: string;
+    FSerializationClass: TCustomSerializableObjectClass;
+    FSerializationClassName: string;
   public
-    property FileClass : TCustomSerializableObjectClass read FFileClass write FFileClass;
-    property FileClassName : string read FFileClassName write FFileClassName;
+    property SerializationClass : TCustomSerializableObjectClass read FSerializationClass write FSerializationClass;
+    property SerializationClassName : string read FSerializationClassName write FSerializationClassName;
   end;
 
-  TFileClassRegister = class({$IFDEF XE3UP} System.Contnrs.TObjectList {$ELSE} Contnrs.TObjectList {$ENDIF})
+  TSerializationClassRegister = class({$IFDEF XE3UP} System.Contnrs.TObjectList {$ELSE} Contnrs.TObjectList {$ENDIF})
   protected
-    function GetItem(const Index : Integer) : TFileClassRegisterItem;
+    function GetItem(const Index : Integer) : TSerializationClassRegisterItem;
   public
-    class var InternalClassRegister: TFileClassRegister;
-    procedure Registrar(const AClass : TCustomSerializableObjectClass);
+    class var InternalClassRegister: TSerializationClassRegister;
+    procedure Registrate(const AClass : TCustomSerializableObjectClass);
     function GetClass(const AClassName : string) : TCustomSerializableObjectClass; overload;
     function GetClass(const AIndex : Integer) : TCustomSerializableObjectClass; overload;
-    property Items[const Index: Integer]: TFileClassRegisterItem read GetItem; default;
+    property Items[const Index: Integer]: TSerializationClassRegisterItem read GetItem; default;
   end;
 
-  FileClassRegistrer = class
+  SerializationClassRegistrer = class
   public
-    class procedure Destruir;
-    class procedure Registrar(const AClass : TCustomSerializableObjectClass);
+    class procedure FreeRegister;
+    class procedure Registrate(const AClass : TCustomSerializableObjectClass);
     class function GetClass(const AClassName : string) : TCustomSerializableObjectClass; overload;
     class function GetClass(const AIndex : Integer) : TCustomSerializableObjectClass; overload;
     class function Count : Integer;
-//    class procedure Instanciar(const AClass : TXMLCustomObjectClass; const ANomeInstancia : string);
   end;
 
-  TRpBaseFileController = class(TCustomSerializableObject)
+  TSerializationBaseController = class(TCustomSerializableObject)
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode : IXMLNode); override;
@@ -308,16 +307,16 @@ type
     procedure FromOther(const AOther: ISerializableBase); override;
   end;
 
-  // Usado para controlar o save dos forms, panels, groupBox, etc... que sejam
-  // parent de outro componente
-  TRpContainerFileController = class(TRpBaseFileController)
+  // Used to control the save of forms, panels, groupBox, etc...
+  // must be parent another component
+  TContainerSerializationController = class(TSerializationBaseController)
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode : IXMLNode); override;
   end;
 
-  // classe para listas (TList, TObjectList, TCollection...)
-  TRpListFileController = class(TRpBaseFileController)
+  // Helper for TList, TObjectList, TCollection...
+  TListSerializationController = class(TSerializationBaseController)
   private
     procedure LoadListFromJsonObject(const AJsonString : string);
   protected
@@ -334,7 +333,7 @@ const
 
 implementation
 
-{ TXMLCustomObject }
+{ TCustomSerializableObject }
 
 procedure TCustomSerializableObject.Assign(const AOther: ISerializableBase);
 var
@@ -387,7 +386,7 @@ begin
   if lClassName = '' then
     raise Exception.Create(R_CLASS_ID_NOT_FOUND);
 
-  lObjClass := FileClassRegistrer.GetClass(lClassName);
+  lObjClass := SerializationClassRegistrer.GetClass(lClassName);
   if lObjClass = nil then
     raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
@@ -410,7 +409,7 @@ begin
   if (lClassName = EmptyStr) and (Assigned(AOwner)) and (AOwner is TCustomSerializableList) then
     lClassName := TCustomSerializableList(AOwner).GetItemClass.ClassName;
 
-  lObjClass := FileClassRegistrer.GetClass(lClassName);
+  lObjClass := SerializationClassRegistrer.GetClass(lClassName);
   if lObjClass = nil then
     raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
@@ -588,7 +587,7 @@ begin
   lNodeClass := ANode.AttributeNodes.FindNode('ClassName');
   if lNodeClass <> nil then
   begin
-    lObjClass := FileClassRegistrer.GetClass(String(ANode.Attributes['ClassName']));
+    lObjClass := SerializationClassRegistrer.GetClass(String(ANode.Attributes['ClassName']));
     if lObjClass <> nil then
     begin
       AItem := lObjClass.Create(Self);
@@ -664,7 +663,7 @@ begin
 
   if lNameClass <> EmptyStr then
   begin
-    lObjClass := FileClassRegistrer.GetClass(lNameClass);
+    lObjClass := SerializationClassRegistrer.GetClass(lNameClass);
     if lObjClass <> nil then
     begin
       AItem := lObjClass.Create(Self);
@@ -718,7 +717,7 @@ begin
   lNodeClass := ANode.AttributeNodes.FindNode('ClassName');
   if lNodeClass <> nil then
   begin
-    lObjClass := FileClassRegistrer.GetClass(String(ANode.Attributes['ClassName']));
+    lObjClass := SerializationClassRegistrer.GetClass(String(ANode.Attributes['ClassName']));
     if lObjClass <> nil then
     begin
       Result := lObjClass.Create(Self);
@@ -1566,9 +1565,9 @@ begin
   TRpStrings.StringToSet(ASetTypeInfo, ASetVar, lStr);
 end;
 
-{ TRpContainerXMLController }
+{ TContainerSerializationController }
 
-procedure TRpContainerFileController.DoLoadFromNode(const ANode: IXMLNode);
+procedure TContainerSerializationController.DoLoadFromNode(const ANode: IXMLNode);
 var
   i: Integer;
   lIntf: ISerializationSupport;
@@ -1585,7 +1584,7 @@ begin
     end;
 end;
 
-procedure TRpContainerFileController.DoSaveToNode;
+procedure TContainerSerializationController.DoSaveToNode;
 var
   i: Integer;
   lIntf: ISerializationSupport;
@@ -1601,7 +1600,7 @@ begin
 //    if Assigned(FParent) and FParent.InheritsFrom(TWinControl) then
 end;
 
-{ TXMLCustomList }
+{ TCustomSerializableList }
 
 function TCustomSerializableList.Add(const ACustomFileObject: TCustomSerializableObject) : Integer;
 begin
@@ -1883,88 +1882,87 @@ begin
   FItens.OwnsObjects := Value;
 end;
 
-{ TXMLClassRegister }
+{ TSerializationClassRegister }
 
-function TFileClassRegister.GetClass(const AClassName: string): TCustomSerializableObjectClass;
+function TSerializationClassRegister.GetClass(const AClassName: string): TCustomSerializableObjectClass;
 var
   I: Integer;
 begin
   Result := nil;
   for I := 0 to Count - 1 do
-    if Items[I].FileClassName = AClassName then
+    if Items[I].SerializationClassName = AClassName then
     begin
-      Result := TCustomSerializableObjectClass(Items[I].FileClass);
+      Result := TCustomSerializableObjectClass(Items[I].SerializationClass);
       Exit;
     end;
 end;
 
-function TFileClassRegister.GetClass(const AIndex: Integer): TCustomSerializableObjectClass;
+function TSerializationClassRegister.GetClass(const AIndex: Integer): TCustomSerializableObjectClass;
 begin
-  Result := TCustomSerializableObjectClass(Items[AIndex].FileClass);
+  Result := TCustomSerializableObjectClass(Items[AIndex].SerializationClass);
 end;
 
-function TFileClassRegister.GetItem(const Index: Integer): TFileClassRegisterItem;
+function TSerializationClassRegister.GetItem(const Index: Integer): TSerializationClassRegisterItem;
 begin
-  Result := TFileClassRegisterItem(Self.Get(Index));
+  Result := TSerializationClassRegisterItem(Self.Get(Index));
 end;
 
-procedure TFileClassRegister.Registrar(const AClass: TCustomSerializableObjectClass);
+procedure TSerializationClassRegister.Registrate(const AClass: TCustomSerializableObjectClass);
 var
-  lItem : TFileClassRegisterItem;
+  lItem : TSerializationClassRegisterItem;
 begin
-  // so registra se ainda não existir
   if GetClass(AClass.ClassName) = nil then
   begin
-    lItem := TFileClassRegisterItem.Create;
-    lItem.FileClass := AClass;
-    lItem.FileClassName := AClass.ClassName;
+    lItem := TSerializationClassRegisterItem.Create;
+    lItem.SerializationClass := AClass;
+    lItem.SerializationClassName := AClass.ClassName;
     Add(lItem);
   end;
 end;
 
-{ FileClassRegistrer }
+{ SerializationClassRegistrer }
 
-class function FileClassRegistrer.Count: Integer;
+class function SerializationClassRegistrer.Count: Integer;
 begin
-  if TFileClassRegister.InternalClassRegister = nil then
+  if TSerializationClassRegister.InternalClassRegister = nil then
     Result := -1
   else
-    Result := TFileClassRegister.InternalClassRegister.Count;
+    Result := TSerializationClassRegister.InternalClassRegister.Count;
 end;
 
-class procedure FileClassRegistrer.Destruir;
+class procedure SerializationClassRegistrer.FreeRegister;
 begin
-  if TFileClassRegister.InternalClassRegister <> nil then
-    FreeAndNil(TFileClassRegister.InternalClassRegister);
+  if TSerializationClassRegister.InternalClassRegister <> nil then
+    FreeAndNil(TSerializationClassRegister.InternalClassRegister);
 end;
 
-class function FileClassRegistrer.GetClass(const AClassName: string): TCustomSerializableObjectClass;
+class function SerializationClassRegistrer.GetClass(const AClassName: string): TCustomSerializableObjectClass;
 begin
-  if TFileClassRegister.InternalClassRegister = nil then
-    TFileClassRegister.InternalClassRegister := TFileClassRegister.Create;
+  if TSerializationClassRegister.InternalClassRegister = nil then
+    TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
 
-  Result := TFileClassRegister.InternalClassRegister.GetClass(AClassName);
+  Result := TSerializationClassRegister.InternalClassRegister.GetClass(AClassName);
 end;
 
-class function FileClassRegistrer.GetClass(
+class function SerializationClassRegistrer.GetClass(
   const AIndex: Integer): TCustomSerializableObjectClass;
 begin
-  if TFileClassRegister.InternalClassRegister = nil then
-    TFileClassRegister.InternalClassRegister := TFileClassRegister.Create;
+  if TSerializationClassRegister.InternalClassRegister = nil then
+    TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
 
-  Result := TFileClassRegister.InternalClassRegister.GetClass(AIndex);
+  Result := TSerializationClassRegister.InternalClassRegister.GetClass(AIndex);
 end;
 
-class procedure FileClassRegistrer.Registrar(const AClass: TCustomSerializableObjectClass);
+class procedure SerializationClassRegistrer.Registrate(const AClass: TCustomSerializableObjectClass);
 begin
-  if TFileClassRegister.InternalClassRegister = nil then
-    TFileClassRegister.InternalClassRegister := TFileClassRegister.Create;
-  TFileClassRegister.InternalClassRegister.Registrar(AClass);
+  if TSerializationClassRegister.InternalClassRegister = nil then
+    TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
+  TSerializationClassRegister.InternalClassRegister.Registrate(AClass);
 end;
 
-{ TRpListXMLController }
+{ TListSerializationController }
 
-function TRpListFileController.ClearList: Boolean;
+function TListSerializationController.ClearList: Boolean;
 begin
   if Parent.InheritsFrom(TCollection) then
   begin
@@ -1981,7 +1979,7 @@ begin
       Result := False;
 end;
 
-procedure TRpListFileController.DoLoadFromNode(const ANode: IXMLNode);
+procedure TListSerializationController.DoLoadFromNode(const ANode: IXMLNode);
 var
   i: Integer;
 begin
@@ -1997,7 +1995,7 @@ begin
   end;
 end;
 
-procedure TRpListFileController.DoLoadItem(const ANode: IXMLNode);
+procedure TListSerializationController.DoLoadItem(const ANode: IXMLNode);
 var
   lObj : TObject;
   lIntf: ISerializationSupport;
@@ -2017,7 +2015,7 @@ begin
   end;
 end;
 
-procedure TRpListFileController.DoSaveToNode;
+procedure TListSerializationController.DoSaveToNode;
 var
   i: Integer;
   lIntf: ISerializationSupport;
@@ -2066,7 +2064,7 @@ begin
   end;
 end;
 
-procedure TRpListFileController.LoadListFromJsonObject(const AJsonString : string);
+procedure TListSerializationController.LoadListFromJsonObject(const AJsonString : string);
 var
   i: Integer;
   lPair: TJSONPair;
@@ -2100,7 +2098,7 @@ begin
     FJSonObject := nil;
 
   lTempStr := AJsonString;
-  // espera-se que AJSONString seja uma array: iniciando com '[', terminando com ']'
+
   if Pos('ClassName', lTempStr) = 3 then
     System.Delete(lTempStr, 1, Pos(',', lTempStr));
 
@@ -2112,10 +2110,9 @@ begin
   FJSonObject := TJSONObject.Create;
   FJSonObject.Parse(BytesOf(lTempStr), 0);
 
-  // se o parse deu certo
   if (FJSonObject <> nil) then
   begin
-    // lista
+    // list
     lPair := FJSonObject.Get('Itens');
     if lPair <> nil then
     begin
@@ -2124,28 +2121,26 @@ begin
       begin
         lTempStr := (lJsonList.Get(i) as TJSONObject).ToString;
         InternalLoad;
-//        lObjeto := TFileCustomObject.CreateFromJson(lJsonList.Get(i) as TJSONObject, Self);
-//        Add(lObjeto);
       end;
     end;
   end;
 end;
 
-{ TRpBaseFileController }
+{ TSerializationBaseController }
 
-procedure TRpBaseFileController.DoLoadFromNode(const ANode: IXMLNode);
+procedure TSerializationBaseController.DoLoadFromNode(const ANode: IXMLNode);
 begin
 end;
 
-procedure TRpBaseFileController.DoSaveToNode;
+procedure TSerializationBaseController.DoSaveToNode;
 begin
 end;
 
-procedure TRpBaseFileController.FromOther(const AOther: ISerializableBase);
+procedure TSerializationBaseController.FromOther(const AOther: ISerializableBase);
 begin
 end;
 
-procedure TRpBaseFileController.Reset;
+procedure TSerializationBaseController.Reset;
 begin
 end;
 
@@ -2212,24 +2207,24 @@ begin
   end;
 end;
 
-{ TFileCustomObjectEx }
+{ TCustomSerializableObjectEx }
 
-function TFileCustomObjectEx.DoDelete(const ADataComponent: TComponent): Boolean;
+function TCustomSerializableObjectEx.DoDelete(const ADataComponent: TComponent): Boolean;
 begin
   Result := False;
 end;
 
-function TFileCustomObjectEx.DoExecute(const ADataComponent: TComponent): Boolean;
+function TCustomSerializableObjectEx.DoExecute(const ADataComponent: TComponent): Boolean;
 begin
   Result := False;
 end;
 
-function TFileCustomObjectEx.DoLoad(const ADataComponent: TComponent): Boolean;
+function TCustomSerializableObjectEx.DoLoad(const ADataComponent: TComponent): Boolean;
 begin
   Result := False;
 end;
 
-function TFileCustomObjectEx.DoSave(const ADataComponent: TComponent): Boolean;
+function TCustomSerializableObjectEx.DoSave(const ADataComponent: TComponent): Boolean;
 begin
   Result := False;
 end;
@@ -2237,6 +2232,6 @@ end;
 initialization
 
 finalization
-  FileClassRegistrer.Destruir;
+  SerializationClassRegistrer.FreeRegister;
 
 end.

@@ -17,13 +17,13 @@ type
   TRpFieldType = (ftString, ftInteger, ftFloat, ftDate, ftTime, ftDateTime, ftBoolean);
   TRpStringFilter = (sfNormal, sfUpperCase);
 
-  TRpColumnDefsFileController = class(TRpBaseFileController)
+  TRpColumnDefsFileController = class(TSerializationBaseController)
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode: IXMLNode); override;
   end;
 
-  TRpColumnDefsListFileController = class(TRpListFileController)
+  TRpColumnDefsListFileController = class(TListSerializationController)
   protected
     function GetNewItem(out AObject: TObject): Boolean; override;
   end;
@@ -75,7 +75,7 @@ type
     procedure SetItem(AIndex: Integer; const Value: TRpColumnDefs);
     procedure VerifyFileController;
   protected
-    FFileController : TRpListFileController;
+    FFileController : TListSerializationController;
     function GetOwner : TPersistent; override;
   public
     property Items[AIndex : Integer] : TRpColumnDefs read GetItem write SetItem; default;
