@@ -14,6 +14,7 @@ resourcestring
 
   R_SERIALIZE_FIELD_VALUE_ERROR    = 'O valor informado para o campo %s não é suportado.';
   R_SERIALIZE_FIELD_VALUE_ERROR_EX = 'O valor informado para o campo %s não é suportado (%d).';
+  R_SERIALIZE_WRITE_ERROR          = 'Não é possível escrever para a classe %s. Formato desconhecido.';
   R_SERIALIZE_UNKNOWN_OBJECT_TYPE  = 'Não é possível determinar o tipo do objeto %s.';
   R_SERIALIZE_UNKNOWN_FILE_TYPE    = 'Formato de arquivo não identificado.';
 

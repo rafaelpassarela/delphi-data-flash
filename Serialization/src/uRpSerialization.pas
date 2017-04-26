@@ -1436,7 +1436,7 @@ var
 begin
   if FProxyMode then
   begin
-    // salva o enum do set
+    // save the enum value of the set type
     lItensInfo := GetTypeData(ASetTypeInfo)^.CompType^;
     ToNode(AFieldName, 0, lItensInfo);
 
@@ -1461,7 +1461,7 @@ end;
 procedure TCustomSerializableObject.ToNode(const AFieldName : string; const AEnumValue : Cardinal; ASetTypeInfo : PTypeInfo);
 var
   lStr : string;
-  lValores: string;
+  lValues: string;
   I: Integer;
   T: PTypeData;
   lNode: IXMLNode;
@@ -1474,15 +1474,15 @@ begin
 
     T := GetTypeData(GetTypeData(ASetTypeInfo)^.BaseType^);
 
-    lValores := '';
+    lValues := '';
     for I := T^.MinValue to T^.MaxValue do
     begin
-      if lValores <> '' then
-        lValores := lValores + ',';
-      lValores := lValores  + GetEnumName(ASetTypeInfo, I);
+      if lValues <> '' then
+        lValues := lValues + ',';
+      lValues := lValues  + GetEnumName(ASetTypeInfo, I);
     end;
 
-    FXMLNode.Attributes[string(ASetTypeInfo.Name)] := lValores;
+    FXMLNode.Attributes[string(ASetTypeInfo.Name)] := lValues;
   end
   else
   begin
@@ -1520,7 +1520,7 @@ end;
 
 procedure TCustomSerializableObject.ToNode(const AFieldName: string; const AValue: Variant);
 var
-  lLimpa: Boolean;
+  lClear: Boolean;
 begin
   if FFormatType = sfUnknown then
     FFormatType := C_DEFAULT_FORMAT;
@@ -1529,11 +1529,11 @@ begin
     InternalSaveNodeProxy(AFieldName, AValue)
   else
   begin
-    lLimpa := (VarIsStr(AValue) and (Trim(AValue) = ''))
+    lClear := (VarIsStr(AValue) and (Trim(AValue) = ''))
            or (VarIsNumeric(AValue) and (AValue = 0))
            or ((FindVarData(AValue)^.VType = varDate) and (AValue <= 2));
 
-    if not lLimpa then
+    if not lClear then
     begin
       if FFormatType = sfXML then
       begin
@@ -1551,7 +1551,7 @@ begin
         if FFormatType = sfJSON then
           InternalSaveJSON(AFieldName, AValue)
         else
-          raise EBaseSerializationTypeUnknown.CreateFmt('Não é possível escrever para a classe %s. Formato desconhecido.', [Self.ClassName]);
+          raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_WRITE_ERROR, [Self.ClassName]);
     end;
   end;
 end;
