@@ -24,7 +24,7 @@ type
     class procedure SetOrdValue(Info: PTypeInfo; var SetParam; Value: Integer);
   public
     class function FisrtUpper(const AValue : string) : string;
-    class function RemoveAcentos(const AValue : string) : string;
+    class function RemoveAccent(const AValue : string) : string;
     {$IFNDEF ANDROID}
     class function CharSize(Canvas: TCanvas): TPoint;
     class function TextWidth(const pCanvas: TCanvas; const pFont : TFont;
@@ -145,7 +145,7 @@ begin
   Result := lSqlTratado;
 end;
 
-class function TRpStrings.RemoveAcentos(const AValue: string): string;
+class function TRpStrings.RemoveAccent(const AValue: string): string;
 const
   ComAcento = '‡‚ÍÙ˚„ı·ÈÌÛ˙Á¸¿¬ ‘€√’¡…Õ”⁄«‹<>!?';
   SemAcento = 'aaeouaoaeioucuAAEOUAOAEIOUCU    ';

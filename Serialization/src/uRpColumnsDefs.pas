@@ -28,7 +28,7 @@ type
     function GetNewItem(out AObject: TObject): Boolean; override;
   end;
 
-  TRpColumnDefs = class(TCollectionItem, IInterface, IRpFileSupport)
+  TRpColumnDefs = class(TCollectionItem, IInterface, ISerializationSupport)
   private
     FDataField: string;
     FCaption: string;
@@ -53,8 +53,8 @@ type
     function _Release: Integer; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     // IRpXMLSupport
-    function GetFileController: IFileBase;
-    function GetFileNodeName: string;
+    function GetSerializationController: ISerializableBase;
+    function GetSerializationNodeName: string;
 
     function GetFieldOnlyName: String;
   published
@@ -88,7 +88,7 @@ type
     // xml
     function SaveToXmlString : string;
     function SaveToJSONString : string;
-    procedure SaveToFile(const AFile : string; const AFormat : TFileFormat = ffUnknown);
+    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown);
     procedure LoadFromFile(const AFile : string);
     procedure LoadFromXmlString(const AXmlString : string);
     procedure LoadFromJSONString(const AJSONString : string);
@@ -163,16 +163,16 @@ end;
 procedure TRpColumnDefsList.LoadFromJSONString(const AJSONString: string);
 begin
   VerifyFileController;
-  FFileController.LoadFromString( AJSONString, ffJSON);
+  FFileController.LoadFromString( AJSONString, sfJSON);
 end;
 
 procedure TRpColumnDefsList.LoadFromXmlString(const AXmlString: string);
 begin
   VerifyFileController;
-  FFileController.LoadFromString( AXmlString, ffXML);
+  FFileController.LoadFromString( AXmlString, sfXML);
 end;
 
-procedure TRpColumnDefsList.SaveToFile(const AFile: string; const AFormat : TFileFormat = ffUnknown);
+procedure TRpColumnDefsList.SaveToFile(const AFile: string; const AFormat : TSerializationFormat);
 begin
   VerifyFileController;
   FFileController.SaveToFile(AFile, AFormat);
@@ -276,12 +276,12 @@ begin
     Result := Copy(Result, 1, Pos(';', Result) - 1);
 end;
 
-function TRpColumnDefs.GetFileController: IFileBase;
+function TRpColumnDefs.GetSerializationController: ISerializableBase;
 begin
   Result := FFileController;
 end;
 
-function TRpColumnDefs.GetFileNodeName: string;
+function TRpColumnDefs.GetSerializationNodeName: string;
 begin
   Result := Self.ClassName;
 end;

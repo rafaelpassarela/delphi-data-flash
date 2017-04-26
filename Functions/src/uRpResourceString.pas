@@ -12,6 +12,11 @@ resourcestring
   R_NO_INTERNET_CONNECTION = 'Could not find an internet connection.';
   R_NO_INTERNET_QUERY = 'The query could not be performed.';
 
+  R_SERIALIZE_FIELD_VALUE_ERROR    = 'O valor informado para o campo %s não é suportado.';
+  R_SERIALIZE_FIELD_VALUE_ERROR_EX = 'O valor informado para o campo %s não é suportado (%d).';
+  R_SERIALIZE_UNKNOWN_OBJECT_TYPE  = 'Não é possível determinar o tipo do objeto %s.';
+  R_SERIALIZE_UNKNOWN_FILE_TYPE    = 'Formato de arquivo não identificado.';
+
 implementation
 
 end.
