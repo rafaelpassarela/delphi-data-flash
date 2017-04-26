@@ -9,6 +9,9 @@
 			<Projects Include="Common\RpEncryption.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="Functions\RpCommonFunctions.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
 		<Target Name="RpEncryption:Make">
 			<MSBuild Projects="Common\RpEncryption.dproj" Targets="Make"/>
 		</Target>
+		<Target Name="RpCommonFunctions">
+			<MSBuild Projects="Functions\RpCommonFunctions.dproj"/>
+		</Target>
+		<Target Name="RpCommonFunctions:Clean">
+			<MSBuild Projects="Functions\RpCommonFunctions.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="RpCommonFunctions:Make">
+			<MSBuild Projects="Functions\RpCommonFunctions.dproj" Targets="Make"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="RpRegister;RpEncryption"/>
+			<CallTarget Targets="RpRegister;RpEncryption;RpCommonFunctions"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="RpRegister:Clean;RpEncryption:Clean"/>
+			<CallTarget Targets="RpRegister:Clean;RpEncryption:Clean;RpCommonFunctions:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="RpRegister:Make;RpEncryption:Make"/>
+			<CallTarget Targets="RpRegister:Make;RpEncryption:Make;RpCommonFunctions:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

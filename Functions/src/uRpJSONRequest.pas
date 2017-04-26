@@ -1,12 +1,13 @@
 unit uRpJSONRequest;
 
+{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
   IdHTTP, SysUtils, Classes;
 
 type
-
   TRpRequestInfoEncode = (icUTF_8, icISO_8859_1);
 
   TRpJsonRequest = class

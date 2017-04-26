@@ -29,7 +29,6 @@
 			<SanitizedProjectName>RpRegister</SanitizedProjectName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Description>DataFlash - Registration Package - Rafael Passarela</DCC_Description>
-			<DCC_DcpOutput>..\Bin\Dcp</DCC_DcpOutput>
 			<GenPackage>true</GenPackage>
 			<GenDll>true</GenDll>
 			<DCC_CBuilderOutput>All</DCC_CBuilderOutput>

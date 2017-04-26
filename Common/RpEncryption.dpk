@@ -30,7 +30,8 @@ requires
   rtl,
   IndySystem,
   IndyProtocols,
-  IndyCore;
+  IndyCore,
+  RpRegister;
 
 contains
   uRpAlgorithms in 'src\uRpAlgorithms.pas',

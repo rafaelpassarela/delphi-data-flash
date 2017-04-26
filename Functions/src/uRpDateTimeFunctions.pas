@@ -13,22 +13,23 @@ uses
   {$ENDIF}
   StrUtils;
 
+resourcestring
+  R_DATE_FORMAT = 'dd/mm/yyyy';
+
 type
   TRpDateTime = class
-  public const
-    C_DATE_FORMAT = 'dd/mm/yyyy';
   public
-    class function DataInicioMes(const ADate : TDateTime) : TDate;
-    class function DataInicioMesStr(const ADate : TDateTime) : string;
+    class function StartDateOfMonth(const ADate : TDateTime) : TDate;
+    class function StartDateOfMonthStr(const ADate : TDateTime) : string;
 
-    class function DataFinalMes(const ADate : TDateTime) : TDate;
-    class function DataFinalMesStr(const ADate : TDateTime) : string;
+    class function EndDateOfMonth(const ADate : TDateTime) : TDate;
+    class function EndDateOfMonthStr(const ADate : TDateTime) : string;
 
-    class function DataInicioSemana(const ADate : TDateTime) : TDate;
-    class function DataInicioSemanaStr(const ADate: TDateTime) : string;
+    class function StartDateOfWeek(const ADate : TDateTime) : TDate;
+    class function StartDateOfWeekStr(const ADate: TDateTime) : string;
 
-    class function DataFinalSemana(const ADate : TDateTime) : TDate;
-    class function DataFinalSemanaStr(const ADate : TDateTime) : string;
+    class function EndDateOfWeek(const ADate : TDateTime) : TDate;
+    class function EndDateOfWeekStr(const ADate : TDateTime) : string;
 
     class function StrToDateFmt(const AFormat, AValue : string; const ADefault : TDateTime) : TDateTime;
   end;
@@ -37,12 +38,12 @@ implementation
 
 { TRpDateTime }
 
-class function TRpDateTime.DataInicioMesStr(const ADate: TDateTime): string;
+class function TRpDateTime.StartDateOfMonthStr(const ADate: TDateTime): string;
 begin
-  Result := FormatDateTime(C_DATE_FORMAT, TRpDateTime.DataInicioMes(ADate));
+  Result := FormatDateTime(R_DATE_FORMAT, TRpDateTime.StartDateOfMonth(ADate));
 end;
 
-class function TRpDateTime.DataInicioSemana(const ADate: TDateTime): TDate;
+class function TRpDateTime.StartDateOfWeek(const ADate: TDateTime): TDate;
 var
   i : Word;
 begin
@@ -50,9 +51,9 @@ begin
   Result := IncDay(ADate, (-i + 1) );
 end;
 
-class function TRpDateTime.DataInicioSemanaStr(const ADate: TDateTime): string;
+class function TRpDateTime.StartDateOfWeekStr(const ADate: TDateTime): string;
 begin
-  Result := FormatDateTime(C_DATE_FORMAT, TRpDateTime.DataInicioSemana(ADate));
+  Result := FormatDateTime(R_DATE_FORMAT, TRpDateTime.StartDateOfWeek(ADate));
 end;
 
 class function TRpDateTime.StrToDateFmt(const AFormat, AValue: string; const ADefault: TDateTime): TDateTime;
@@ -170,7 +171,6 @@ begin
           end;
         end;
 
-
         // Month January..December
         if Mask = 'MMMM' then
         begin
@@ -232,7 +232,6 @@ begin
            delete(Data,1,3);
         end;
 
-
         // AmPm A or P flag
         if (Mask = 'AP') then
         begin
@@ -274,7 +273,7 @@ begin
   TryEncodeDateTime(Year, Month, Day, Hour, Minute, Second, MSec, Result);
 end;
 
-class function TRpDateTime.DataFinalMes(const ADate: TDateTime): TDate;
+class function TRpDateTime.EndDateOfMonth(const ADate: TDateTime): TDate;
 var
   D, M, A : Word;
 begin
@@ -283,12 +282,12 @@ begin
   Result := EncodeDate(A, M, D);
 end;
 
-class function TRpDateTime.DataFinalMesStr(const ADate: TDateTime): string;
+class function TRpDateTime.EndDateOfMonthStr(const ADate: TDateTime): string;
 begin
-  Result := FormatDateTime(C_DATE_FORMAT, TRpDateTime.DataFinalMes(ADate));
+  Result := FormatDateTime(R_DATE_FORMAT, TRpDateTime.EndDateOfMonth(ADate));
 end;
 
-class function TRpDateTime.DataFinalSemana(const ADate: TDateTime): TDate;
+class function TRpDateTime.EndDateOfWeek(const ADate: TDateTime): TDate;
 var
   i : Word;
 begin
@@ -296,12 +295,12 @@ begin
   Result := IncDay(ADate, (7 - i) );
 end;
 
-class function TRpDateTime.DataFinalSemanaStr(const ADate: TDateTime): string;
+class function TRpDateTime.EndDateOfWeekStr(const ADate: TDateTime): string;
 begin
-  Result := FormatDateTime(C_DATE_FORMAT, TRpDateTime.DataFinalSemana(ADate));
+  Result := FormatDateTime(R_DATE_FORMAT, TRpDateTime.EndDateOfWeek(ADate));
 end;
 
-class function TRpDateTime.DataInicioMes(const ADate: TDateTime): TDate;
+class function TRpDateTime.StartDateOfMonth(const ADate: TDateTime): TDate;
 var
   D, M, Y : Word;
 begin

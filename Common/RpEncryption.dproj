@@ -36,7 +36,6 @@
 			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Description>DataFlash - Runtime Encryption Package - Rafael Passarela</DCC_Description>
-			<DCC_DcpOutput>..\Bin\Dcp</DCC_DcpOutput>
 			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
 			<DCC_CBuilderOutput>All</DCC_CBuilderOutput>
 			<DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
@@ -76,6 +75,7 @@
 			<DCCReference Include="IndySystem.dcp"/>
 			<DCCReference Include="IndyProtocols.dcp"/>
 			<DCCReference Include="IndyCore.dcp"/>
+			<DCCReference Include="RpRegister.dcp"/>
 			<DCCReference Include="src\uRpAlgorithms.pas"/>
 			<DCCReference Include="src\uRpEncryption.pas"/>
 			<BuildConfiguration Include="Release">

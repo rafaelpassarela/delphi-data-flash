@@ -17,7 +17,7 @@ uses
   {$ELSE}
   Contnrs,
   {$ENDIF} // XE3UP
-  TypInfo, uRpFields, uRpJSONBase, uRpAlgoritmos, DB, StrUtils;
+  TypInfo, uRpFields, uRpJSONBase, uRpAlgorithms, DB, StrUtils;
 
 type
   TFileFormat = (ffXML, ffJSON, ffUnknown);
@@ -603,7 +603,7 @@ begin
   AValue := lField.AsString;
 
   if ABase64 and (AValue <> '') then
-    AValue := Algoritimos.Base64DecompressedString(AValue);
+    AValue := Algorithms.Base64DecompressedString(AValue);
 
   FreeAndNil(lField);
 end;
@@ -1395,7 +1395,7 @@ begin
     InternalGravarNodeProxy(AFieldName, AValue, IfThen(ABase64, 'AsBase64', ''));
   end else
     if ABase64 and (AValue <> '') then
-      ToNode(AFieldName, Algoritimos.Base64CompressedString(AValue))
+      ToNode(AFieldName, Algorithms.Base64CompressedString(AValue))
     else
       ToNode(AFieldName, AValue);
 end;

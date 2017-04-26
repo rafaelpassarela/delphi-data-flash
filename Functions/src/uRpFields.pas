@@ -1,5 +1,7 @@
 unit uRpFields;
 
+{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
@@ -166,14 +168,14 @@ end;
 
 function TRpFieldsBase.GetAsBoolean: Boolean;
 var
-  lResultado: Variant;
+  lValue: Variant;
 begin
-  lResultado := GetValue;
-  if VarIsNull(lResultado) then
+  lValue := GetValue;
+  if VarIsNull(lValue) then
     Result := False
   else
     try
-      Result := lResultado;
+      Result := lValue;
     except
       Result := False;
     end;
@@ -181,59 +183,59 @@ end;
 
 function TRpFieldsBase.GetAsDateTime: TDateTime;
 var
-  lDataResultado: string;
-  lResultado: Variant;
+  lResultDate: string;
+  lValue: Variant;
 begin
   Result := 0;
 
-  lResultado := GetValue;
-  if VarIsNull(lResultado) then
+  lValue := GetValue;
+  if VarIsNull(lValue) then
     Exit;
 
-  lDataResultado := lResultado;
+  lResultDate := lValue;
 
   //2014-10-23
-  if (Pos('-', lResultado) > 0) then
+  if (Pos('-', lValue) > 0) then
   begin
-    if (Pos('T', lResultado) > 0) then
-      Result := TRpDateTime.StrToDateFmt('yyyy-mm-ddThh:nn:ss:zzzZ', lDataResultado, 0)
+    if (Pos('T', lValue) > 0) then
+      Result := TRpDateTime.StrToDateFmt('yyyy-mm-ddThh:nn:ss:zzzZ', lResultDate, 0)
     else
-      Result := TRpDateTime.StrToDateFmt('yyyy-mm-dd', lDataResultado, 0)
+      Result := TRpDateTime.StrToDateFmt('yyyy-mm-dd', lResultDate, 0)
   end;
 
   // 2014-10-23T15:55:23.123Z
-  if (Pos('T', lResultado) > 0) and (Pos('-', lResultado) > 0) then
-    Result := TRpDateTime.StrToDateFmt('yyyy-mm-ddThh:nn:ss:zzzZ', lDataResultado, 0);
+  if (Pos('T', lValue) > 0) and (Pos('-', lValue) > 0) then
+    Result := TRpDateTime.StrToDateFmt('yyyy-mm-ddThh:nn:ss:zzzZ', lResultDate, 0);
 
   // 23.10.2014 15:55:23:789
-  if Length(lDataResultado) = 23 then
-    Result := TRpDateTime.StrToDateFmt('dd.mm.yyyy hh:nn:ss:zzz', lDataResultado, 0);
+  if Length(lResultDate) = 23 then
+    Result := TRpDateTime.StrToDateFmt('dd.mm.yyyy hh:nn:ss:zzz', lResultDate, 0);
 
   // 03:07:31.2200124
-  if Length(lDataResultado) = 16 then
-    Result := TRpDateTime.StrToDateFmt('hh:nn:ss:zzz', lDataResultado, 0);
+  if Length(lResultDate) = 16 then
+    Result := TRpDateTime.StrToDateFmt('hh:nn:ss:zzz', lResultDate, 0);
 
   //Sun, 15 Mar 2015 19:40:15 GMT
-  if Length(lDataResultado) = 29 then
-    Result := TRpDateTime.StrToDateFmt('DDD, dd MMM yyyy hh:nn:ss', lDataResultado, 0);
+  if Length(lResultDate) = 29 then
+    Result := TRpDateTime.StrToDateFmt('DDD, dd MMM yyyy hh:nn:ss', lResultDate, 0);
 end;
 
 function TRpFieldsBase.GetAsFloat: Double;
 var
   lFrac, lInt, lDiv: string;
   p: Integer;
-  lResultado: Variant;
+  lValue: Variant;
 begin
-  lResultado := GetValue;
-  if VarIsNull(lResultado) then
+  lValue := GetValue;
+  if VarIsNull(lValue) then
     Result := 0
   else
   begin
     try
-      lFrac := StringReplace(lResultado, '.,', '.', [rfReplaceAll]);
+      lFrac := StringReplace(lValue, '.,', '.', [rfReplaceAll]);
 
-      // modo antigo trazia com virgula e o novo com ponto
-      p := Pos(',', lFrac); // O valor é salvo com "," (antigo)
+      // old format ',' -> new format '.'
+      p := Pos(',', lFrac); // saved values with "," (old)
       if p = 0 then
         p := Pos('.', lFrac);
 
@@ -262,14 +264,14 @@ end;
 
 function TRpFieldsBase.GetAsInteger: Integer;
 var
-  lResultado: Variant;
+  lValue: Variant;
 begin
-  lResultado := GetValue;
-  if VarIsNull(lResultado) then
+  lValue := GetValue;
+  if VarIsNull(lValue) then
     Result := 0
   else
     try
-      Result := lResultado;
+      Result := lValue;
     except
       Result := 0;
     end;
@@ -277,13 +279,13 @@ end;
 
 function TRpFieldsBase.GetAsString: string;
 var
-  lResultado: Variant;
+  lValue: Variant;
 begin
-  lResultado := GetValue;
-  if VarIsNull(lResultado) then
+  lValue := GetValue;
+  if VarIsNull(lValue) then
     Result := ''
   else
-    Result := VarToStr(lResultado);
+    Result := VarToStr(lValue);
 end;
 
 class function TRpFieldsBase.GetDateFormated(const ADateTime: TDateTime): string;
@@ -320,7 +322,7 @@ begin
 //    lInt := Int(ADouble);
 //    lFrac := Frac(ADouble);
 
-    // Corrigir erro de arredondamento: ADouble = 2 -> Int(ADouble) = 1
+    // Fix rounding error: ADouble = 2 -> Int(ADouble) = 1
     lValue := StrToFloat(FloatToStr(ADouble));
     lInt := Int(lValue);
     lFrac := Frac(lValue);

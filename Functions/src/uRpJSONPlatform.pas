@@ -1,10 +1,6 @@
 unit uRpJSONPlatform;
 
-{$IFDEF ANDROID}
-  {$I C:\Componentes\RafaPack\Common\src\RpInc.inc}
-{$ELSE}
-  {$I ..\Common\src\RpInc.inc}
-{$ENDIF}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 

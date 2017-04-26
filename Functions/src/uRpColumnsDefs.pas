@@ -73,7 +73,7 @@ type
     FOwner : TPersistent;
     function GetItem(AIndex: Integer): TRpColumnDefs;
     procedure SetItem(AIndex: Integer; const Value: TRpColumnDefs);
-    procedure VerifyXmlController;
+    procedure VerifyFileController;
   protected
     FFileController : TRpListFileController;
     function GetOwner : TPersistent; override;
@@ -134,7 +134,7 @@ constructor TRpColumnDefsList.CreateOwner(ItemClass: TCollectionItemClass;
   Owner: TPersistent);
 begin
   FOwner := Owner;
-  VerifyXmlController;
+  VerifyFileController;
   inherited Create(ItemClass);
 end;
 
@@ -156,38 +156,38 @@ end;
 
 procedure TRpColumnDefsList.LoadFromFile(const AFile: string);
 begin
-  VerifyXmlController;
+  VerifyFileController;
   FFileController.LoadFromFile( AFile );
 end;
 
 procedure TRpColumnDefsList.LoadFromJSONString(const AJSONString: string);
 begin
-  VerifyXmlController;
+  VerifyFileController;
   FFileController.LoadFromString( AJSONString, ffJSON);
 end;
 
 procedure TRpColumnDefsList.LoadFromXmlString(const AXmlString: string);
 begin
-  VerifyXmlController;
+  VerifyFileController;
   FFileController.LoadFromString( AXmlString, ffXML);
 end;
 
 procedure TRpColumnDefsList.SaveToFile(const AFile: string; const AFormat : TFileFormat = ffUnknown);
 begin
-  VerifyXmlController;
+  VerifyFileController;
   FFileController.SaveToFile(AFile, AFormat);
 end;
 
 function TRpColumnDefsList.SaveToJSONString: string;
 begin
-  VerifyXmlController;
+  VerifyFileController;
 
   Result := FFileController.SaveToJSONString
 end;
 
 function TRpColumnDefsList.SaveToXmlString: string;
 begin
-  VerifyXmlController;
+  VerifyFileController;
 
   Result := FFileController.SaveToXmlString
 end;
@@ -197,7 +197,7 @@ begin
   inherited Items[AIndex] := Value;
 end;
 
-procedure TRpColumnDefsList.VerifyXmlController;
+procedure TRpColumnDefsList.VerifyFileController;
 begin
   if not Assigned(FFileController) then
     FFileController := TRpColumnDefsListFileController.Create(Self, Self.ClassName);
@@ -252,7 +252,7 @@ end;
 
 function TRpColumnDefs.GetDisplayName: string;
 begin
-// ID (Código) - ftInteger - coNormal
+// ID (code) - ftInteger - coNormal
   Result := Format('%s (%s) - %s - %s', [
     DataField,
     Caption,
@@ -269,9 +269,9 @@ end;
 
 function TRpColumnDefs.GetFieldOnlyName: String;
 begin
-  // Retira o alias do Campo
+  // remove the field alias
   Result := Copy(FDataField, Pos('.', FDataField) + 1, Length(FDataField));
-  //Deixa somente o primeiro campo do Nome "p.PKCod;b.Cod_Barra" --> "PKCod"
+  // keep just the first field "p.ID;b.BarCode" --> "ID"
   if Pos(';', Result) > 0 then
     Result := Copy(Result, 1, Pos(';', Result) - 1);
 end;

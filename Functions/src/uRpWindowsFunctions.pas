@@ -1,7 +1,6 @@
 unit uRpWindowsFunctions;
 
-{$I ..\Common\src\RpInc.inc}
-//{$I C:\Rafael\RPack\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
