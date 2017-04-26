@@ -234,8 +234,8 @@ end;
 function TRpJSONStringBuffer.ToString: String;
 begin
   if FCount > System.Length(FBuffer) then
-    SetLength(FBuffer,FCount);
-  Result := Copy(FBuffer,0,FCount);
+    SetLength(FBuffer, FCount);
+  Result := Copy(FBuffer, 0, FCount);
 end;
 
 function TRpJSONStringBuffer.Substring(const Ordinal: Integer): String;
@@ -251,9 +251,11 @@ var
   Pos: Integer;
 begin
   if FCount+System.Length(Value) > System.Length(FBuffer) then
-    SetLength(FBuffer,Math.Max(2*System.Length(FBuffer),System.Length(FBuffer)+System.Length(Value)));
+    SetLength(FBuffer, Math.Max(2 * System.Length(FBuffer), System.Length(FBuffer) + System.Length(Value)));
+
   for Pos := 1 to System.Length(Value) do
     FBuffer[FCount+Pos] := Value[Pos];
+
   FCount := FCount + System.Length(Value);
 end;
 
@@ -271,7 +273,7 @@ procedure TRpJSONStringBuffer.Replace(const Original, Replacement: String; const
 var
   Part: UnicodeString;
 begin
-  Part := Copy(FBuffer, StartIndex+1, Count);
+  Part := Copy(FBuffer, StartIndex + 1, Count);
   Part := ReplaceStr(Part, Original, Replacement);
   Self.FCount := StartIndex;
   Zap(Self);

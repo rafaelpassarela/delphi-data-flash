@@ -513,7 +513,7 @@ end;
 constructor TRpJSONNamedCallback.Create(const Name: UnicodeString);
 begin
   inherited Create;
-  self.FName := Name;
+  Self.FName := Name;
 end;
 
 function TRpJSONNamedCallback.GetName: UnicodeString;

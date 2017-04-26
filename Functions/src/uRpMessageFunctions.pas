@@ -20,7 +20,7 @@ resourcestring
 type
   TRpMessageFunctions = class
   protected
-    class function VerificarQuebraLinha(const AMessage : string) : string;
+    class function CheckLineBreak(const AMessage : string) : string;
   public
     class procedure Error(const AError : string); virtual;
     class procedure ErrorFmt(const AError : string; const Args : array of const);
@@ -41,7 +41,7 @@ implementation
 
 class procedure TRpMessageFunctions.Error(const AError: string);
 begin
-  Application.MessageBox(PChar( VerificarQuebraLinha(AError)), PChar(R_MSG_ERROR), MB_OK + MB_ICONERROR);
+  Application.MessageBox(PChar( CheckLineBreak(AError)), PChar(R_MSG_ERROR), MB_OK + MB_ICONERROR);
 end;
 
 class procedure TRpMessageFunctions.ErrorFmt(const AError: string;
@@ -52,7 +52,7 @@ end;
 
 class procedure TRpMessageFunctions.Information(const AInfo: string);
 begin
-  Application.MessageBox(PChar(VerificarQuebraLinha(AInfo)), PChar(R_MSG_INFO), MB_OK + MB_ICONINFORMATION);
+  Application.MessageBox(PChar(CheckLineBreak(AInfo)), PChar(R_MSG_INFO), MB_OK + MB_ICONINFORMATION);
 end;
 
 class procedure TRpMessageFunctions.InformationFmt(const AInfo: string;
@@ -63,7 +63,7 @@ end;
 
 class function TRpMessageFunctions.Question(const AQuestion: string): Boolean;
 begin
-  Result := Application.MessageBox(PChar(VerificarQuebraLinha(AQuestion)), PChar(R_MSG_QUESTION), MB_YESNO + MB_ICONQUESTION) = IDYES;
+  Result := Application.MessageBox(PChar(CheckLineBreak(AQuestion)), PChar(R_MSG_QUESTION), MB_YESNO + MB_ICONQUESTION) = IDYES;
 end;
 
 class function TRpMessageFunctions.QuestionFmt(const AQuestion: string;
@@ -74,7 +74,7 @@ end;
 
 class procedure TRpMessageFunctions.Warning(const AWarning: string);
 begin
-  Application.MessageBox(PChar(VerificarQuebraLinha(AWarning)), PChar(R_MSG_WARNING), MB_OK + MB_ICONWARNING);
+  Application.MessageBox(PChar(CheckLineBreak(AWarning)), PChar(R_MSG_WARNING), MB_OK + MB_ICONWARNING);
 end;
 
 class procedure TRpMessageFunctions.WarningFmt(const AWarning: string;
@@ -83,8 +83,7 @@ begin
   TRpMessageFunctions.Warning( Format(AWarning, Args) );
 end;
 
-class function TRpMessageFunctions.VerificarQuebraLinha(
-  const AMessage: string): string;
+class function TRpMessageFunctions.CheckLineBreak(const AMessage: string): string;
 begin
   Result := StringReplace(AMessage, '\n', sLineBreak, [rfReplaceAll]);
 end;
