@@ -81,15 +81,8 @@
 			<DCCReference Include="src\uRpWindowsFunctions.pas"/>
 			<DCCReference Include="src\uRpMessageFunctions.pas"/>
 			<DCCReference Include="src\uRpTypes.pas"/>
-			<DCCReference Include="src\uRpFileHelper.pas"/>
-			<DCCReference Include="src\uRpFields.pas"/>
-			<DCCReference Include="src\uRpColumnsDefs.pas"/>
 			<DCCReference Include="src\uRpSystem.pas"/>
-			<DCCReference Include="src\uRpJSONCommonResStrs.pas"/>
-			<DCCReference Include="src\uRpJSONBase.pas"/>
-			<DCCReference Include="src\uRpJSONPlatform.pas"/>
 			<DCCReference Include="src\uRpDateTimeFunctions.pas"/>
-			<DCCReference Include="src\uRpJSONRequest.pas"/>
 			<DCCReference Include="src\uRpApplicationUtil.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

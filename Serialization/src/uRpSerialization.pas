@@ -1,4 +1,4 @@
-unit uRpFileHelper;
+unit uRpSerialization;
 
 {$I ..\..\Common\src\RpInc.inc}
 //  RegisterClassAlias(TXMLCustomObject, 'TXMLCustomObject');

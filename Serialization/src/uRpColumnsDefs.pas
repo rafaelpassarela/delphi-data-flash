@@ -10,7 +10,7 @@ uses
   {$ELSE}
   XMLIntf,
   {$ENDIF}
-  uRpFileHelper, Classes, uRpSystem, SysUtils, uRpStringFunctions;
+  uRpSerialization, Classes, uRpSystem, SysUtils, uRpStringFunctions;
 
 type
   TRpColumnOrder = (coNormal, coAscending, coDescending);

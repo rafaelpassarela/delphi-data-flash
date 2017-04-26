@@ -10,7 +10,7 @@ uses
   {$ELSE}
   SysUtils,
   {$ENDIF}
-  StdCtrls, XMLIntf, uRpFileHelper;
+  StdCtrls, XMLIntf;
 
 type
   ERpNoInternetConnection = class(Exception);
@@ -20,8 +20,6 @@ type
     ccUpperCase = Ord(ecUpperCase),
     ccLowerCase = Ord(ecLowerCase),
     ccFirstUpper);
-
-  IRpFileSupport = uRpFileHelper.IRpFileSupport;
 
 implementation
 
