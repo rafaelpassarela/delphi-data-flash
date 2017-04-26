@@ -338,7 +338,7 @@ implementation
 
 procedure TCustomSerializableObject.Assign(const AOther: ISerializableBase);
 var
-  lNodo: IXMLNode;
+  lNode: IXMLNode;
 begin
   Reset;
 
@@ -346,8 +346,8 @@ begin
   AOther.FormatType := C_DEFAULT_FORMAT;
 
   AOther.SaveToNode;
-  lNodo := AOther.XMLNode.CloneNode(True);
-  LoadFromNode(lNodo);
+  lNode := AOther.XMLNode.CloneNode(True);
+  LoadFromNode(lNode);
 end;
 
 constructor TCustomSerializableObject.Create(AOwner: TObject; const ANodeName: string);
@@ -371,71 +371,73 @@ end;
 class function TCustomSerializableObject.CreateFromJson(const AJSonObject: IJSONObject;
   const AOwner: TCustomSerializableObject): TCustomSerializableObject;
 var
-  lClasse: TCustomSerializableObjectClass;
-  lNomeClass: string;
+  lObjClass: TCustomSerializableObjectClass;
+  lClassName: string;
   lPair: TJSONPair;
 begin
   lPair := AJSonObject.Get('ClassName');
   if Assigned(lPair) then
-    lNomeClass := StringReplace(lPair.FieldValue, '"', '', [rfReplaceAll])
+    lClassName := StringReplace(lPair.FieldValue, '"', '', [rfReplaceAll])
   else
   begin
     if Assigned(AOwner) and (AOwner is TCustomSerializableList) then
-      lNomeClass := TCustomSerializableList(AOwner).GetItemClass.ClassName;
+      lClassName := TCustomSerializableList(AOwner).GetItemClass.ClassName;
   end;
 
-  if lNomeClass = '' then
-    raise Exception.Create('Não foi encontrado o identificador de classe !');
+  if lClassName = '' then
+    raise Exception.Create(R_CLASS_ID_NOT_FOUND);
 
-  lClasse := FileClassRegistrer.GetClass(lNomeClass);
-  if lClasse = nil then
-    raise Exception.Create('Classe ' +  lNomeClass + ' não registrada !');
-  if not lClasse.InheritsFrom(TCustomSerializableObject) then
-    raise Exception.Create('Classe ' + lNomeClass + ' inválida !');
+  lObjClass := FileClassRegistrer.GetClass(lClassName);
+  if lObjClass = nil then
+    raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
-  Result := lClasse.Create(AOwner);
+  if not lObjClass.InheritsFrom(TCustomSerializableObject) then
+    raise Exception.CreateFmt(R_CLASS_NAME_INVALID, [lClassName]);
+
+  Result := lObjClass.Create(AOwner);
   Result.LoadFromJSONString( AJSonObject.ToString );
 end;
 
 class function TCustomSerializableObject.CreateFromNode(const ANode: IXMLNode;
   const AOwner: TCustomSerializableObject): TCustomSerializableObject;
 var
-  lClasse: TCustomSerializableObjectClass;
-  lNomeClass: string;
+  lObjClass: TCustomSerializableObjectClass;
+  lClassName: string;
 begin
   if (ANode.Attributes['ClassName'] <> Null) and (ANode.Attributes['ClassName'] <> Unassigned) then
-    lNomeClass := ANode.Attributes['ClassName'];
+    lClassName := ANode.Attributes['ClassName'];
 
-  if (lNomeClass = EmptyStr) and (Assigned(AOwner)) and (AOwner is TCustomSerializableList) then
-    lNomeClass := TCustomSerializableList(AOwner).GetItemClass.ClassName;
+  if (lClassName = EmptyStr) and (Assigned(AOwner)) and (AOwner is TCustomSerializableList) then
+    lClassName := TCustomSerializableList(AOwner).GetItemClass.ClassName;
 
-  lClasse := FileClassRegistrer.GetClass(lNomeClass);
-  if lClasse = nil then
-    raise Exception.Create('Classe ' +  lNomeClass + ' não registrada !');
-  if not lClasse.InheritsFrom(TCustomSerializableObject) then
-    raise Exception.Create('Classe ' + lNomeClass + ' inválida !');
+  lObjClass := FileClassRegistrer.GetClass(lClassName);
+  if lObjClass = nil then
+    raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
-  Result := lClasse.Create(AOwner, ANode.NodeName);
+  if not lObjClass.InheritsFrom(TCustomSerializableObject) then
+    raise Exception.CreateFmt(R_CLASS_NAME_INVALID, [lClassName]);
+
+  Result := lObjClass.Create(AOwner, ANode.NodeName);
   Result.LoadFromNode(ANode);
 end;
 
 class function TCustomSerializableObject.CreateFromXML(const AXMLString : string;
   const AOwner: TCustomSerializableObject): TCustomSerializableObject;
 var
-  lNomeClass: string;
-  lClasse: TCustomSerializableObjectClass;
+  lClassName: string;
+  lObjClass: TCustomSerializableObjectClass;
 begin
   if Assigned(AOwner) and (AOwner is TCustomSerializableList) then
-    lNomeClass := TCustomSerializableList(AOwner).GetItemClassName
+    lClassName := TCustomSerializableList(AOwner).GetItemClassName
   else
-    lNomeClass := Self.ClassName;
+    lClassName := Self.ClassName;
 
-  if lNomeClass = '' then
-    raise Exception.Create('Não foi encontrado o identificador de classe !');
+  if lClassName = '' then
+    raise Exception.Create(R_CLASS_ID_NOT_FOUND);
 
-  lClasse := Self;
+  lObjClass := Self;
 
-  Result := lClasse.Create(nil);
+  Result := lObjClass.Create(nil);
   Result.LoadFromXmlString(AXmlString);
 end;
 
@@ -870,7 +872,7 @@ begin
     Reset;
   except
     on E:EAbstractError do
-      raise Exception.CreateFmt('Mótodo "Reset" da classe "%s" não está implementado.', [Self.ClassName]);
+      raise Exception.CreateFmt(R_SERIALIZE_RESET_ABSTRACT, [Self.ClassName]);
     on E:Exception do
       raise Exception.Create(E.Message);
   end;
@@ -989,8 +991,8 @@ end;
 
 procedure TCustomSerializableObject.LoadFromFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
 var
-  lNodeRoot: IXMLNode;
-  lFormato : TSerializationFormat;
+  lRootNode: IXMLNode;
+  lFormat : TSerializationFormat;
   lFileStr : TStrings;
   lChar: string;
 
@@ -1011,35 +1013,35 @@ begin
       InternalLoadFile;
       lChar := Copy(lFileStr.Text, 1, 1);
       if lChar = '<' then
-        lFormato := sfXML
+        lFormat := sfXML
       else
         if lChar = '{' then
-          lFormato := sfJSON
+          lFormat := sfJSON
         else
-          raise EBaseSerializationTypeUnknown.Create('A string informada não pode ser identificada durante o load.');
+          raise EBaseSerializationTypeUnknown.Create(R_SERIALIZE_UNKNOWN_STRING_FOTMAT);
     end
     else
-      lFormato := AFormat;
+      lFormat := AFormat;
 
-    if lFormato = sfXML then
+    if lFormat = sfXML then
     begin
       FFormatType := sfXML;
 
       FXMLFile := TXMLDocument.Create(nil);
       FXMLFile.LoadFromFile(FFileName);
-      lNodeRoot := FXMLFile.ChildNodes.FindNode('root');
-      LoadFromNode(lNodeRoot.ChildNodes.FindNode(FNodeName));
-      lNodeRoot := nil;
+      lRootNode := FXMLFile.ChildNodes.FindNode('root');
+      LoadFromNode(lRootNode.ChildNodes.FindNode(FNodeName));
+      lRootNode := nil;
     end
     else
-      if lFormato = sfJSON then
+      if lFormat = sfJSON then
       begin
         if lFileStr = nil then
           InternalLoadFile;
         LoadFromJSONString( lFileStr.Text );
       end
       else
-        raise EBaseSerializationTypeUnknown.CreateFmt('O tipo do arquivo não foi reconhecido para efetuar load. %s%s', [sLineBreak, AFile]);
+        raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_UNKNOWN_FILE_FORMAT, [sLineBreak, AFile]);
   finally
     if lFileStr <> nil then
       FreeAndNil( lFileStr );
@@ -1065,12 +1067,12 @@ begin
   lIsNil := ANode = nil;
 
   if lIsNil and GetRaiseExceptions then
-    raise Exception.Create('Node não encontrado!!');
+    raise Exception.Create(R_SERIALIZE_NODE_NOT_FOUND);
 
   if (not lIsNil) and GetRaiseExceptions and (ANode.Attributes['ClassName'] <> Self.ClassName) then
   begin
     raise Exception.CreateFmt(
-      'Classe de carga XML (%s) incompatível com o node atual (%s)!',
+      R_SERIALIZE_CLASS_NODE_ERROR,
       [ANode.Attributes['ClassName'], Self.ClassName]);
   end;
 
@@ -1099,7 +1101,7 @@ begin
       if lChar = '{' then
         lFormato := sfJSON
       else
-        raise EBaseSerializationTypeUnknown.Create('A string informada não pode ser identificada durante o load.');
+        raise EBaseSerializationTypeUnknown.Create(R_SERIALIZE_UNKNOWN_STRING_FOTMAT);
   end
   else
     lFormato := AFormat;
@@ -1134,7 +1136,7 @@ begin
   FFileName := GetParentFileName;
 
   if FFileName = '' then
-    raise Exception.Create('Nome do arquivo é nescessário para este procedimento !');
+    raise Exception.Create(R_SERIALIZE_NO_FILE_NAME);
 
   SaveToNode;
 
@@ -1207,15 +1209,15 @@ end;
 procedure TCustomSerializableObject.SaveToNode(const ANodeName: string; const ASaveParent: Boolean);
 var
   lNode: IXMLNode;
-  lCriarNovoArquivo: Boolean;
+  lCreateNewFile: Boolean;
   lIntf: ISerializableBase;
   lIntf2: ISerializationSupport;
 begin
   lNode := nil;
-  lCriarNovoArquivo := True;
+  lCreateNewFile := True;
   if (FParent <> nil) and ASaveParent then
   begin
-    // teste de herança
+    // Inheritance test
     if FParent.InheritsFrom(TCustomSerializableObject) then
     begin
       FXMLFile := TCustomSerializableObject(FParent).GetXMLFile;
@@ -1232,7 +1234,7 @@ begin
         lNode := TCustomSerializableList(FParent).GetXMLNode;
       end
       else
-        // testa se tem interface
+        // Interface test
         if Supports(FParent, ISerializableBase, lIntf) then
         begin
           FXMLFile := lIntf.XMLFile;
@@ -1249,7 +1251,7 @@ begin
             lNode := lIntf2.GetSerializationController.XMLNode;
           end;
 
-    lCriarNovoArquivo := not Assigned(FXMLFile);
+    lCreateNewFile := not Assigned(FXMLFile);
   end;
 
   if ANodeName <> '' then
@@ -1261,7 +1263,7 @@ begin
   case FFormatType of
   sfXML:
     begin
-      if lCriarNovoArquivo then
+      if lCreateNewFile then
       begin
         FXMLFile := TXMLDocument.Create(nil);
         FXMLFile.Active := True;
@@ -1282,7 +1284,7 @@ begin
     InitializeJson;
 
   sfUnknown:
-    raise EBaseSerializationTypeUnknown.CreateFmt('Não é possível realizar a escrita da classe %s. Tipo de formato não foi informado.', [Self.ClassName]);
+    raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_UNKNOWN_FILE_TYPE_EX, [Self.ClassName]);
   end;
 
   DoSaveToNode;
@@ -1290,17 +1292,17 @@ end;
 
 function TCustomSerializableObject.SaveToXmlString: string;
 var
-  lArquivo: IXMLDocument;
+  lFile: IXMLDocument;
   lNode: IXMLNode;
 begin
   FFormatType := sfXML;
 
-  lArquivo := TXMLDocument.Create(nil);
-  lArquivo.Active := True;
-  lArquivo.Encoding := C_XML_ENCODING;
-  lArquivo.Version := '1.0';
-  lArquivo.StandAlone := 'yes';
-  lNode := lArquivo.AddChild('root');
+  lFile := TXMLDocument.Create(nil);
+  lFile.Active := True;
+  lFile.Encoding := C_XML_ENCODING;
+  lFile.Version := '1.0';
+  lFile.StandAlone := 'yes';
+  lNode := lFile.AddChild('root');
 
   FXMLNode := lNode.AddChild(FNodeName);
   if FIncludeClassName or FProxyMode then
@@ -1321,8 +1323,8 @@ begin
     end;
   end;
 
-  Result := lArquivo.XML.Text;
-  // verifica se o texto possui o Encoding
+  Result := lFile.XML.Text;
+  // check for XML Encoding on file text
   if Pos(C_XML_ENCODING, Result) <= 0 then
     Insert(' encoding="' + C_XML_ENCODING + '"', Result, Pos('"1.0"', Result) + 5);
 end;
