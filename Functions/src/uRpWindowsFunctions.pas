@@ -15,6 +15,10 @@ uses
   {$ENDIF}
   uRpStringFunctions, uRpTypes, IdHTTP;
 
+resourcestring
+  R_NO_INTERNET_CONNECTION = 'Could not find an internet connection.';
+  R_NO_INTERNET_QUERY = 'The query could not be performed.';
+
 const
   cUtilWindowExClass: TWndClass = (
     style: 0;
@@ -60,7 +64,7 @@ type
     class function AllocateHWndEx(Method: TWndMethod;
       const AClassName: string = ''): THandle;
 
-    class function IconeWindows(const AType : TIconType; const AIconImage : TIcon) : Boolean;
+    class function IconWindows(const AType : TIconType; const AIconImage : TIcon) : Boolean;
     class function DlgButtonToModalResul(const AButtonType: TMsgDlgBtn) : TModalResult;
     class function FileSize(const AFileName : string) : Int64;
     class function FileDate(const AFileName : string) : TDateTime;
@@ -130,7 +134,7 @@ class function TRpWindows.CheckInternetConnection(const ARaiseOnFalse : Boolean)
 begin
   Result := InternetCheckConnection('http://www.google.com/', 1, 0);
   if (not Result) and ARaiseOnFalse then
-    raise ERpNoInternetConnection.Create('Não foi possível localizar uma conexão com a internet.');
+    raise ERpNoInternetConnection.Create(R_NO_INTERNET_CONNECTION);
 end;
 
 class procedure TRpWindows.DeallocateHWndEx(Wnd: THandle);
@@ -163,11 +167,11 @@ var
   lFileAtr: TWin32FileAttributeData;
   SystemTime, LocalTime: TSystemTime;
 begin
-  if GetFileAttributesEx(PChar(AFileName), GetFileExInfoStandard, @lFileAtr) 
+  if GetFileAttributesEx(PChar(AFileName), GetFileExInfoStandard, @lFileAtr)
   and FileTimeToSystemTime(lFileAtr.ftCreationTime, SystemTime) and SystemTimeToTzSpecificLocalTime(nil, SystemTime, LocalTime) then
     Result := SystemTimeToDateTime(LocalTime)
   else
-    Result := 0;  
+    Result := 0;
 end;
 
 class function TRpWindows.FileSize(const AFileName: string): Int64;
@@ -433,7 +437,7 @@ begin
         on E: Exception do
         begin
           Result := False;
-          raise Exception.Create('Não foi possível realizar a consulta. ' + E.Message);
+          raise Exception.Create(R_NO_INTERNET_QUERY + ' ' + E.Message);
         end;
       end;
     finally
@@ -460,7 +464,7 @@ begin
   end;
 end;
 
-class function TRpWindows.IconeWindows(const AType: TIconType;
+class function TRpWindows.IconWindows(const AType: TIconType;
   const AIconImage: TIcon): Boolean;
 var
   Icone : PChar;
@@ -492,8 +496,7 @@ end;
 class procedure TRpWindows.PrintScreen(const AFileName: TFileName;
   const AInsertCursor: Boolean; const AJPEGQuality : SmallInt);
 var
-//  lIni : TIniFile;
-  lTaxaJpg : Integer;
+  lJpgCompRatio : Integer;
   lJPG : TJPEGImage;
   R : TRect;
   DC : HDc;
@@ -501,9 +504,8 @@ var
   MyFormat : Word;
   AData : {$IFDEF XE3UP} NativeUInt {$ELSE} Cardinal {$ENDIF};
   APalette : HPALETTE;
-//  lNomeImg: String;
 
-  { adiciona o cursor no paint screen no momento do erro }
+  { draw mouse cursor on screen image }
   procedure DrawCursor(ScreenShotBitmap : TBitmap);
   var
     r: TRect;
@@ -533,13 +535,13 @@ var
   end;
 
 begin
-  { taxa de compactacao do jpg }
-  lTaxaJpg := 100 - AJPEGQuality;
-  if (lTaxaJpg <= 0) or (lTaxaJpg > 100) then
-    lTaxaJpg := 50;
-      
-  { Tira PaintScreen }
-  keybd_event(vk_snapshot,0, 0, 0); // tecla do paint screen
+  { jpg compress ratio }
+  lJpgCompRatio := 100 - AJPEGQuality;
+  if (lJpgCompRatio <= 0) or (lJpgCompRatio > 100) then
+    lJpgCompRatio := 50;
+
+  { take PaintScreen }
+  keybd_event(vk_snapshot,0, 0, 0); // paint screen key
 
   with TImage.Create(Application) do
   try
@@ -555,7 +557,7 @@ begin
     ReleaseDC( GetDeskTopWindow, DC );
     DrawCursor(Picture.Bitmap);
     Picture.SaveToClipboardFormat(MyFormat, AData, APalette);
-    lJPG.CompressionQuality := lTaxaJpg;
+    lJPG.CompressionQuality := lJpgCompRatio;
     lJPG.Assign(Picture.Bitmap);
     lJPG.Compress;
     lJPG.SaveToFile( AFileName );

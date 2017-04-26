@@ -17,6 +17,9 @@ uses
   Graphics, Types, Controls, SysUtils, Windows, Classes, Forms;
   {$ENDIF}
 
+resourcestring
+  R_FIRST_UPPER_EXCPTION = 'de da das do dos a as o os na nas no nos e em para todo todos toda todas';
+
 type
   TRpStrings = class
   private
@@ -69,8 +72,6 @@ begin
 end;
 
 class function TRpStrings.FisrtUpper(const AValue: string): string;
-const
-  cExcessao: string = 'de da das do dos a as o os na nas no nos e em para todo todos toda todas';
 var
   I: Integer;
   lStr: string;
@@ -82,7 +83,7 @@ begin
       lStr[I] := AnsiUpperCase(lStr[1])[1]
     else
       if CharInSet(lStr[I-1], [' ', #10, #13]) then
-        if Pos( Copy(lStr, I, Pos(' ', Copy(lStr, I + 1, Length(lStr)))), cExcessao) = 0 then
+        if Pos( Copy(lStr, I, Pos(' ', Copy(lStr, I + 1, Length(lStr)))), R_FIRST_UPPER_EXCPTION) = 0 then
           lStr[I] := AnsiUpperCase(lStr[I])[1];
   end;
 
