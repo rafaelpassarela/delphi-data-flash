@@ -3,9 +3,9 @@ unit uRpDataFlash.ProxyGenerator;
 interface
 
 uses
-  Classes, uLRDF.Comando, SysUtils, Contnrs, uLRDF.Types, uLRDF.Component,
-  uLRDF.ComandController, uLRDF.DataSetProvider, uLRDF.ComandoGetCommandList,
-  DBClient, DB, Forms, uLRDF.ObjectReg;
+  Classes, uRpDataFlash.Command, SysUtils, Contnrs, uRpDataFlash.Types,
+  uRpDataFlash.Components, uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
+  uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg;
 
 const
   C_DEFAULT_PROXY_NAME = 'uClassesProxyGenerator';

@@ -5,8 +5,8 @@ unit uRpDataFlash.Protocol;
 interface
 
 uses
-  SysUtils, Classes, DBClient, Variants, uLRDF.ManipuladorXML, uLRDF.Types,
-  Contnrs, ActiveX, uRpEncryption;
+  SysUtils, Classes, DBClient, Variants, Contnrs, ActiveX, uRpEncryption,
+  uRpDataFlash.XMLController, uRpDataFlash.Types;
 
 type
   TLRDataFlashQuebraProtocolo = class

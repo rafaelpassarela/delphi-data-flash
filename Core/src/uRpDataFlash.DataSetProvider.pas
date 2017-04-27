@@ -3,7 +3,8 @@ unit uRpDataFlash.DataSetProvider;
 interface
  
 uses
-  uLRDF.Comando, Classes, uLRDF.Component, SysUtils, uLRDF.Types;
+  uRpDataFlash.Command, Classes, uRpDataFlash.Components, SysUtils,
+  uRpDataFlash.Types;
 
 type
   TLRDataFlashCustomDataSetProvider = class;

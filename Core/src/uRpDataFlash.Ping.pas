@@ -2,7 +2,7 @@ unit uRpDataFlash.Ping;
 
 interface
 
-uses uLRDF.Comando, uLRDF.Component, uLRDF.Types;
+uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types;
 
 type
   TLRDataFlashComandoPing = class(TLRDataFlashComando)

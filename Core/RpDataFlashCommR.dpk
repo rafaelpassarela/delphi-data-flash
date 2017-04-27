@@ -49,7 +49,7 @@ contains
   uRpDataFlash.Connection in 'src\uRpDataFlash.Connection.pas',
   fLRDF.ComandoView in 'src\fLRDF.ComandoView.pas' {frmComandoView},
   fLRDF.ComandosControllerView in 'src\fLRDF.ComandosControllerView.pas' {frmComandosControllerView},
-  uRpDataFlash.ComandController in 'src\uRpDataFlash.ComandController.pas',
+  uRpDataFlash.CommandController in 'src\uRpDataFlash.CommandController.pas',
   uRpDataFlash.XMLController in 'src\uRpDataFlash.XMLController.pas',
   uRpDataFlash.DataSet in 'src\uRpDataFlash.DataSet.pas',
   uRpDataFlash.FieldFormatter in 'src\uRpDataFlash.FieldFormatter.pas',

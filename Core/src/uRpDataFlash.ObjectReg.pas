@@ -4,7 +4,7 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, Dialogs, Forms, Variants,
-  uRpSerialization, uRpAlgorithms, uLRDF.Types, uLRDF.Comando;
+  uRpSerialization, uRpAlgorithms, uRpDataFlash.Types, uRpDataFlash.Command;
 
 type
   TPropType = (ptNone, ptNative, ptSet, ptEnum, ptClass);

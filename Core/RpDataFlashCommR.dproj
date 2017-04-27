@@ -93,7 +93,7 @@
 			<DCCReference Include="src\fLRDF.ComandosControllerView.pas">
 				<Form>frmComandosControllerView</Form>
 			</DCCReference>
-			<DCCReference Include="src\uRpDataFlash.ComandController.pas"/>
+			<DCCReference Include="src\uRpDataFlash.CommandController.pas"/>
 			<DCCReference Include="src\uRpDataFlash.XMLController.pas"/>
 			<DCCReference Include="src\uRpDataFlash.DataSet.pas"/>
 			<DCCReference Include="src\uRpDataFlash.FieldFormatter.pas"/>

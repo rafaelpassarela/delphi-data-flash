@@ -5,8 +5,8 @@ unit uRpDataFlash.Command;
 interface
 
 uses
-  Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uLRDF.Types, IdContext,
-  Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uLRDF.ConvertUtils,
+  Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uRpDataFlash.Types, IdContext,
+  Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uRpDataFlash.ConvertUtils,
   uRpSerialization, Windows, IdCustomHttpServer;
 
 type

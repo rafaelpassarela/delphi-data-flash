@@ -4,7 +4,7 @@ unit uRpDataFlash.AuthCommand;
 
 interface
 
-uses uLRDF.Comando, uLRDF.Component, uLRDF.Types, SysUtils;
+uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, SysUtils;
 
 type
   TLRDataFlashComandoAutenticar = class(TLRDataFlashComando)

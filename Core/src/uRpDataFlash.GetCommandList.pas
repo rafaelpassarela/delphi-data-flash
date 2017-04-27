@@ -3,8 +3,8 @@ unit uRpDataFlash.GetCommandList;
 interface
 
 uses
-  SysUtils, uLRDF.Comando, uLRDF.Types, uLRDF.Component, Classes,
-  uRpSerialization, XMLIntf, uLRDF.DataSetProvider;
+  SysUtils, uRpDataFlash.Command, uRpDataFlash.Types, uRpDataFlash.Components,
+  Classes, uRpSerialization, XMLIntf, uRpDataFlash.DataSetProvider;
 
 type
   TLRDFParametrosInfoComando = class(TCustomSerializableObject)

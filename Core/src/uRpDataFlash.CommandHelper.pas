@@ -3,8 +3,8 @@ unit uRpDataFlash.CommandHelper;
 interface
 
 uses
-  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uRpSerialization, SysUtils,
-  Classes, Windows;
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Types,
+  uRpSerialization, SysUtils, Classes, Windows;
 
 type
   TLRDataFlashComandoHelper = class(TLRDataFlashComando)

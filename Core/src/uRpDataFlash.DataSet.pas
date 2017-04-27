@@ -5,9 +5,9 @@ unit uRpDataFlash.DataSet;
 interface
 
 uses
-  uLRDF.Component, Classes, DB, DBClient, SysUtils, uLRDF.Comando, uLRDF.Types,
-  uLRDF.FieldFormatter, Variants, Provider, StrUtils, Dialogs, Windows,
-  uRpAlgorithms, uRpStringFunctions;
+  uRpDataFlash.Components, Classes, DB, DBClient, SysUtils, uRpDataFlash.Command,
+  uRpDataFlash.Types, uRpDataFlash.FieldFormatter, Variants, Provider, StrUtils,
+  Dialogs, Windows, uRpAlgorithms, uRpStringFunctions;
 
 type
   TLRDataFlashDataSet = class;

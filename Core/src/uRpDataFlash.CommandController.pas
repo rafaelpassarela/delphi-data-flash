@@ -1,12 +1,12 @@
-unit uRpDataFlash.ComandController;
+unit uRpDataFlash.CommandController;
 
 {$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Classes, Contnrs, SysUtils, uLRDF.Comando, uLRDF.Types, Variants, uRpAlgorithms,
-  uRpStringFunctions;
+  Classes, Contnrs, SysUtils, uRpDataFlash.Command, uRpDataFlash.Types, Variants,
+  uRpAlgorithms, uRpStringFunctions;
 
 type
   TLRDataFlashComandItemBase = class;

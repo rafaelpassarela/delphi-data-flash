@@ -1,4 +1,3 @@
-//{$D-}
 unit uRpDataFlash.Components;
 
 {$I ..\..\Common\src\RpInc.inc}
@@ -7,11 +6,11 @@ interface
 
 uses
   Classes, IdContext, IdTCPServer, IdIOHandler, ActiveX, Contnrs, IdStackWindows,
-  XMLIntf, XMLDoc, Controls, IdSync, SysUtils, Windows, ZLib, DateUtils,
-  uLRDF.Types, uLRDF.Protocolo, uLRDF.Comando, uLRDF.ThreadConexao, uLRDF.Conexao,
-  uLRDF.ComandController, IdExceptionCore, IdCustomHTTPServer, IdHTTPServer,
-  IdFTPServer, IdComponent, IdFTP, IdHTTP, uRpJsonBase, uLRDF.ConvertUtils,
-  IdTCPClient, IdURI, uRpSerialization;
+  XMLIntf, XMLDoc, Controls, IdSync, SysUtils, Windows, ZLib, DateUtils, IdFTP,
+  IdExceptionCore, IdCustomHTTPServer, IdHTTPServer, IdFTPServer, IdComponent,
+  IdHTTP, uRpJsonBase, IdTCPClient, IdURI, uRpSerialization, uRpDataFlash.Types,
+  uRpDataFlash.Protocol, uRpDataFlash.Command, uRpDataFlash.ThreadConnection,
+  uRpDataFlash.Connection, uRpDataFlash.CommandController, uRpDataFlash.ConvertUtils;
 
 type
   TLRDataFlashConexaoItem = class;
@@ -680,11 +679,10 @@ type
 implementation
 
 uses
-  uLRDF.ComandoPing,
-  uLRDF.ComandoAutenticar,
-  uLRDF.ProxyGenerator,
-  uLRDF.DataSetProvider,
-//  uLRDF.ComandoGetProviderList,
+  uRpDataFlash.Ping,
+  uRpDataFlash.AuthCommand,
+  uRpDataFlash.ProxyGenerator,
+  uRpDataFlash.DataSetProvider,
   fLRDF.ComandosControllerView,
   Types,
   WinSock,

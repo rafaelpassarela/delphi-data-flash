@@ -2,7 +2,9 @@ unit uRpDataFlash.ProxyBase;
 
 interface
 
-uses uLRDF.Component, uLRDF.Comando, uLRDF.Protocolo, SysUtils;
+uses
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Protocol,
+  SysUtils;
 
 type
   TLRDataFlashComandoProxy = class(TLRDataFlashComando)

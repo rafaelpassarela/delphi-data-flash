@@ -1,4 +1,3 @@
-//{$D-}
 unit uRpDataFlash.Connection;
 
 {$I ..\..\Common\src\RpInc.inc}
@@ -6,7 +5,8 @@ unit uRpDataFlash.Connection;
 interface
 
 uses
-  IdTCPClient, Classes, uLRDF.Types, IdExceptionCore, IdStack, SysUtils, IdHTTP;
+  IdTCPClient, Classes, uRpDataFlash.Types, IdExceptionCore, IdStack, SysUtils,
+  IdHTTP;
 
 type
   TLRDataFlashConnectionHelperCustomClass = class of TLRDataFlashConnectionHelperCustom;
@@ -77,7 +77,7 @@ type
 implementation
 
 uses
-  fLRDF.DefinirConexao, Controls, uLRDF.Component;
+  fLRDF.DefinirConexao, Controls, uRpDataFlash.Components;
 
 { TLRDataFlashConnectionHelper }
 

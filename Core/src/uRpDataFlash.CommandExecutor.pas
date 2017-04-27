@@ -10,7 +10,8 @@ uses
   {$ELSE}
   Classes, SysUtils,
   {$ENDIF}
-  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uLRDF.ComandController;
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Types,
+  uRpDataFlash.CommandController;
 
 type
   TLRDFErrorExecucao = procedure(const AErrorMessage : string; var ARaiseException : Boolean) of object;

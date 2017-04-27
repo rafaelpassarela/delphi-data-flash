@@ -4,8 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ExtCtrls, uLRDF.Comando, uLRDF.Types, Buttons, 
-  uLRDF.ComandController;
+  Dialogs, StdCtrls, ExtCtrls, uRpDataFlash.Command, uRpDataFlash.Types, Buttons,
+  uRpDataFlash.CommandController;
 
 type
 
