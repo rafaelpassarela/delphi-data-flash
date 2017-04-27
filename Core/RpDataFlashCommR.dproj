@@ -75,38 +75,38 @@
 			<DCCReference Include="RpCommonFunctions.dcp"/>
 			<DCCReference Include="RpEncryption.dcp"/>
 			<DCCReference Include="RpSerialization.dcp"/>
-			<DCCReference Include="src\uLRDF.Component.pas"/>
-			<DCCReference Include="src\uLRDF.Protocolo.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Components.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Protocol.pas"/>
 			<DCCReference Include="src\fLRDF.DefinirConexao.pas">
 				<Form>frmLRDF.DefinirConexao</Form>
 			</DCCReference>
-			<DCCReference Include="src\uLRDF.Comando.pas"/>
-			<DCCReference Include="src\uLRDF.ProxyGenerator.pas"/>
-			<DCCReference Include="src\uLRDF.ProxyBase.pas"/>
-			<DCCReference Include="src\uLRDF.ComandoPing.pas"/>
-			<DCCReference Include="src\uLRDF.Types.pas"/>
-			<DCCReference Include="src\uLRDF.ThreadConexao.pas"/>
-			<DCCReference Include="src\uLRDF.Conexao.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Command.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ProxyGenerator.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ProxyBase.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Ping.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Types.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ThreadConnection.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Connection.pas"/>
 			<DCCReference Include="src\fLRDF.ComandoView.pas">
 				<Form>frmComandoView</Form>
 			</DCCReference>
 			<DCCReference Include="src\fLRDF.ComandosControllerView.pas">
 				<Form>frmComandosControllerView</Form>
 			</DCCReference>
-			<DCCReference Include="src\uLRDF.ComandController.pas"/>
-			<DCCReference Include="src\uLRDF.ManipuladorXML.pas"/>
-			<DCCReference Include="src\uLRDF.DataSet.pas"/>
-			<DCCReference Include="src\uLRDF.FieldFormatter.pas"/>
-			<DCCReference Include="src\uLRDF.DataSetProvider.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ComandController.pas"/>
+			<DCCReference Include="src\uRpDataFlash.XMLController.pas"/>
+			<DCCReference Include="src\uRpDataFlash.DataSet.pas"/>
+			<DCCReference Include="src\uRpDataFlash.FieldFormatter.pas"/>
+			<DCCReference Include="src\uRpDataFlash.DataSetProvider.pas"/>
 			<DCCReference Include="src\fLRDF.EditorComandosProvider.pas">
 				<Form>frmEditorComandosProvider</Form>
 			</DCCReference>
-			<DCCReference Include="src\uLRDF.ComandoAutenticar.pas"/>
-			<DCCReference Include="src\uLRDF.ExecutorComandos.pas"/>
-			<DCCReference Include="src\uLRDF.ComandoGetCommandList.pas"/>
-			<DCCReference Include="src\uLRDF.ConvertUtils.pas"/>
-			<DCCReference Include="src\uLRDF.ObjectReg.pas"/>
-			<DCCReference Include="src\uLRDF.ComandoHelper.pas"/>
+			<DCCReference Include="src\uRpDataFlash.AuthCommand.pas"/>
+			<DCCReference Include="src\uRpDataFlash.CommandExecutor.pas"/>
+			<DCCReference Include="src\uRpDataFlash.GetCommandList.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ConvertUtils.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ObjectReg.pas"/>
+			<DCCReference Include="src\uRpDataFlash.CommandHelper.pas"/>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

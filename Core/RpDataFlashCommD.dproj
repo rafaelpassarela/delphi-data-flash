@@ -59,8 +59,10 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="RpDataFlashCommIcons.dcr"/>
-			<DCCReference Include="LRDataFlashTCPcomm.dcp"/>
+			<DCCReference Include="RpDataFlashCommIcons.dcr"/>
+			<DCCReference Include="RpDataFlashCommIcons.dcr"/>
 			<DCCReference Include="vcldb.dcp"/>
+			<DCCReference Include="RpDataFlashCommR.dcp"/>
 			<DCCReference Include="src\Editors\uLRDF.ComponentRegister.pas"/>
 			<DCCReference Include="src\Editors\uLRDF.ConexaoClienteEditor.pas"/>
 			<DCCReference Include="src\Editors\uLRDF.ComandControllerEditor.pas"/>

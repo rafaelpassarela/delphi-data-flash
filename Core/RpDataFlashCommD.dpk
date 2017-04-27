@@ -5,6 +5,8 @@ package RpDataFlashCommD;
 
 {$R *.res}
 {$R 'RpDataFlashCommIcons.dcr'}
+{$R 'RpDataFlashCommIcons.dcr'}
+{$R 'RpDataFlashCommIcons.dcr'}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -31,8 +33,8 @@ package RpDataFlashCommD;
 {$IMPLICITBUILD OFF}
 
 requires
-  LRDataFlashTCPcomm,
-  vcldb;
+  vcldb,
+  RpDataFlashCommR;
 
 contains
   uLRDF.ComponentRegister in 'src\Editors\uLRDF.ComponentRegister.pas',
