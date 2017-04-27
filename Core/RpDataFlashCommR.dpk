@@ -1,31 +1,28 @@
-package LRDataFlashTCPcomm;
+package RpDataFlashCommR;
 
 {$R *.res}
-{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
-{$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'LRDataFlash - Pacote de Comunicação TCP Runtime'}
+{$DESCRIPTION 'DataFlash - Runtime Communication Package - Rafael Passarela'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
@@ -36,7 +33,8 @@ requires
   designide,
   dsnap,
   RpCommonFunctions,
-  RpCriptografia;
+  RpEncryption,
+  RpSerialization;
 
 contains
   uLRDF.Component in 'src\uLRDF.Component.pas',

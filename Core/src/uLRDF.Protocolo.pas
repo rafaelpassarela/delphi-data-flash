@@ -1,10 +1,12 @@
 unit uLRDF.Protocolo;
 
+{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
   SysUtils, Classes, DBClient, Variants, uLRDF.ManipuladorXML, uLRDF.Types,
-  Contnrs, ActiveX, uRpCriptografia;
+  Contnrs, ActiveX, uRpEncryption;
 
 type
   TLRDataFlashQuebraProtocolo = class
@@ -100,7 +102,7 @@ type
     FIdentificador : string;
     FMensagem : string;
     FNomeNodoMsgRetorno: string;
-    FCriptografia : TRpCriptografia;
+    FCriptografia : TRpEncryption;
     FTipoMensagem: TLRDataFlashTipoMensagem;
     function GetIdentificadorInicialCompleto: string;
     function GetIdentificadorFinalCompleta: string;
@@ -129,7 +131,7 @@ type
     property TipoMensagem : TLRDataFlashTipoMensagem read FTipoMensagem write FTipoMensagem;
 
     property NomeNodoMsgRetorno : string read FNomeNodoMsgRetorno write SetNomeNodoMsgRetorno;
-    procedure SetTipoCriptografia(const pTipoCriptografia : TRpCriptografiaClass);
+    procedure SetTipoCriptografia(const pTipoCriptografia : TRpEncryptionClass);
 
     function GetMarcaCriptoPadrao : string;
     function GetMarcaCripto(const pValue : string) : string;
@@ -194,7 +196,7 @@ begin
   Result := pValue;
   if Assigned(FCriptografia) then
   begin
-    Result := IDENTIFICADOR_CRIPTO + FCriptografia.Criptografar(pValue);
+    Result := IDENTIFICADOR_CRIPTO + FCriptografia.Encrypt(pValue);
   end;
 end;
 
@@ -243,8 +245,8 @@ begin
   case ATipoCriptografia of
     tcSemCriptografia : SetTipoCriptografia(nil);
     tcCriptografiaCustomizada : SetTipoCriptografia(nil);
-    tcBase64 : SetTipoCriptografia(TRpCriptografiaBase64);
-    tcBase64Compressed : SetTipoCriptografia(TRpCriptografiaBase64Compressed);
+    tcBase64 : SetTipoCriptografia(TRpEncryptionBase64);
+    tcBase64Compressed : SetTipoCriptografia(TRpEncryptionBase64Compressed);
   end;
 end;
 
@@ -280,7 +282,7 @@ begin
   Result := pValue;
   if (MensagemCriptografada(pValue) <> -1) and (Assigned(FCriptografia)) then
   begin
-    Result := FCriptografia.Descriptografar(RemoverFlagCriptografia(pValue));
+    Result := FCriptografia.Decrypt(RemoverFlagCriptografia(pValue));
   end;
 end;
 
@@ -313,7 +315,7 @@ end;
 function TProtocolo.GetMarcaCriptoPadrao: string;
 begin
   if Assigned(FCriptografia) then
-    FCriptografia.GetMarcacaoCripoPadrao
+    Result := FCriptografia.GetDefaultEncryptionIdentifier
   else
     Result := IDENTIFICADOR_CRIPTO;
 end;
@@ -509,7 +511,7 @@ begin
     FNomeNodoMsgRetorno := Value;
 end;
 
-procedure TProtocolo.SetTipoCriptografia(const pTipoCriptografia: TRpCriptografiaClass);
+procedure TProtocolo.SetTipoCriptografia(const pTipoCriptografia: TRpEncryptionClass);
 var
   lRecriar: Boolean;
 begin

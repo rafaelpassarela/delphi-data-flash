@@ -1,9 +1,12 @@
 unit uLRDF.ManipuladorXML;
 
+{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
-  Contnrs, SysUtils, Classes, Variants, DBClient, DB, XMLDoc, XMLIntf;
+  Contnrs, SysUtils, Classes, Variants, DBClient, DB, XMLDoc, XMLIntf,
+  uRpEncryption;
 
 const
   VERSION_XML_1_0 = '1.0';
@@ -364,8 +367,6 @@ const
   ATRIBUTE_CHAVE_PUBLICA = 'ChavePublica'; //["Chave pública gerada pelo sistema"]
 
 implementation
-
-uses uRpCriptografia;
 
 { TListaCampos }
 
@@ -815,7 +816,7 @@ var
 //      lGrupoCriado.ChaveValida := TRpCriptografiaMD5.Validar(lValorCampo, lChavePublica);
       if lGrupoCriado.ChaveValida then
       begin
-        lValoresDescripto := TRpCriptografiaCifrada.Descriptografa(lValorCampo);
+        lValoresDescripto := TRpEncryptionCiffer.Decrypting(lValorCampo);
         if lValoresDescripto <> EmptyStr then
         begin
           lDocumento := TXMLDocument.Create(nil);
@@ -1477,7 +1478,7 @@ begin
   if Criptografado then
   begin
     lNodoGrupo.ChildNodes.Clear;
-    lNodoGrupo.NodeValue := TRpCriptografiaCifrada.Criptografa(lTextoGeral, lChavePublica);
+    lNodoGrupo.NodeValue := TRpEncryptionCiffer.Encrypting(lTextoGeral, lChavePublica);
     SetChave(lChavePublica);
   end;
 
@@ -1490,7 +1491,7 @@ end;
 procedure TGrupo.ProcessarValidacaoChave(const pValorCampo, pChavePublica: string);
 begin
   if FValidarChave then
-    FChaveValida := TRpCriptografiaMD5.Validar(pValorCampo, pChavePublica)
+    FChaveValida := TRpEncryptionMD5.Validate(pValorCampo, pChavePublica)
   else
     FChaveValida := True;
 end;

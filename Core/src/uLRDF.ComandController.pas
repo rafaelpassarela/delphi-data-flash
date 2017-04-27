@@ -1,9 +1,11 @@
 unit uLRDF.ComandController;
 
+{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
-  Classes, Contnrs, SysUtils, uLRDF.Comando, uLRDF.Types, Variants, uRpAlgoritmos,
+  Classes, Contnrs, SysUtils, uLRDF.Comando, uLRDF.Types, Variants, uRpAlgorithms,
   uRpStringFunctions;
 
 type
@@ -510,7 +512,7 @@ end;
 
 function TLRDataFlashParametroValueItem.GetAsBase64: string;
 begin
-  Result := Algoritimos.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
+  Result := Algorithms.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
 end;
 
 function TLRDataFlashParametroValueItem.GetAsBoolean: Boolean;
@@ -566,7 +568,7 @@ end;
 
 procedure TLRDataFlashParametroValueItem.SetAsBase64(const Value: string);
 begin
-  FValor := Algoritimos.Base64CompressedString(Value);
+  FValor := Algorithms.Base64CompressedString(Value);
 end;
 
 procedure TLRDataFlashParametroValueItem.SetAsBoolean(const Value: Boolean);

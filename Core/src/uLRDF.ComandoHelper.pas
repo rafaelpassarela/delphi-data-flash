@@ -3,8 +3,8 @@ unit uLRDF.ComandoHelper;
 interface
 
 uses
-  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uRpFileHelper, SysUtils, Classes,
-  Windows;
+  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uRpSerialization, SysUtils,
+  Classes, Windows;
 
 type
   TLRDataFlashComandoHelper = class(TLRDataFlashComando)
@@ -20,18 +20,18 @@ implementation
 function TLRDataFlashComandoHelper.DoExecutar: Boolean;
 var
   lContinuar: Boolean;
-  lClass: TFileCustomObjectClass;
-  lObjeto: TFileCustomObject;
+  lClass: TCustomSerializableObjectClass;
+  lObjeto: TCustomSerializableObject;
   lClassName: string;
   lOperacao: TLRDataFlashHelperAction;
-  lIntf : IFileBaseHelper;
+  lIntf : ISerializableBaseHelper;
   lDataComponent: TComponent;
 begin
   lIntf := nil;
   lObjeto := nil;
   Result := False;
   lClassName := Parametro['ObjectClass'].AsString;
-  lClass := FileClassRegistrer.GetClass(lClassName);
+  lClass := SerializationClassRegistrer.GetClass(lClassName);
   if lClass = nil then
     raise Exception.CreateFmt('Classe do objeto %s não foi encontrada.', [lClassName])
   else
@@ -47,7 +47,7 @@ begin
 
       if lContinuar then
       begin
-        if Supports(lObjeto, IFileBaseHelper, lIntf) then
+        if Supports(lObjeto, ISerializableBaseHelper, lIntf) then
         begin
           if Assigned(Executor) then
             lDataComponent := Executor.GetDataComponent

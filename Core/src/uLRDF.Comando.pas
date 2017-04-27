@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uLRDF.Types, IdContext,
-  Variants, ActiveX, StrUtils, uRpAlgoritmos, uRpJsonBase, uLRDF.ConvertUtils,
-  uRpFileHelper, Windows, IdCustomHttpServer;
+  Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uLRDF.ConvertUtils,
+  uRpSerialization, Windows, IdCustomHttpServer;
 
 type
   TLRDataFlashParametrosComando = class;
@@ -99,9 +99,9 @@ type
     property ServerInstanceController : IServerInstanceController read GetServerInstanceController write SetServerInstanceController;
     property SessionInstanceController : ISessionInstanceController read GetSessionInstanceController write SetSessionInstanceController;
 
-    function GetSerializationFormat : TLRDataFlashSerializationFormat;
-    procedure SetSerializationFormat(const ASerializationFormat : TLRDataFlashSerializationFormat);
-    property SerializationFormat : TLRDataFlashSerializationFormat read GetSerializationFormat write SetSerializationFormat;
+    function GetSerializationFormat : TSerializationFormat;
+    procedure SetSerializationFormat(const ASerializationFormat : TSerializationFormat);
+    property SerializationFormat : TSerializationFormat read GetSerializationFormat write SetSerializationFormat;
 
     property Comando : string read GetComando;
     function StatusRetorno : Boolean;
@@ -164,7 +164,7 @@ type
     function GetAsDateTime: TDateTime;
     function GetAsJSONString: string;
     function GetAsBinaryFile: TFileProxy;
-    function GetAsObject : TFileCustomObject;
+    function GetAsObject : TCustomSerializableObject;
     procedure SetAsString(const Value: string);
     procedure SetAsFloat(const Value: Double);
     procedure SetAsBoolean(const Value: Boolean);
@@ -199,7 +199,7 @@ type
     property AsDateTime : TDateTime read GetAsDateTime write SetAsDateTime;
     property AsJSONString : string read GetAsJSONString write SetAsJSONString;
     property AsBinaryFile: TFileProxy read GetAsBinaryFile;
-    property AsObject : TFileCustomObject read GetAsObject;
+    property AsObject : TCustomSerializableObject read GetAsObject;
 
     procedure LoadFromFile(const AArquivo : string);
     procedure SaveToFile(const AArquivo : string);
@@ -247,7 +247,7 @@ type
   private
     FParametros : TObjectList;
     FComando: string;
-    FSerializationFormat: TLRDataFlashSerializationFormat;
+    FSerializationFormat: TSerializationFormat;
     FFileTransferSupport: ILRDataFlashFileTransferSupport;
     function GetParametro(const ANome: string; const ATipo : TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
     function GetParametroIdx(const Index: Integer) : TLRDataFlashParametroComando;
@@ -289,7 +289,7 @@ type
     property Comando : string read FComando write FComando;
     property StatusProcessamento : TLRDataFlashStatusProcessamento read GetStatusProcessamento write SetStatusProcessamento;
     property Count : Integer read GetCount;
-    property SerializationFormat : TLRDataFlashSerializationFormat read FSerializationFormat write FSerializationFormat;
+    property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
   end;
 
   TLRDataFlashComando = class(TInterfacedObject, IComandoTCPInterfaced)
@@ -330,15 +330,15 @@ type
     procedure SetSessionInstanceController(const Value: ISessionInstanceController);
     function GetLock : Boolean;
     procedure SetLock(const Value : Boolean);
-    function GetSerializationFormat: TLRDataFlashSerializationFormat;
-    procedure SetSerializationFormat(const Value: TLRDataFlashSerializationFormat);
+    function GetSerializationFormat: TSerializationFormat;
+    procedure SetSerializationFormat(const Value: TSerializationFormat);
     function GetExecutor : IExecutorComandoPacote;
     procedure SetExecutor(const AExecutor : IExecutorComandoPacote);
   protected
     FExecutor : IExecutorComandoPacote;
     FServer: TComponent;
     FConexaoItem: IAutenticationProvider;
-    FSerealizationFormat: TLRDataFlashSerializationFormat;
+    FSerealizationFormat: TSerializationFormat;
 
     function GetComando: string; virtual;
     function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean; virtual;
@@ -364,9 +364,9 @@ type
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); virtual;
     procedure DoExecutarAntesComunicarPonte(var AContinuar : Boolean); virtual;
     procedure NovoParametro(const ANome : string; const ATipo : TLRDataFlashTipoValorParametro; const ARecarregar : Boolean = True); overload;
-    procedure NovoParametro(const ANome : string; const ABaseClass : TFileCustomObjectClass; const ARecarregar : Boolean = True); overload;
+    procedure NovoParametro(const ANome : string; const ABaseClass : TCustomSerializableObjectClass; const ARecarregar : Boolean = True); overload;
     procedure NovoRetorno(const ANome : string; const ATipo : TLRDataFlashTipoValorParametro); overload;
-    procedure NovoRetorno(const ANome : string; const ABaseClass : TFileCustomObjectClass; const ARecarregar : Boolean = True); overload;
+    procedure NovoRetorno(const ANome : string; const ABaseClass : TCustomSerializableObjectClass; const ARecarregar : Boolean = True); overload;
     procedure NovoParamInterno(const ANome : string; const ATipo : TLRDataFlashTipoValorParametro); overload;
     procedure SetLifeCycle(const ALifeCycle: TLRDataFlashLifeCycle);
   public
@@ -402,7 +402,7 @@ type
 
     property LifeCycle : TLRDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
     property Lock : Boolean read GetLock write SetLock;
-    property SerializationFormat : TLRDataFlashSerializationFormat read GetSerializationFormat write SetSerializationFormat;
+    property SerializationFormat : TSerializationFormat read GetSerializationFormat write SetSerializationFormat;
     property RequestInfo  : TIdHTTPRequestInfo read GetRequestInfo write SetRequestInfo;
     property ResponseInfo : TIdHTTPResponseInfo read GetResponseInfo write SetResponseInfo;
 
@@ -659,7 +659,7 @@ end;
 
 function TLRDataFlashParametroComando.GetAsBase64: string;
 begin
-  Result := Algoritimos.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
+  Result := Algorithms.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
 end;
 
 function TLRDataFlashParametroComando.GetAsBinaryFile: TFileProxy;
@@ -711,12 +711,12 @@ begin
     Result := '{}';
 end;
 
-function TLRDataFlashParametroComando.GetAsObject: TFileCustomObject;
+function TLRDataFlashParametroComando.GetAsObject: TCustomSerializableObject;
 var
-  lClasseBase: TFileCustomObjectClass;
+  lClasseBase: TCustomSerializableObjectClass;
 begin
   Result := nil;
-  lClasseBase := FileClassRegistrer.GetClass(FBaseClass);
+  lClasseBase := SerializationClassRegistrer.GetClass(FBaseClass);
   if lClasseBase <> nil then
     Result := lClasseBase.CreateFromXML(AsBase64, nil);
 end;
@@ -821,7 +821,7 @@ end;
 
 procedure TLRDataFlashParametroComando.SetAsBase64(const Value: string);
 begin
-  FValor := Algoritimos.Base64CompressedString(Value);
+  FValor := Algorithms.Base64CompressedString(Value);
 end;
 
 procedure TLRDataFlashParametroComando.SetAsBoolean(const Value: Boolean);
@@ -1180,11 +1180,11 @@ begin
   if FComando = '' then
     raise Exception.Create('Serialização. Comando não pode ser vazio!');
 
-  if SerializationFormat = sfDesconhecido then
-    SerializationFormat := TLRDataFlashSerializationFormat(Parametro[C_PARAM_INT_TIPO_FORMATO].AsInteger);
+  if SerializationFormat = sfUnknown then
+    SerializationFormat := TSerializationFormat(Parametro[C_PARAM_INT_TIPO_FORMATO].AsInteger);
 
   // mantem como padrao o JSON
-  if SerializationFormat in [sfDesconhecido, sfJSON] then
+  if SerializationFormat in [sfUnknown, sfJSON] then
   begin
     Result := '{"Comando":"' + FComando + '",';
     Result := Result
@@ -1565,7 +1565,7 @@ begin
   Result := FExecutor;
 end;
 
-function TLRDataFlashComando.GetSerializationFormat: TLRDataFlashSerializationFormat;
+function TLRDataFlashComando.GetSerializationFormat: TSerializationFormat;
 begin
   Result := FSerealizationFormat;
 end;
@@ -1692,8 +1692,7 @@ begin
 //  Result := FParametros.Serializar;
 end;
 
-procedure TLRDataFlashComando.SetSerializationFormat(
-  const Value: TLRDataFlashSerializationFormat);
+procedure TLRDataFlashComando.SetSerializationFormat(const Value: TSerializationFormat);
 begin
   FSerealizationFormat := Value;
 end;
@@ -1788,7 +1787,7 @@ begin
 end;
 
 procedure TLRDataFlashComando.NovoParametro(const ANome: string;
-  const ABaseClass: TFileCustomObjectClass; const ARecarregar: Boolean);
+  const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
 begin
   if not ARecarregar then
     FParametros.Novo(ANome, tpEntradaSemRecaregar, ABaseClass.ClassName)
@@ -1803,7 +1802,7 @@ begin
 end;
 
 procedure TLRDataFlashComando.NovoRetorno(const ANome: string;
-  const ABaseClass: TFileCustomObjectClass; const ARecarregar: Boolean);
+  const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
 begin
   FParametros.Novo(ANome, tpSaida, ABaseClass.ClassName);
 end;
@@ -2030,7 +2029,7 @@ begin
       for i := 0 to lTotal - 1 do
       begin
         lSQL := lStatements.Values[ IntToStr(i) ];
-        lSQL := Algoritimos.Base64DecompressedString( lSQL );
+        lSQL := Algorithms.Base64DecompressedString( lSQL );
         ExecSQL( lSQL );
       end;
       Result := True;

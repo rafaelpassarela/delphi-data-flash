@@ -7,7 +7,7 @@ interface
 uses
   uLRDF.Component, Classes, DB, DBClient, SysUtils, uLRDF.Comando, uLRDF.Types,
   uLRDF.FieldFormatter, Variants, Provider, StrUtils, Dialogs, Windows,
-  uRpAlgoritmos, uRpStringFunctions;
+  uRpAlgorithms, uRpStringFunctions;
 
 type
   TLRDataFlashDataSet = class;
@@ -288,7 +288,7 @@ begin
       end;
 
       if lPrepared then
-        lCommandList.Append( IntToStr(lCommandList.Count) + '=' + Algoritimos.Base64CompressedString(lSQL) );
+        lCommandList.Append( IntToStr(lCommandList.Count) + '=' + Algorithms.Base64CompressedString(lSQL) );
       lChange.Next;
     end;
 

@@ -5,8 +5,8 @@ unit uLRDF.Types;
 interface
 
 uses
-  SysUtils, IdStackWindows, Classes, Contnrs, DB, uRpAlgoritmos, StrUtils,
-  DBConsts, Variants, uRpFileHelper;
+  SysUtils, IdStackWindows, Classes, Contnrs, DB, uRpAlgorithms, StrUtils,
+  DBConsts, Variants, uRpSerialization;
 
 const
   TAG_RET_ERRO = 'ERRO';
@@ -63,7 +63,6 @@ type
   TLRDataFlashTipoServer = (tsServidor, tsPonte);
   TLRDataFlashTipoComunicacao = (tcTexto, tcStream, tcCompressedStream, tcChar);
   TLRDataFlashLifeCycle = (tlfInstance, tlfSession, tlfServer, tlfInternal);
-  TLRDataFlashSerializationFormat = (sfDesconhecido, sfXML, sfJSON);
   TLRDataFlashHelperAction = (haSave, haLoad, haDelete, haExecute);
 
   TLRDataFlashDoConectarEvent = procedure of object;
@@ -77,7 +76,7 @@ type
   TLRDataFlashExecucaoInternaComando = function : Boolean of object;
   TLRDataFlashExecucaoExternaComando = function : string of object;
   TLRDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
-  TLRDataFlashOnObjectRequest = procedure(const AOperacao : TLRDataFlashHelperAction; const AObject : TFileCustomObject; out AContinue : Boolean) of object;
+  TLRDataFlashOnObjectRequest = procedure(const AOperacao : TLRDataFlashHelperAction; const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
 
   // Exceptions
   ELRDataFlashException = class(Exception);
@@ -271,11 +270,11 @@ var
 begin
   lStr := TStringList.Create;
   try
-    lStr.Add('CustomCommand=' + Algoritimos.Base64CompressedString( FCustomCommand ) );
-    lStr.Add('Insert=' + Algoritimos.Base64CompressedString( FInsertSQL.Text ) );
-    lStr.Add('UpdateSQL=' + Algoritimos.Base64CompressedString( FUpdateSQL.Text ) );
-    lStr.Add('DeleteSQL=' + Algoritimos.Base64CompressedString( FDeleteSQL.Text ) );
-    lStr.Add('SelectSQL=' + Algoritimos.Base64CompressedString( FSelectSQL.Text ) );
+    lStr.Add('CustomCommand=' + Algorithms.Base64CompressedString( FCustomCommand ) );
+    lStr.Add('Insert=' + Algorithms.Base64CompressedString( FInsertSQL.Text ) );
+    lStr.Add('UpdateSQL=' + Algorithms.Base64CompressedString( FUpdateSQL.Text ) );
+    lStr.Add('DeleteSQL=' + Algorithms.Base64CompressedString( FDeleteSQL.Text ) );
+    lStr.Add('SelectSQL=' + Algorithms.Base64CompressedString( FSelectSQL.Text ) );
     Result := lStr.Text;
   finally
     FreeAndNil(lStr);
@@ -294,11 +293,11 @@ begin
   lStr := TStringList.Create;
   lStr.Text := Value;
   try
-    FCustomCommand := Algoritimos.Base64DecompressedString( lStr.Values['CustomCommand'] );
-    FInsertSQL.Text := Algoritimos.Base64DecompressedString( lStr.Values['Insert'] );
-    FUpdateSQL.Text := Algoritimos.Base64DecompressedString( lStr.Values['UpdateSQL'] );
-    FDeleteSQL.Text := Algoritimos.Base64DecompressedString( lStr.Values['DeleteSQL'] );
-    FSelectSQL.Text := Algoritimos.Base64DecompressedString( lStr.Values['SelectSQL'] );
+    FCustomCommand := Algorithms.Base64DecompressedString( lStr.Values['CustomCommand'] );
+    FInsertSQL.Text := Algorithms.Base64DecompressedString( lStr.Values['Insert'] );
+    FUpdateSQL.Text := Algorithms.Base64DecompressedString( lStr.Values['UpdateSQL'] );
+    FDeleteSQL.Text := Algorithms.Base64DecompressedString( lStr.Values['DeleteSQL'] );
+    FSelectSQL.Text := Algorithms.Base64DecompressedString( lStr.Values['SelectSQL'] );
   finally
     FreeAndNil(lStr);
   end;
@@ -443,7 +442,7 @@ begin
     for i := 0 to lLista.Count - 1 do
     begin
       lNome := GetTagValue('NAME');
-      lValor := Algoritimos.Base64DecompressedString( GetTagValue('VALUE') );
+      lValor := Algorithms.Base64DecompressedString( GetTagValue('VALUE') );
       lTipo := GetTagValue('TYPE');
 
       with ParamByName(lNome) do
@@ -471,7 +470,7 @@ begin
   if (Value = Null) or (Value = Unassigned) then
     lStr := C_NULL_TCPVALUE
   else
-    lStr := Algoritimos.Base64CompressedString( VarToStrDef(Value, EmptyStr) );
+    lStr := Algorithms.Base64CompressedString( VarToStrDef(Value, EmptyStr) );
 
   Result := Format('<TYPE>%3.3d</TYPE><NAME>%s</NAME><VALUE>%s</VALUE>', [Ord(Self.DataType), Name, lStr] );
 end;

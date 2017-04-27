@@ -11,7 +11,7 @@ uses
   uLRDF.Types, uLRDF.Protocolo, uLRDF.Comando, uLRDF.ThreadConexao, uLRDF.Conexao,
   uLRDF.ComandController, IdExceptionCore, IdCustomHTTPServer, IdHTTPServer,
   IdFTPServer, IdComponent, IdFTP, IdHTTP, uRpJsonBase, uLRDF.ConvertUtils,
-  IdTCPClient, IdURI;
+  IdTCPClient, IdURI, uRpSerialization;
 
 type
   TLRDataFlashConexaoItem = class;
@@ -228,7 +228,7 @@ type
     procedure NovaExcecao(const AException : Exception; out AExpandir : Boolean); overload;
     procedure NovaExcecao(const AException : Exception); overload;
 
-    function CriarException(const AException : Exception; const AResultType : TLRDataFlashSerializationFormat = sfJSON) : string;
+    function CriarException(const AException : Exception; const AResultType : TSerializationFormat = sfJSON) : string;
     procedure TentaGerarException(const AProtocolo : TProtocolo); overload;
     function TentaGerarException(const AMensagem : string; out AException : string) : Boolean; overload;
 
@@ -656,7 +656,7 @@ type
 
   TCustomProxyClient = class
   private
-    FSerializationFormat: TLRDataFlashSerializationFormat;
+    FSerializationFormat: TSerializationFormat;
   protected
     FClient: TLRDataFlashConexaoClienteCustom;
     FLastError: string;
@@ -674,7 +674,7 @@ type
     procedure SetEvents(const AEventoStatus : TLRDataFlashOnStatus);
     function GetLastError : string;
     function GetStatusProcessamento : TLRDataFlashStatusProcessamento;
-    property SerializationFormat : TLRDataFlashSerializationFormat read FSerializationFormat write FSerializationFormat;
+    property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
   end;
 
 implementation
@@ -764,7 +764,7 @@ begin
 end;
 
 function TLRDataFlashConexaoCustom.CriarException(const AException: Exception;
-  const AResultType : TLRDataFlashSerializationFormat): string;
+  const AResultType : TSerializationFormat): string;
 var
   lXmlException: IXMLDocument;
   lRoot: IXMLNode;
@@ -2525,7 +2525,7 @@ procedure TLRDataFlashConexaoServer.AoExecutarNoServidorRest(
   AResponseInfo: TIdHTTPResponseInfo);
 var
   lException : string;
-  lType: TLRDataFlashSerializationFormat;
+  lType: TSerializationFormat;
   lProtocolo: TProtocolo;
   lValue: string;
 begin
