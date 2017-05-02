@@ -1,7 +1,7 @@
 //{$D-}
 unit uRpDataFlash.ThreadConnection;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 

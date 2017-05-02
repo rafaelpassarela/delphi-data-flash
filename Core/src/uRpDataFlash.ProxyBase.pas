@@ -1,5 +1,7 @@
 unit uRpDataFlash.ProxyBase;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
@@ -7,9 +9,9 @@ uses
   SysUtils;
 
 type
-  TLRDataFlashComandoProxy = class(TLRDataFlashComando)
+  TLRDataFlashComandoProxy = class(TRpDataFlashCommand)
   protected
-    FLastError : string;  
+    FLastError : string;
     function GetComando: string; override;
     procedure DoBeforeExecute; virtual;
     procedure DoAfterExecute(const AResult : string); virtual;
@@ -21,7 +23,7 @@ type
     function Executar(const pTcpClient : TLRDataFlashConexaoCliente) : Boolean; reintroduce;
   end;
 
-  TLRDataFlashComandoServer = class(TLRDataFlashComando)
+  TLRDataFlashComandoServer = class(TRpDataFlashCommand)
   protected
     procedure DoCarregar; override;
     function DoExecutar: Boolean; override;

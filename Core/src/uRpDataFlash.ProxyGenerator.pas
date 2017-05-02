@@ -1,5 +1,7 @@
 unit uRpDataFlash.ProxyGenerator;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
@@ -59,7 +61,7 @@ type
   private class var
     PrefixoCmd : string;
   public
-    class function GetInterfaceForClass(const pClass: TLRDataFlashAbstractClass): IComandoTCPInterfaced;
+    class function GetInterfaceForClass(const pClass: TRpDataFlashAbstractClass): IRpDataFlashCommandInterfaced;
     class function GetNomeComando(const AClassName: string): string;
   end;
 
@@ -120,7 +122,7 @@ type
     function ImplementarGrupos : string;
   end;
 
-  TLRDataFlashComandoList = class(TLRDataFlashComando)
+  TLRDataFlashComandoList = class(TRpDataFlashCommand)
   private
     FGrupos : TProxyGruposList;
     FTipoBusca: TRLDataFlashTipoRetornoProxy;
@@ -879,12 +881,12 @@ var
 
   function InternalPodeGerarGrupo(const ANomeGrupo : string) : Boolean;
   begin
-    Result := ANomeGrupo <> C_GRUPO_INTERNO;
+    Result := ANomeGrupo <> C_GROUP_INTERNAL;
     // se não for interno, realiza testes especificos para cada FTipoBusca
     if Result then
     begin
-      Result := ((ANomeGrupo =  C_GRUPO_DATASET) and (FTipoBusca = trpDataSetList))   // se for um DataSet
-             or ((ANomeGrupo <> C_GRUPO_DATASET) and (FTipoBusca <> trpDataSetList)); // se for um grupo qualquer mas nao buscando por DataSet
+      Result := ((ANomeGrupo =  C_GROUP_DATASET) and (FTipoBusca = trpDataSetList))   // se for um DataSet
+             or ((ANomeGrupo <> C_GROUP_DATASET) and (FTipoBusca <> trpDataSetList)); // se for um grupo qualquer mas nao buscando por DataSet
     end;
   end;
 
@@ -1346,7 +1348,7 @@ var
 
   function InternalGetDescription : string;
   var
-    lCmd : IComandoTCPInterfaced;
+    lCmd : IRpDataFlashCommandInterfaced;
   begin
     lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
     if (lCmd <> nil) and (Assigned(lCmd.GetParametros)) then
@@ -1423,7 +1425,7 @@ end;
 
 procedure TProxyComandosItem.LoadParams(const pRegistroComando: TTcpClassRegisterItem);
 var
-  lCmd : IComandoTCPInterfaced;
+  lCmd : IRpDataFlashCommandInterfaced;
   i : Integer;
 begin
   lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
@@ -1457,7 +1459,7 @@ begin
     Result.NomeClasse := pCommandName;
     Result.Descricao := pDescricaoComando;
     Add(Result);
-  end;  
+  end;
 end;
 
 function TProxyComandosList.DeclararComandos: string;
@@ -1471,7 +1473,7 @@ begin
     for i := 0 to Self.Count - 1 do
     begin
       lComent := 'Comando: ' + Self[i].NomeClasse;
-      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> C_COMANDO_NO_DESCRIPTION) then
+      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> C_COMMAND_NO_DESCRIPTION) then
         lComent := lComent + '|' + Self[i].Descricao;
 
       lTexto.Add( FormatParamLine(4, '{ ' + lComent + ' }', ' ') );
@@ -1766,19 +1768,19 @@ end;
 { TProxyClassSupport }
 
 class function TProxyClassSupport.GetInterfaceForClass(
-  const pClass: TLRDataFlashAbstractClass): IComandoTCPInterfaced;
+  const pClass: TRpDataFlashAbstractClass): IRpDataFlashCommandInterfaced;
 begin
   if (pClass <> nil) then
   begin
-    if Supports(pClass, IComandoTCPInterfaced) then
+    if Supports(pClass, IRpDataFlashCommandInterfaced) then
     begin
       if pClass.InheritsFrom(TComponent) then
-        Result := (TComponentClass(pClass).Create(nil) as IComandoTCPInterfaced)
+        Result := (TComponentClass(pClass).Create(nil) as IRpDataFlashCommandInterfaced)
       else
-        if pClass.InheritsFrom(TLRDataFlashComando) then
-          Result := (TLRDataFlashComandoClass(pClass).Create as IComandoTCPInterfaced)
+        if pClass.InheritsFrom(TRpDataFlashCommand) then
+          Result := (TRpDataFlashCommandClass(pClass).Create as IRpDataFlashCommandInterfaced)
         else
-          Result  := (TLRDataFlashComando(pClass.Create) as IComandoTCPInterfaced);
+          Result  := (TRpDataFlashCommand(pClass.Create) as IRpDataFlashCommandInterfaced);
     end;
   end;
 end;
@@ -1809,6 +1811,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoList, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoList, C_GROUP_INTERNAL);
 
 end.

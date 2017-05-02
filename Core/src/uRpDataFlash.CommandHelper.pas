@@ -1,5 +1,7 @@
 unit uRpDataFlash.CommandHelper;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
@@ -7,7 +9,7 @@ uses
   uRpSerialization, SysUtils, Classes, Windows;
 
 type
-  TLRDataFlashComandoHelper = class(TLRDataFlashComando)
+  TLRDataFlashComandoHelper = class(TRpDataFlashCommand)
   protected
     procedure DoRegistrarParametros; override;
     function DoExecutar : Boolean; override;
@@ -89,6 +91,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoHelper, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoHelper, C_GROUP_INTERNAL);
 
 end.

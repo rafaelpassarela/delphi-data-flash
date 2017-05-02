@@ -1,6 +1,6 @@
 unit uRpDataFlash.Protocol;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 

@@ -1,6 +1,6 @@
 unit uRpDataFlash.Command;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -10,28 +10,15 @@ uses
   uRpSerialization, Windows, IdCustomHttpServer;
 
 type
-  TLRDataFlashParametrosComando = class;
-  TLRDataFlashComando = class;
-  TLRDataFlashComandoClass = class of TLRDataFlashComando;
-  TLRDataFlashAbstractClass = class of TObject;
-  TFileProxy = class;
+  TRpDataFlashCommandParameters = class;
+  TRpDataFlashCommand = class;
+  TRpDataFlashCommandClass = class of TRpDataFlashCommand;
+  TRpDataFlashAbstractClass = class of TObject;
+  TRpFileProxy = class;
 
-  TLRDataFlashOperacaoDataSet = (
-    opdsSelect,            //0
-    opdsInsert,            //1
-    opdsDelete,            //2
-    opdsUpdate,            //3
-    opdsApplyUpdates,      //4
-    opdsStartTrans,        //5
-    opdsCommit,            //6
-    opdsCommitRetaining,   //7
-    opdsRollback,          //8
-    opdsRollbackRetaining, //9
-    opdsPrepare);          //10
-
-  IExecutorComandoPacote = interface
+  IRpPackageCommandExecutor = interface
     ['{2C11C1CC-758E-49CE-AD1B-563535B0835B}']
-    function GetNome : string;
+    function GetName : string;
     function GetDataComponent : TComponent;
     function GetClassName : string;
     function AsObject : TObject;
@@ -45,7 +32,7 @@ type
     function ExecuteSQL(const ASQL: string): Boolean;
   end;
 
-  TCallBackEvent = function(const AContext: TIdContext; const AMensagem : string) : Boolean of object;
+  TRpDataFlashCallBackEvent = function(const AContext: TIdContext; const AMessage : string) : Boolean of object;
 
   IServerInstanceController = interface;
   ISessionInstanceController = interface;
@@ -62,10 +49,10 @@ type
     function Ip : string;
     property UserName : string read GetUserName write SetUserName;
     property Password : string read GetPassword write SetPassword;
-    property Autenticado : Boolean read GetAutenticado write SetAutenticado;
+    property Authenticated : Boolean read GetAutenticado write SetAutenticado;
   end;
 
-  IComandoTCPInterfaced = interface
+  IRpDataFlashCommandInterfaced = interface
     ['{4EE3E304-8FAE-42C8-9830-488C67BC3135}']
     function GetTipoProcessamento : TLRDataFlashTipoProcessamento;
     function GetLifeCycle : TLRDataFlashLifeCycle;
@@ -76,23 +63,23 @@ type
     procedure SetSessionInstanceController(
       const Value: ISessionInstanceController);
 
-    function Executar(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote) : string;
+    function Executar(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor) : string;
     function GetComando : string;
-    function GetParametros: TLRDataFlashParametrosComando;
+    function GetParametros: TRPDataFlashCommandParameters;
     function GetDescricao: string;
-    procedure DoRegistrarParametros(const AParametros : TLRDataFlashParametrosComando);
-    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TLRDataFlashParametrosComando);
-    procedure DoSerializar(const AParametros : TLRDataFlashParametrosComando);
-    procedure DoErroExecucao(const AParametros : TLRDataFlashParametrosComando);
-    function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean;
+    procedure DoRegistrarParametros(const AParametros : TRPDataFlashCommandParameters);
+    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TRPDataFlashCommandParameters);
+    procedure DoSerializar(const AParametros : TRPDataFlashCommandParameters);
+    procedure DoErroExecucao(const AParametros : TRPDataFlashCommandParameters);
+    function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean;
     function EnviarCallBack : Boolean;
 
-    function ExecutarPonteInvalida(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote;
+    function ExecutarPonteInvalida(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor;
       var AContinuar : Boolean) : string;
-    function ExecutarPonteBemSucedida(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote;
+    function ExecutarPonteBemSucedida(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor;
       var AContinuar : Boolean) : string;
-    function ExecutarAntesComunicarPonte(const AParametros: TLRDataFlashParametrosComando;
-      AExecutor: IExecutorComandoPacote; var AContinuar: Boolean): string;
+    function ExecutarAntesComunicarPonte(const AParametros: TRPDataFlashCommandParameters;
+      AExecutor: IRpPackageCommandExecutor; var AContinuar: Boolean): string;
 
     property TipoProcessamento : TLRDataFlashTipoProcessamento read GetTipoProcessamento;
     property LifeCycle : TLRDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
@@ -107,15 +94,15 @@ type
     function StatusRetorno : Boolean;
     function LastError : string;
 
-    procedure SetCallBackEvent(const AContext: TIdContext; const ACallBackEvent : TCallBackEvent);
+    procedure SetCallBackEvent(const AContext: TIdContext; const ACallBackEvent : TRpDataFlashCallBackEvent);
     procedure SetServer(const AServer: TComponent);
     procedure SetConexaoItem(const AConexaoItem: IAutenticationProvider);
 
     function GetObject : TObject;
 
-    procedure SetExecutor(const AExecutor : IExecutorComandoPacote);
-    function GetExecutor : IExecutorComandoPacote;
-    property Executor : IExecutorComandoPacote read GetExecutor write SetExecutor;
+    procedure SetExecutor(const AExecutor : IRpPackageCommandExecutor);
+    function GetExecutor : IRpPackageCommandExecutor;
+    property Executor : IRpPackageCommandExecutor read GetExecutor write SetExecutor;
 
     function GetLock : Boolean;
     procedure SetLock(const Value : Boolean);
@@ -134,8 +121,8 @@ type
 
   IInstanceController = interface
     ['{6E22D354-7991-47BA-8331-8554582DC1C4}']
-    function LocalizarInstancia(const AComando : string) : IComandoTCPInterfaced;
-    procedure AdicionarInstancia(const AInstancia : IComandoTCPInterfaced);
+    function LocalizarInstancia(const AComando : string) : IRpDataFlashCommandInterfaced;
+    procedure AdicionarInstancia(const AInstancia : IRpDataFlashCommandInterfaced);
   end;
 
   IServerInstanceController = interface(IInstanceController)
@@ -144,16 +131,16 @@ type
 
   ISessionInstanceController = interface(IInstanceController)
     ['{C2D0EF02-C7A9-4C4E-A7A9-8E9D7CD4D1E7}']
-  end;  
+  end;
 
   TLRDataFlashParametroComando = class(TPersistent)
   private
     FValor: Variant;
     FNome: string;
-    FOwner: TLRDataFlashParametrosComando;
+    FOwner: TRPDataFlashCommandParameters;
     FTipo: TLRDataFlashTipoParametro;
     FTipoValor: TLRDataFlashTipoValorParametro;
-    FFile: TFileProxy;
+    FFile: TRpFileProxy;
     FBaseClass: string;
     function GetAsString: string;
     function GetAsFloat: Double;
@@ -163,7 +150,7 @@ type
     function GetAsVariant: string;
     function GetAsDateTime: TDateTime;
     function GetAsJSONString: string;
-    function GetAsBinaryFile: TFileProxy;
+    function GetAsBinaryFile: TRpFileProxy;
     function GetAsObject : TCustomSerializableObject;
     procedure SetAsString(const Value: string);
     procedure SetAsFloat(const Value: Double);
@@ -175,7 +162,7 @@ type
     procedure SetAsJSONString(const Value: string);
   public
     constructor Create; overload; virtual;
-    constructor Create(const AOwner : TLRDataFlashParametrosComando;
+    constructor Create(const AOwner : TRPDataFlashCommandParameters;
       const ANome : string;
       const AValor : Variant;
       const ATipo : TLRDataFlashTipoParametro;
@@ -183,7 +170,7 @@ type
       const ABaseClass : string = ''); overload;
     destructor Destroy; override;
 
-    property Owner : TLRDataFlashParametrosComando read FOwner;
+    property Owner : TRPDataFlashCommandParameters read FOwner;
     property Nome : string read FNome;
     property Valor : Variant read FValor;
     property Tipo : TLRDataFlashTipoParametro read FTipo;
@@ -198,7 +185,7 @@ type
     property AsBase64 : string read GetAsBase64 write SetAsBase64;
     property AsDateTime : TDateTime read GetAsDateTime write SetAsDateTime;
     property AsJSONString : string read GetAsJSONString write SetAsJSONString;
-    property AsBinaryFile: TFileProxy read GetAsBinaryFile;
+    property AsBinaryFile: TRpFileProxy read GetAsBinaryFile;
     property AsObject : TCustomSerializableObject read GetAsObject;
 
     procedure LoadFromFile(const AArquivo : string);
@@ -243,7 +230,7 @@ type
     property Value : Boolean read GetValue write SetValue;
   end;
 
-  TLRDataFlashParametrosComando = class(TPersistent)
+  TRpDataFlashCommandParameters = class(TPersistent)
   private
     FParametros : TObjectList;
     FComando: string;
@@ -262,7 +249,7 @@ type
   public
     constructor Create(const AFileTransferSupport : ILRDataFlashFileTransferSupport); virtual;
     destructor Destroy; override;
-    procedure Assign(const Source: TLRDataFlashParametrosComando); reintroduce;
+    procedure Assign(const Source: TRPDataFlashCommandParameters); reintroduce;
 
     procedure Novo(const AParametro : TLRDataFlashParametroComando); overload;
     function Novo(const ANome : string; AValor : Variant; const ATipo : TLRDataFlashTipoParametro;
@@ -292,11 +279,11 @@ type
     property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
   end;
 
-  TLRDataFlashComando = class(TInterfacedObject, IComandoTCPInterfaced)
+  TRpDataFlashCommand = class(TInterfacedObject, IRpDataFlashCommandInterfaced)
   private
-    FParametros: TLRDataFlashParametrosComando;
+    FParametros: TRPDataFlashCommandParameters;
     FContext: TIdContext;
-    FOnCallBackEvent: TCallBackEvent;
+    FOnCallBackEvent: TRpDataFlashCallBackEvent;
     FLifeCycle: TLRDataFlashLifeCycle;
     FServerInstanceController: IServerInstanceController;
     FSessionInstanceController: ISessionInstanceController;
@@ -304,25 +291,25 @@ type
     FRequestInfo: TIdHTTPRequestInfo;
     FResponseInfo: TIdHTTPResponseInfo;
     function GetParametro(const ANome: string; const ATipo : TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
-    function GetParametros: TLRDataFlashParametrosComando;
+    function GetParametros: TRPDataFlashCommandParameters;
     function GetStatusProcessamento: TLRDataFlashStatusProcessamento;
     function GetDescricao: string;
     procedure SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
-    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TLRDataFlashParametrosComando); overload; virtual;
-    procedure DoSerializar(const AParametros : TLRDataFlashParametrosComando); overload;
-    procedure DoErroExecucao(const AParametros: TLRDataFlashParametrosComando); overload;
-    procedure DoRegistrarParametros(const AParametros: TLRDataFlashParametrosComando); overload;
+    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TRPDataFlashCommandParameters); overload; virtual;
+    procedure DoSerializar(const AParametros : TRPDataFlashCommandParameters); overload;
+    procedure DoErroExecucao(const AParametros: TRPDataFlashCommandParameters); overload;
+    procedure DoRegistrarParametros(const AParametros: TRPDataFlashCommandParameters); overload;
 
-    function Executar(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote) : string; overload;
-    function Executar(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote;
+    function Executar(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor) : string; overload;
+    function Executar(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor;
       const ATipo : TLRDataFlashTipoExecucao; var AContinuar : Boolean) : string; overload; virtual;
 
-    function ExecutarPonteInvalida(const AParametros: TLRDataFlashParametrosComando; AExecutor: IExecutorComandoPacote;
+    function ExecutarPonteInvalida(const AParametros: TRPDataFlashCommandParameters; AExecutor: IRpPackageCommandExecutor;
       var AContinuar : Boolean): string; overload;
-    function ExecutarPonteBemSucedida(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote;
+    function ExecutarPonteBemSucedida(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor;
       var AContinuar : Boolean) : string;
-    function ExecutarAntesComunicarPonte(const AParametros: TLRDataFlashParametrosComando;
-      AExecutor: IExecutorComandoPacote; var AContinuar: Boolean): string;
+    function ExecutarAntesComunicarPonte(const AParametros: TRPDataFlashCommandParameters;
+      AExecutor: IRpPackageCommandExecutor; var AContinuar: Boolean): string;
 
     function GetSessionInstanceController: ISessionInstanceController;
     procedure SetServerInstanceController(const Value: IServerInstanceController);
@@ -332,24 +319,24 @@ type
     procedure SetLock(const Value : Boolean);
     function GetSerializationFormat: TSerializationFormat;
     procedure SetSerializationFormat(const Value: TSerializationFormat);
-    function GetExecutor : IExecutorComandoPacote;
-    procedure SetExecutor(const AExecutor : IExecutorComandoPacote);
+    function GetExecutor : IRpPackageCommandExecutor;
+    procedure SetExecutor(const AExecutor : IRpPackageCommandExecutor);
   protected
-    FExecutor : IExecutorComandoPacote;
+    FExecutor : IRpPackageCommandExecutor;
     FServer: TComponent;
     FConexaoItem: IAutenticationProvider;
     FSerealizationFormat: TSerializationFormat;
 
     function GetComando: string; virtual;
-    function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean; virtual;
+    function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; virtual;
     function DoExecutar : Boolean; virtual; abstract;
     function DoGetDescricao: string; virtual;
     function FindParametro(const ANome: string): TLRDataFlashParametroComando;
     function FindRetorno(const ANome: string): TLRDataFlashParametroComando;
     function GetTipoProcessamento : TLRDataFlashTipoProcessamento; virtual;
-    function InternalCarregarComando(const AComando : TLRDataFlashComandoClass;
-      out AObjComando : IComandoTCPInterfaced;
-      out AParametros : TLRDataFlashParametrosComando) : Boolean;
+    function InternalCarregarComando(const AComando : TRpDataFlashCommandClass;
+      out AObjComando : IRpDataFlashCommandInterfaced;
+      out AParametros : TRPDataFlashCommandParameters) : Boolean;
     function GetObject: TObject;
     function GetLifeCycle: TLRDataFlashLifeCycle; virtual;
     function GetResponseFileName: string; virtual;
@@ -382,7 +369,7 @@ type
     procedure SetResponseInfo(const AValue: TIdHTTPResponseInfo);
 
     function EnviarCallBack: Boolean;
-    procedure SetCallBackEvent(const AContext: TIdContext;const ACallBackEvent: TCallBackEvent);
+    procedure SetCallBackEvent(const AContext: TIdContext;const ACallBackEvent: TRpDataFlashCallBackEvent);
     function Serializar : string;
     procedure Carregar(const AComando : string);
 
@@ -390,12 +377,12 @@ type
     function LastError : string;
 
     property Comando: string read GetComando;
-    property Parametros : TLRDataFlashParametrosComando read GetParametros;
+    property Parametros : TRPDataFlashCommandParameters read GetParametros;
     property Parametro[const ANome : string] : TLRDataFlashParametroComando index tpEntrada read GetParametro;
     property Retorno[const ANome : string] : TLRDataFlashParametroComando index tpSaida read GetParametro;
     property TipoProcessamento : TLRDataFlashTipoProcessamento read GetTipoProcessamento;
     property StatusProcessamento : TLRDataFlashStatusProcessamento read GetStatusProcessamento write SetStatusProcessamento;
-    property Executor : IExecutorComandoPacote read GetExecutor write SetExecutor;
+    property Executor : IRpPackageCommandExecutor read GetExecutor write SetExecutor;
     property Server : TComponent read FServer;
     property ServerInstanceController : IServerInstanceController read GetServerInstanceController write SetServerInstanceController;
     property SessionInstanceController : ISessionInstanceController read GetSessionInstanceController write SetSessionInstanceController;
@@ -408,21 +395,21 @@ type
 
     class function CarregarComando(
       const AComando : string;
-      out AObjComando : IComandoTCPInterfaced;
-      out AParametros : TLRDataFlashParametrosComando;
+      out AObjComando : IRpDataFlashCommandInterfaced;
+      out AParametros : TRPDataFlashCommandParameters;
       const AServerInstanceController : IServerInstanceController = nil;
       const ASessionInstanceController :ISessionInstanceController = nil;
       const ALoadParams : Boolean = True) : Boolean; overload;
 
     class function CarregarComando(
       const ACommandClass : string;
-      out AObjComando : IComandoTCPInterfaced;
+      out AObjComando : IRpDataFlashCommandInterfaced;
       out ALifeCycle: TLRDataFlashLifeCycle;
       const AServerInstanceController : IServerInstanceController;
       const ASessionInstanceController : ISessionInstanceController) : Boolean; overload;
   end;
 
-  TLRDataFlashComandoEnvio = class(TLRDataFlashComando)
+  TLRDataFlashComandoEnvio = class(TRpDataFlashCommand)
   private
     FComando : string;
   protected
@@ -430,16 +417,16 @@ type
   public
     function GetComando: string; override;
     procedure SetComando(const AComando : string); overload;
-    procedure SetComando(const AComando : TLRDataFlashComandoClass); overload;
+    procedure SetComando(const AComando : TRpDataFlashCommandClass); overload;
   end;
 
-  TLRDataFlashComandoBrowser = class(TLRDataFlashComando)
+  TLRDataFlashComandoBrowser = class(TRpDataFlashCommand)
   protected
     function GetBrowserPage : string; virtual;
     function DoGetParametrosSerializados : string; override;
   end;
 
-  TLRDataFlashComandoTexto = class(TLRDataFlashComando)
+  TLRDataFlashComandoTexto = class(TRpDataFlashCommand)
   private
     FOnExecutarMensagem: TLRDataFlashOnExecutarMensagem;
   protected
@@ -485,7 +472,7 @@ type
     procedure CopyInfo(const ASource : IFileProxy);
   end;
 
-  TFileProxy = class(TInterfacedPersistent, IFileProxy)
+  TRpFileProxy = class(TInterfacedPersistent, IFileProxy)
   private
     FFileStream: TStringStream;
     FFileName: string;
@@ -530,10 +517,10 @@ type
     class function GetFileSizeFmt(const ABytes : Int64) : string;
   end;
 
-  TLRDataFlashComandoDataSetProvider = class(TLRDataFlashComando)
+  TLRDataFlashComandoDataSetProvider = class(TRpDataFlashCommand)
   private
     FProviderClass: string;
-    FOperacao: TLRDataFlashOperacaoDataSet;
+    FOperacao: TRpDataFlashDataSetOperations;
     FApplyMaxErrors: Cardinal;
     FInfoQuery: Boolean;
     function ApplyUpdates : Boolean;
@@ -558,21 +545,21 @@ type
     destructor Destroy; override;
 
     property ProviderClass : string read FProviderClass;
-    property Operacao : TLRDataFlashOperacaoDataSet read FOperacao;
+    property Operacao : TRpDataFlashDataSetOperations read FOperacao;
     property ApplyMaxErrors : Cardinal read FApplyMaxErrors write FApplyMaxErrors;
     property InfoQuery : Boolean read FInfoQuery;
   end;
 
   TTcpClassRegisterItem = class
   private
-    FClass : TLRDataFlashAbstractClass;
+    FClass : TRpDataFlashAbstractClass;
     FProxyGroup : string;
     FLifeCycle: TLRDataFlashLifeCycle;
     FPublicItem: Boolean;
     FMnemonico: string;
     function GetProxyGroup: string;
   public
-    property ProxyClass : TLRDataFlashAbstractClass read FClass write FClass;
+    property ProxyClass : TRpDataFlashAbstractClass read FClass write FClass;
     property ProxyGroup : string read GetProxyGroup write FProxyGroup;
     property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle;
     property PublicItem : Boolean read FPublicItem write FPublicItem;
@@ -584,25 +571,25 @@ type
     function GetItem(const Index : Integer) : TTcpClassRegisterItem;
   public
     class var TcpClassRegister: TTcpClassRegister;
-    procedure Registrar(const AClass : TLRDataFlashAbstractClass; const AGrupoProxy : string;
+    procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
       const ALifeCycle : TLRDataFlashLifeCycle = tlfInstance);
-    function GetClass(const AClassName : string) : TLRDataFlashAbstractClass; overload;
-    function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TLRDataFlashAbstractClass; overload;
+    function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
+    function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
     property Items[const Index: Integer]: TTcpClassRegisterItem read GetItem; default;
   end;
 
   TCPClassRegistrer = class
   public
     class procedure Destruir;
-    class procedure Registrar(const AClass : TLRDataFlashAbstractClass; const AGrupoProxy : string;
+    class procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
       const ALifeCycle : TLRDataFlashLifeCycle = tlfInstance);
-    class procedure RegistrarDSProvider(const AClass : TLRDataFlashAbstractClass;
+    class procedure RegistrarDSProvider(const AClass : TRpDataFlashAbstractClass;
       const ALifeCycle : TLRDataFlashLifeCycle);
     class procedure Registrados(out ARegistrados : TTcpClassRegister; const ASomentePublicos : Boolean = False);
-    class function GetClass(const AClassName : string) : TLRDataFlashAbstractClass; overload;
-    class function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TLRDataFlashAbstractClass; overload;
+    class function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
+    class function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
 //    class procedure Instanciar(const AClass : TLRDataFlashAbstractClass; const ANomeInstancia : string);
   end;
 
@@ -622,7 +609,7 @@ begin
 end;
 
 constructor TLRDataFlashParametroComando.Create(
-  const AOwner: TLRDataFlashParametrosComando; const ANome: string;
+  const AOwner: TRPDataFlashCommandParameters; const ANome: string;
   const AValor: Variant; const ATipo : TLRDataFlashTipoParametro;
   const ATipoValor : TLRDataFlashTipoValorParametro;
   const ABaseClass : string);
@@ -662,11 +649,11 @@ begin
   Result := Algorithms.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
 end;
 
-function TLRDataFlashParametroComando.GetAsBinaryFile: TFileProxy;
+function TLRDataFlashParametroComando.GetAsBinaryFile: TRpFileProxy;
 begin
   if not Assigned(FFile) then
   begin
-    FFile := TFileProxy.Create;
+    FFile := TRpFileProxy.Create;
     FFile.FileID := '-1';
   end;
 
@@ -687,12 +674,12 @@ end;
 
 function TLRDataFlashParametroComando.GetAsDateTime: TDateTime;
 begin
-  Result := TDateConverter.Encode( GetAsString );
+  Result := TRpDateConverter.Encode( GetAsString );
 end;
 
 function TLRDataFlashParametroComando.GetAsFloat: Double;
 begin
-  Result := TFloatConverter.Encode( GetAsString );
+  Result := TRpFloatConverter.Encode( GetAsString );
 end;
 
 function TLRDataFlashParametroComando.GetAsInteger: Integer;
@@ -831,12 +818,12 @@ end;
 
 procedure TLRDataFlashParametroComando.SetAsDateTime(const Value: TDateTime);
 begin
-  FValor := TDateConverter.Decode(Value);
+  FValor := TRpDateConverter.Decode(Value);
 end;
 
 procedure TLRDataFlashParametroComando.SetAsFloat(const Value: Double);
 begin
-  FValor := TFloatConverter.Decode( Value );
+  FValor := TRpFloatConverter.Decode( Value );
 end;
 
 procedure TLRDataFlashParametroComando.SetAsInteger(const Value: Integer);
@@ -861,19 +848,19 @@ end;
 
 { TLRDataFlashParametrosComando }
 
-procedure TLRDataFlashParametrosComando.AddParametro(const ANome: string;
+procedure TRPDataFlashCommandParameters.AddParametro(const ANome: string;
   const AValor: Variant; const ATipo: TLRDataFlashTipoValorParametro);
 begin
   Novo(ANome, AValor, tpEntrada, ATipo);
 end;
 
-procedure TLRDataFlashParametrosComando.AddRetorno(const ANome: string;
+procedure TRPDataFlashCommandParameters.AddRetorno(const ANome: string;
   AValor: Variant; const ATipo: TLRDataFlashTipoValorParametro);
 begin
   Novo(ANome, AValor, tpSaida, ATipo);
 end;
 
-procedure TLRDataFlashParametrosComando.Assign(const Source: TLRDataFlashParametrosComando);
+procedure TRPDataFlashCommandParameters.Assign(const Source: TRPDataFlashCommandParameters);
 var
   I: Integer;
   lParam: TLRDataFlashParametroComando;
@@ -899,7 +886,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashParametrosComando.Carregar(const AParametros: string);
+procedure TRPDataFlashCommandParameters.Carregar(const AParametros: string);
 
   procedure InternalLoadXML;
   var
@@ -909,7 +896,7 @@ procedure TLRDataFlashParametrosComando.Carregar(const AParametros: string);
     lStream: TStringStream;
     lNodoParametros: IXMLNode;
   begin
-    Novo(C_PARAM_INT_TIPO_FORMATO, Ord(sfXML), tpInterno, tvpInteger);
+    Novo(C_PARAM_INT_FORMAT_TYPE, Ord(sfXML), tpInterno, tvpInteger);
 
     lStream := TStringStream.Create(AParametros);
     try
@@ -944,7 +931,7 @@ procedure TLRDataFlashParametrosComando.Carregar(const AParametros: string);
     lPair: TJSONPair;
   begin
     try
-      Novo(C_PARAM_INT_TIPO_FORMATO, Ord(sfJSON), tpInterno, tvpInteger);
+      Novo(C_PARAM_INT_FORMAT_TYPE, Ord(sfJSON), tpInterno, tvpInteger);
 
       lJsonObj := TJSONObject.Create;
       try
@@ -981,14 +968,14 @@ begin
     raise Exception.Create('Nenhum parâmetro foi recebido.');
 end;
 
-constructor TLRDataFlashParametrosComando.Create(const AFileTransferSupport : ILRDataFlashFileTransferSupport);
+constructor TRPDataFlashCommandParameters.Create(const AFileTransferSupport : ILRDataFlashFileTransferSupport);
 begin
   FParametros := TObjectList.Create;
   FFileTransferSupport := AFileTransferSupport;
   Novo( C_PARAM_INT_STATUS_PROC , EmptyStr, tpInterno, tvpInteger);
 end;
 
-procedure TLRDataFlashParametrosComando.DeJson(const AJsonPair: TJSONPair);
+procedure TRPDataFlashCommandParameters.DeJson(const AJsonPair: TJSONPair);
 var
   i: Integer;
   lTipo: TLRDataFlashTipoParametro;
@@ -1028,7 +1015,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashParametrosComando.DeNodo(const ANodo: IXMLNode);
+procedure TRPDataFlashCommandParameters.DeNodo(const ANodo: IXMLNode);
 var
   I: Integer;
   lNodo: IXMLNode;
@@ -1050,13 +1037,13 @@ begin
   end;
 end;
 
-destructor TLRDataFlashParametrosComando.Destroy;
+destructor TRPDataFlashCommandParameters.Destroy;
 begin
   FreeAndNil(FParametros);
   inherited;
 end;
 
-function TLRDataFlashParametrosComando.GetCount: Integer;
+function TRPDataFlashCommandParameters.GetCount: Integer;
 begin
   if Assigned(FParametros) then
     Result := FParametros.Count
@@ -1064,7 +1051,7 @@ begin
     Result := -1;
 end;
 
-function TLRDataFlashParametrosComando.GetParametro(const ANome: string; const ATipo : TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
+function TRPDataFlashCommandParameters.GetParametro(const ANome: string; const ATipo : TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
 var
   lParametro: TLRDataFlashParametroComando;
 begin
@@ -1079,7 +1066,7 @@ begin
   Result := lParametro;
 end;
 
-function TLRDataFlashParametrosComando.GetParametroIdx(const Index: Integer): TLRDataFlashParametroComando;
+function TRPDataFlashCommandParameters.GetParametroIdx(const Index: Integer): TLRDataFlashParametroComando;
 begin
   try
     Result := TLRDataFlashParametroComando(FParametros[Index]);
@@ -1088,12 +1075,12 @@ begin
   end;
 end;
 
-function TLRDataFlashParametrosComando.GetStatusProcessamento: TLRDataFlashStatusProcessamento;
+function TRPDataFlashCommandParameters.GetStatusProcessamento: TLRDataFlashStatusProcessamento;
 begin
   Result := TLRDataFlashStatusProcessamento(ParametroInterno[C_PARAM_INT_STATUS_PROC].AsInteger);
 end;
 
-function TLRDataFlashParametrosComando.Novo(const ANome: string;
+function TRPDataFlashCommandParameters.Novo(const ANome: string;
   const ATipo: TLRDataFlashTipoParametro;
   const AClasseBase: string): TLRDataFlashParametroComando;
 begin
@@ -1101,13 +1088,13 @@ begin
   Novo(Result);
 end;
 
-procedure TLRDataFlashParametrosComando.Novo(const AParametro: TLRDataFlashParametroComando);
+procedure TRPDataFlashCommandParameters.Novo(const AParametro: TLRDataFlashParametroComando);
 begin
   if not Assigned(PorNome(AParametro.Nome)) then
     FParametros.Add(AParametro);
 end;
 
-function TLRDataFlashParametrosComando.Novo(const ANome: string; AValor: Variant; const ATipo : TLRDataFlashTipoParametro;
+function TRPDataFlashCommandParameters.Novo(const ANome: string; AValor: Variant; const ATipo : TLRDataFlashTipoParametro;
   const ATipoValor : TLRDataFlashTipoValorParametro) : TLRDataFlashParametroComando;
 begin
   Result := PorNome(ANome, ATipo);
@@ -1129,7 +1116,7 @@ begin
   end;
 end;
 
-function TLRDataFlashParametrosComando.ParaJson: string;
+function TRPDataFlashCommandParameters.ParaJson: string;
 var
   I: Integer;
   lParametros: string;
@@ -1146,7 +1133,7 @@ begin
   Result := '"Parametros": {' + lParametros + '}';
 end;
 
-procedure TLRDataFlashParametrosComando.ParaNodo(const ANodo: IXMLNode);
+procedure TRPDataFlashCommandParameters.ParaNodo(const ANodo: IXMLNode);
 var
   I: Integer;
 begin
@@ -1154,7 +1141,7 @@ begin
     TLRDataFlashParametroComando(FParametros[I]).ParaNodo(ANodo);
 end;
 
-function TLRDataFlashParametrosComando.PorNome(const ANome: string;
+function TRPDataFlashCommandParameters.PorNome(const ANome: string;
   const ATipo: TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
 var
   I: Integer;
@@ -1171,7 +1158,7 @@ begin
   end;
 end;
 
-function TLRDataFlashParametrosComando.Serializar: string;
+function TRPDataFlashCommandParameters.Serializar: string;
 var
   lXML: IXMLDocument;
   lXmlNode: IXMLNode;
@@ -1181,7 +1168,7 @@ begin
     raise Exception.Create('Serialização. Comando não pode ser vazio!');
 
   if SerializationFormat = sfUnknown then
-    SerializationFormat := TSerializationFormat(Parametro[C_PARAM_INT_TIPO_FORMATO].AsInteger);
+    SerializationFormat := TSerializationFormat(Parametro[C_PARAM_INT_FORMAT_TYPE].AsInteger);
 
   // mantem como padrao o JSON
   if SerializationFormat in [sfUnknown, sfJSON] then
@@ -1227,12 +1214,12 @@ begin
   end
 end;
 
-procedure TLRDataFlashParametrosComando.SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
+procedure TRPDataFlashCommandParameters.SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
 begin
   Parametro[C_PARAM_INT_STATUS_PROC].AsInteger := Ord(Value);
 end;
 
-function TLRDataFlashParametrosComando.PorNome(const ANome: string): TLRDataFlashParametroComando;
+function TRPDataFlashCommandParameters.PorNome(const ANome: string): TLRDataFlashParametroComando;
 var
   I: Integer;
 begin
@@ -1249,28 +1236,28 @@ end;
 
 { TLRDataFlashComando }
 
-procedure TLRDataFlashComando.Carregar(const AComando: string);
+procedure TRpDataFlashCommand.Carregar(const AComando: string);
 begin
   FParametros.Carregar(AComando);
   DoCarregar;
 end;
 
-class function TLRDataFlashComando.CarregarComando(
+class function TRpDataFlashCommand.CarregarComando(
   const AComando : string;
-  out AObjComando : IComandoTCPInterfaced;
-  out AParametros : TLRDataFlashParametrosComando;
+  out AObjComando : IRpDataFlashCommandInterfaced;
+  out AParametros : TRPDataFlashCommandParameters;
   const AServerInstanceController : IServerInstanceController;
   const ASessionInstanceController :ISessionInstanceController;
   const ALoadParams : Boolean): Boolean;
 var
   lLifeCycle: TLRDataFlashLifeCycle;
 begin
-  AParametros := TLRDataFlashParametrosComando.Create(nil);
+  AParametros := TRPDataFlashCommandParameters.Create(nil);
   AParametros.Carregar(AComando);
 
   AObjComando := nil;
 
-  TLRDataFlashComando.CarregarComando(
+  TRpDataFlashCommand.CarregarComando(
     AParametros.Comando,
     AObjComando,
     lLifeCycle,
@@ -1283,18 +1270,18 @@ begin
   Result := AObjComando <> nil;
 end;
 
-class function TLRDataFlashComando.CarregarComando(const ACommandClass: string;
-  out AObjComando: IComandoTCPInterfaced;
+class function TRpDataFlashCommand.CarregarComando(const ACommandClass: string;
+  out AObjComando: IRpDataFlashCommandInterfaced;
   out ALifeCycle: TLRDataFlashLifeCycle;
   const AServerInstanceController: IServerInstanceController;
   const ASessionInstanceController: ISessionInstanceController): Boolean;
 var
-  lComandoClass: TLRDataFlashAbstractClass;
+  lComandoClass: TRpDataFlashAbstractClass;
 begin
   lComandoClass := TCPClassRegistrer.GetClass(ACommandClass, ALifeCycle);
   if (lComandoClass <> nil) then
   begin
-    if Supports(lComandoClass, IComandoTCPInterfaced) then
+    if Supports(lComandoClass, IRpDataFlashCommandInterfaced) then
     begin
       if ALifeCycle = tlfSession then
         AObjComando := ASessionInstanceController.LocalizarInstancia(ACommandClass)
@@ -1304,12 +1291,12 @@ begin
       if AObjComando = nil then
       begin
         if lComandoClass.InheritsFrom(TComponent) then
-          AObjComando := (TComponentClass(lComandoClass).Create(nil) as IComandoTCPInterfaced)
+          AObjComando := (TComponentClass(lComandoClass).Create(nil) as IRpDataFlashCommandInterfaced)
         else
-          if lComandoClass.InheritsFrom(TLRDataFlashComando) then
-            AObjComando := (TLRDataFlashComandoClass(lComandoClass).Create as IComandoTCPInterfaced)
+          if lComandoClass.InheritsFrom(TRpDataFlashCommand) then
+            AObjComando := (TRpDataFlashCommandClass(lComandoClass).Create as IRpDataFlashCommandInterfaced)
           else
-            AObjComando  := (TLRDataFlashComando(lComandoClass.Create) as IComandoTCPInterfaced);
+            AObjComando  := (TRpDataFlashCommand(lComandoClass.Create) as IRpDataFlashCommandInterfaced);
         AObjComando.LifeCycle := ALifeCycle;
 
         AObjComando.ServerInstanceController := AServerInstanceController;
@@ -1326,14 +1313,14 @@ begin
   Result := AObjComando <> nil;
 end;
 
-constructor TLRDataFlashComando.Create;
+constructor TRpDataFlashCommand.Create;
 begin
   // inicializados na primeira execucao (e atualziados a cada execucao)
   FServer := nil;
   FConexaoItem := nil;
 
   FLock := False;
-  FParametros := TLRDataFlashParametrosComando.Create(nil);
+  FParametros := TRPDataFlashCommandParameters.Create(nil);
   FParametros.Comando := GetComando;
   FSerealizationFormat := sfJSON;
   //FStatusProcessamento := tspServidor;
@@ -1342,83 +1329,82 @@ begin
   FParametros.StatusProcessamento := tspNenhum;
 end;
 
-destructor TLRDataFlashComando.Destroy;
+destructor TRpDataFlashCommand.Destroy;
 begin
   FreeAndNil(FParametros);
   FConexaoItem := nil;
   inherited;
 end;
 
-function TLRDataFlashComando.DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean;
+function TRpDataFlashCommand.DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean;
 begin
   Result := False;
 end;
 
-procedure TLRDataFlashComando.DoCarregar;
+procedure TRpDataFlashCommand.DoCarregar;
 begin
 //dummy
 end;
 
-procedure TLRDataFlashComando.DoErroExecucao(const AParametros: TLRDataFlashParametrosComando);
+procedure TRpDataFlashCommand.DoErroExecucao(const AParametros: TRPDataFlashCommandParameters);
 begin
   FParametros.Assign(AParametros);
   DoErroExecucao(EmptyStr);
 end;
 
-procedure TLRDataFlashComando.DoErroExecucao(const AErrorMsg : string);
+procedure TRpDataFlashCommand.DoErroExecucao(const AErrorMsg : string);
 begin
   Retorno[C_PARAM_INT_EXCEPTION].AsString := AErrorMsg;
 end;
 
-procedure TLRDataFlashComando.DoExecutarAntesComunicarPonte(var AContinuar: Boolean);
+procedure TRpDataFlashCommand.DoExecutarAntesComunicarPonte(var AContinuar: Boolean);
 begin
 //dummy
 end;
 
-procedure TLRDataFlashComando.DoExecutarPonteBemSucedida(var AContinuar: Boolean);
+procedure TRpDataFlashCommand.DoExecutarPonteBemSucedida(var AContinuar: Boolean);
 begin
 //dummy
 end;
 
-procedure TLRDataFlashComando.DoExecutarPonteInvalida(var AContinuar : Boolean);
+procedure TRpDataFlashCommand.DoExecutarPonteInvalida(var AContinuar : Boolean);
 begin
 //dummy
 end;
 
-function TLRDataFlashComando.DoGetDescricao: string;
+function TRpDataFlashCommand.DoGetDescricao: string;
 begin
-//  Result := EmptyStr;
-  Result := C_COMANDO_NO_DESCRIPTION;
+  Result := C_COMMAND_NO_DESCRIPTION;
 end;
 
-function TLRDataFlashComando.DoGetParametrosSerializados: string;
+function TRpDataFlashCommand.DoGetParametrosSerializados: string;
 begin
   Result := FParametros.Serializar;
 end;
 
-procedure TLRDataFlashComando.DoRegistrarParametros;
+procedure TRpDataFlashCommand.DoRegistrarParametros;
 begin
-  NovoParamInterno(C_PARAM_INT_TIPO_FORMATO, tvpInteger);
+  NovoParamInterno(C_PARAM_INT_FORMAT_TYPE, tvpInteger);
   NovoParamInterno(C_PARAM_INT_STATUS_RET, tvpBoolean);
   NovoParamInterno(C_PARAM_INT_EXCEPTION, tvpString);
 end;
 
-procedure TLRDataFlashComando.DoRegistrarParametros(
-  const AParametros: TLRDataFlashParametrosComando);
+procedure TRpDataFlashCommand.DoRegistrarParametros(
+  const AParametros: TRPDataFlashCommandParameters);
 begin
   FParametros.Assign(AParametros);
   DoRegistrarParametros;
 end;
 
-procedure TLRDataFlashComando.DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga;
-  const AParametros: TLRDataFlashParametrosComando);
+procedure TRpDataFlashCommand.DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga;
+  const AParametros: TRPDataFlashCommandParameters);
 begin
 //  FParametros := AParametros;
   FParametros.Assign(AParametros);
   DoCarregar;
 end;
 
-procedure TLRDataFlashComando.DoSerializar(const AParametros: TLRDataFlashParametrosComando);
+procedure TRpDataFlashCommand.DoSerializar(const AParametros: TRPDataFlashCommandParameters);
 begin
 //  FParametros := AParametros;
   FParametros.SerializationFormat := Self.SerializationFormat;
@@ -1426,17 +1412,17 @@ begin
   DoSerializar;
 end;
 
-procedure TLRDataFlashComando.DoSerializar;
+procedure TRpDataFlashCommand.DoSerializar;
 begin
 //dummy
 end;
 
-procedure TLRDataFlashComando.DoValidarParametros;
+procedure TRpDataFlashCommand.DoValidarParametros;
 begin
 //dummy
 end;
 
-function TLRDataFlashComando.Executar(const AParametros: TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote): string;
+function TRpDataFlashCommand.Executar(const AParametros: TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor): string;
 var
   lContinuar: Boolean;
 begin
@@ -1444,13 +1430,13 @@ begin
   Result := Executar(AParametros, AExecutor, teExecucao, lContinuar);
 end;
 
-function TLRDataFlashComando.EnviarCallBack: Boolean;
+function TRpDataFlashCommand.EnviarCallBack: Boolean;
 var
-  lParams: TLRDataFlashParametrosComando;
+  lParams: TRPDataFlashCommandParameters;
 begin
   Result := False;
 
-  lParams := TLRDataFlashParametrosComando.Create(nil);
+  lParams := TRPDataFlashCommandParameters.Create(nil);
   try
     lParams.Comando := TAG_CALLBACK;
     if DoCallBack(lParams) and Assigned(lParams) and Assigned(FOnCallBackEvent) then
@@ -1461,7 +1447,7 @@ begin
   end;
 end;
 
-function TLRDataFlashComando.Executar(const AParametros : TLRDataFlashParametrosComando; AExecutor : IExecutorComandoPacote;
+function TRpDataFlashCommand.Executar(const AParametros : TRPDataFlashCommandParameters; AExecutor : IRpPackageCommandExecutor;
   const ATipo : TLRDataFlashTipoExecucao; var AContinuar : Boolean): string;
 var
   lRetornoPositivo: Boolean;
@@ -1519,123 +1505,123 @@ begin
   end;
 end;
 
-function TLRDataFlashComando.ExecutarAntesComunicarPonte(
-  const AParametros: TLRDataFlashParametrosComando;
-  AExecutor: IExecutorComandoPacote; var AContinuar: Boolean): string;
+function TRpDataFlashCommand.ExecutarAntesComunicarPonte(
+  const AParametros: TRPDataFlashCommandParameters;
+  AExecutor: IRpPackageCommandExecutor; var AContinuar: Boolean): string;
 begin
   Result := Executar(AParametros, AExecutor, teAntesComunicarPonte, AContinuar);
 end;
 
-function TLRDataFlashComando.ExecutarPonteBemSucedida(
-  const AParametros: TLRDataFlashParametrosComando;
-  AExecutor: IExecutorComandoPacote; var AContinuar: Boolean): string;
+function TRpDataFlashCommand.ExecutarPonteBemSucedida(
+  const AParametros: TRPDataFlashCommandParameters;
+  AExecutor: IRpPackageCommandExecutor; var AContinuar: Boolean): string;
 begin
   Result := Executar(AParametros, AExecutor, tePonteBemSucedida, AContinuar);
 end;
 
-function TLRDataFlashComando.ExecutarPonteInvalida(
-  const AParametros: TLRDataFlashParametrosComando;
-  AExecutor: IExecutorComandoPacote; var AContinuar : Boolean): string;
+function TRpDataFlashCommand.ExecutarPonteInvalida(
+  const AParametros: TRPDataFlashCommandParameters;
+  AExecutor: IRpPackageCommandExecutor; var AContinuar : Boolean): string;
 begin
   Result := Executar(AParametros, AExecutor, tePonteInvalida, AContinuar);
 end;
 
-function TLRDataFlashComando.FindParametro(const ANome: string): TLRDataFlashParametroComando;
+function TRpDataFlashCommand.FindParametro(const ANome: string): TLRDataFlashParametroComando;
 begin
   Result := FParametros.PorNome(ANome, tpEntrada);
 end;
 
-function TLRDataFlashComando.FindRetorno(const ANome: string): TLRDataFlashParametroComando;
+function TRpDataFlashCommand.FindRetorno(const ANome: string): TLRDataFlashParametroComando;
 begin
   Result := FParametros.PorNome(ANome, tpSaida);
 end;
 
-function TLRDataFlashComando.GetComando: string;
+function TRpDataFlashCommand.GetComando: string;
 begin
   Result := Self.ClassName;
 end;
 
-function TLRDataFlashComando.GetDescricao: string;
+function TRpDataFlashCommand.GetDescricao: string;
 begin
   Result := DoGetDescricao;
 end;
 
-function TLRDataFlashComando.GetExecutor: IExecutorComandoPacote;
+function TRpDataFlashCommand.GetExecutor: IRpPackageCommandExecutor;
 begin
   Result := FExecutor;
 end;
 
-function TLRDataFlashComando.GetSerializationFormat: TSerializationFormat;
+function TRpDataFlashCommand.GetSerializationFormat: TSerializationFormat;
 begin
   Result := FSerealizationFormat;
 end;
 
-function TLRDataFlashComando.GetServerInstanceController: IServerInstanceController;
+function TRpDataFlashCommand.GetServerInstanceController: IServerInstanceController;
 begin
   Result := FServerInstanceController;
 end;
 
-function TLRDataFlashComando.GetSessionInstanceController: ISessionInstanceController;
+function TRpDataFlashCommand.GetSessionInstanceController: ISessionInstanceController;
 begin
   Result := FSessionInstanceController;
 end;
 
-function TLRDataFlashComando.GetLifeCycle: TLRDataFlashLifeCycle;
+function TRpDataFlashCommand.GetLifeCycle: TLRDataFlashLifeCycle;
 begin
   Result := FLifeCycle;
 end;
 
-function TLRDataFlashComando.GetLock: Boolean;
+function TRpDataFlashCommand.GetLock: Boolean;
 begin
   Result := FLock;
 end;
 
-function TLRDataFlashComando.GetObject: TObject;
+function TRpDataFlashCommand.GetObject: TObject;
 begin
   Result := Self;
 end;
 
-function TLRDataFlashComando.GetParametro(const ANome: string;
+function TRpDataFlashCommand.GetParametro(const ANome: string;
   const ATipo: TLRDataFlashTipoParametro): TLRDataFlashParametroComando;
 begin
   Result := FParametros.GetParametro(ANome, ATipo);
 end;
 
-function TLRDataFlashComando.GetParametros: TLRDataFlashParametrosComando;
+function TRpDataFlashCommand.GetParametros: TRPDataFlashCommandParameters;
 begin
   Result := FParametros;
 end;
 
-function TLRDataFlashComando.GetRequestInfo: TIdHTTPRequestInfo;
+function TRpDataFlashCommand.GetRequestInfo: TIdHTTPRequestInfo;
 begin
   Result := FRequestInfo;
 end;
 
-function TLRDataFlashComando.GetResponseFileName: string;
+function TRpDataFlashCommand.GetResponseFileName: string;
 begin
   Result := '';
 end;
 
-function TLRDataFlashComando.GetResponseInfo: TIdHTTPResponseInfo;
+function TRpDataFlashCommand.GetResponseInfo: TIdHTTPResponseInfo;
 begin
   Result := FResponseInfo;
 end;
 
-function TLRDataFlashComando.GetStatusProcessamento: TLRDataFlashStatusProcessamento;
+function TRpDataFlashCommand.GetStatusProcessamento: TLRDataFlashStatusProcessamento;
 begin
 //  Result := FStatusProcessamento;
   Result := FParametros.StatusProcessamento;
 end;
 
-function TLRDataFlashComando.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TRpDataFlashCommand.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
 begin
   Result := tprPonte;
 end;
 
-function TLRDataFlashComando.InternalCarregarComando(
-  const AComando: TLRDataFlashComandoClass;
-  out AObjComando: IComandoTCPInterfaced;
-  out AParametros: TLRDataFlashParametrosComando): Boolean;
+function TRpDataFlashCommand.InternalCarregarComando(
+  const AComando: TRpDataFlashCommandClass;
+  out AObjComando: IRpDataFlashCommandInterfaced;
+  out AParametros: TRPDataFlashCommandParameters): Boolean;
 var
   lComando: string;
 begin
@@ -1665,12 +1651,12 @@ begin
   end;
 end;
 
-function TLRDataFlashComando.LastError: string;
+function TRpDataFlashCommand.LastError: string;
 begin
   Result := FParametros.Retorno[C_PARAM_INT_EXCEPTION].AsString;
 end;
 
-procedure TLRDataFlashComando.NovoParametro(const ANome: string;
+procedure TRpDataFlashCommand.NovoParametro(const ANome: string;
   const ATipo: TLRDataFlashTipoValorParametro; const ARecarregar : Boolean);
 begin
   if not ARecarregar then
@@ -1679,83 +1665,83 @@ begin
     FParametros.Novo(ANome, EmptyStr, tpEntrada, ATipo);
 end;
 
-procedure TLRDataFlashComando.NovoRetorno(const ANome: string;
+procedure TRpDataFlashCommand.NovoRetorno(const ANome: string;
   const ATipo: TLRDataFlashTipoValorParametro);
 begin
   FParametros.Novo(ANome, EmptyStr, tpSaida, ATipo);
 end;
 
-function TLRDataFlashComando.Serializar: string;
+function TRpDataFlashCommand.Serializar: string;
 begin
   DoSerializar;
   Result := DoGetParametrosSerializados;
 //  Result := FParametros.Serializar;
 end;
 
-procedure TLRDataFlashComando.SetSerializationFormat(const Value: TSerializationFormat);
+procedure TRpDataFlashCommand.SetSerializationFormat(const Value: TSerializationFormat);
 begin
   FSerealizationFormat := Value;
 end;
 
-procedure TLRDataFlashComando.SetServer(const AServer: TComponent);
+procedure TRpDataFlashCommand.SetServer(const AServer: TComponent);
 begin
   FServer := AServer;
 end;
 
-procedure TLRDataFlashComando.SetServerInstanceController(
+procedure TRpDataFlashCommand.SetServerInstanceController(
   const Value: IServerInstanceController);
 begin
   FServerInstanceController := Value;
 end;
 
-procedure TLRDataFlashComando.SetSessionInstanceController(
+procedure TRpDataFlashCommand.SetSessionInstanceController(
   const Value: ISessionInstanceController);
 begin
   FSessionInstanceController := Value;
 end;
 
-procedure TLRDataFlashComando.SetConexaoItem(const AConexaoItem: IAutenticationProvider);
+procedure TRpDataFlashCommand.SetConexaoItem(const AConexaoItem: IAutenticationProvider);
 begin
   FConexaoItem := AConexaoItem;
 end;
 
-procedure TLRDataFlashComando.SetExecutor(const AExecutor: IExecutorComandoPacote);
+procedure TRpDataFlashCommand.SetExecutor(const AExecutor: IRpPackageCommandExecutor);
 begin
   FExecutor := AExecutor;
 end;
 
-procedure TLRDataFlashComando.SetLifeCycle(const ALifeCycle: TLRDataFlashLifeCycle);
+procedure TRpDataFlashCommand.SetLifeCycle(const ALifeCycle: TLRDataFlashLifeCycle);
 begin
   FLifeCycle := ALifeCycle;
 end;
 
-procedure TLRDataFlashComando.SetLock(const Value: Boolean);
+procedure TRpDataFlashCommand.SetLock(const Value: Boolean);
 begin
   FLock := Value;
 end;
 
-procedure TLRDataFlashComando.SetRequestInfo(const AValue: TIdHTTPRequestInfo);
+procedure TRpDataFlashCommand.SetRequestInfo(const AValue: TIdHTTPRequestInfo);
 begin
   FRequestInfo := AValue;
 end;
 
-procedure TLRDataFlashComando.SetResponseInfo(const AValue: TIdHTTPResponseInfo);
+procedure TRpDataFlashCommand.SetResponseInfo(const AValue: TIdHTTPResponseInfo);
 begin
   FResponseInfo := AValue;
 end;
 
-procedure TLRDataFlashComando.SetCallBackEvent(const AContext: TIdContext;const ACallBackEvent: TCallBackEvent);
+procedure TRpDataFlashCommand.SetCallBackEvent(const AContext: TIdContext;const ACallBackEvent: TRpDataFlashCallBackEvent);
 begin
   FOnCallBackEvent := ACallBackEvent;
   FContext := AContext;
 end;
 
-procedure TLRDataFlashComando.SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
+procedure TRpDataFlashCommand.SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
 begin
   FParametros.StatusProcessamento := Value;
 end;
 
-function TLRDataFlashComando.StatusRetorno: Boolean;
+function TRpDataFlashCommand.StatusRetorno: Boolean;
 begin
   Result := FParametros.Retorno[C_PARAM_INT_STATUS_RET].AsBoolean;
 end;
@@ -1781,12 +1767,12 @@ begin
   Result := FComando;
 end;
 
-procedure TLRDataFlashComandoEnvio.SetComando(const AComando: TLRDataFlashComandoClass);
+procedure TLRDataFlashComandoEnvio.SetComando(const AComando: TRpDataFlashCommandClass);
 begin
   SetComando(AComando.ClassName);
 end;
 
-procedure TLRDataFlashComando.NovoParametro(const ANome: string;
+procedure TRpDataFlashCommand.NovoParametro(const ANome: string;
   const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
 begin
   if not ARecarregar then
@@ -1795,13 +1781,13 @@ begin
     FParametros.Novo(ANome, tpEntrada, ABaseClass.ClassName);
 end;
 
-procedure TLRDataFlashComando.NovoParamInterno(const ANome: string;
+procedure TRpDataFlashCommand.NovoParamInterno(const ANome: string;
   const ATipo: TLRDataFlashTipoValorParametro);
 begin
   FParametros.Novo(ANome, EmptyStr, tpInterno, ATipo);
 end;
 
-procedure TLRDataFlashComando.NovoRetorno(const ANome: string;
+procedure TRpDataFlashCommand.NovoRetorno(const ANome: string;
   const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
 begin
   FParametros.Novo(ANome, tpSaida, ABaseClass.ClassName);
@@ -1815,13 +1801,13 @@ begin
     FreeAndNil(TTcpClassRegister.TcpClassRegister);
 end;
 
-class function TCPClassRegistrer.GetClass(const AClassName: string): TLRDataFlashAbstractClass;
+class function TCPClassRegistrer.GetClass(const AClassName: string): TRpDataFlashAbstractClass;
 begin
   Result := TTcpClassRegister.TcpClassRegister.GetClass(AClassName);
 end;
 
 class function TCPClassRegistrer.GetClass(const AClassName: string;
-  out ALifeCycle: TLRDataFlashLifeCycle): TLRDataFlashAbstractClass;
+  out ALifeCycle: TLRDataFlashLifeCycle): TRpDataFlashAbstractClass;
 begin
   Result := TTcpClassRegister.TcpClassRegister.GetClass(AClassName, ALifeCycle);
 end;
@@ -1838,7 +1824,7 @@ begin
   if TTcpClassRegister.TcpClassRegister <> nil then
     for I := 0 to TTcpClassRegister.TcpClassRegister.Count - 1 do
     begin
-      lAdicionar := TTcpClassRegister.TcpClassRegister.Items[I].ProxyGroup <> C_GRUPO_INTERNO;
+      lAdicionar := TTcpClassRegister.TcpClassRegister.Items[I].ProxyGroup <> C_GROUP_INTERNAL;
       if ASomentePublicos then
         lAdicionar := lAdicionar and TTcpClassRegister.TcpClassRegister.Items[I].PublicItem;
 
@@ -1854,7 +1840,7 @@ begin
     end;
 end;
 
-class procedure TCPClassRegistrer.Registrar(const AClass : TLRDataFlashAbstractClass;
+class procedure TCPClassRegistrer.Registrar(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
   const ALifeCycle : TLRDataFlashLifeCycle);
 var
@@ -1870,17 +1856,17 @@ begin
   TTcpClassRegister.TcpClassRegister.Registrar(AClass, lGrupoProxy, AMnemonico, APublico, ALifeCycle);
 end;
 
-class procedure TCPClassRegistrer.RegistrarDSProvider(const AClass: TLRDataFlashAbstractClass;
+class procedure TCPClassRegistrer.RegistrarDSProvider(const AClass: TRpDataFlashAbstractClass;
   const ALifeCycle : TLRDataFlashLifeCycle);
 begin
   if TTcpClassRegister.TcpClassRegister = nil then
     TTcpClassRegister.TcpClassRegister := TTcpClassRegister.Create;
-  TTcpClassRegister.TcpClassRegister.Registrar(AClass, C_GRUPO_DATASET, '', False, ALifeCycle);
+  TTcpClassRegister.TcpClassRegister.Registrar(AClass, C_GROUP_DATASET, '', False, ALifeCycle);
 end;
 
 { TTcpClassRegister }
 
-function TTcpClassRegister.GetClass(const AClassName: string): TLRDataFlashAbstractClass;
+function TTcpClassRegister.GetClass(const AClassName: string): TRpDataFlashAbstractClass;
 var
   lLifeCycle: TLRDataFlashLifeCycle;
 begin
@@ -1888,17 +1874,17 @@ begin
 end;
 
 function TTcpClassRegister.GetClass(const AClassName: string;
-  out ALifeCycle: TLRDataFlashLifeCycle): TLRDataFlashAbstractClass;
+  out ALifeCycle: TLRDataFlashLifeCycle): TRpDataFlashAbstractClass;
 var
   I: Integer;
 begin
   Result := nil;
   ALifeCycle := tlfInstance;
   for I := 0 to Count - 1 do
-    if TLRDataFlashAbstractClass(Items[I].ProxyClass).ClassNameIs(AClassName) or (Items[I].Mnemonico = AClassName) then
+    if TRpDataFlashAbstractClass(Items[I].ProxyClass).ClassNameIs(AClassName) or (Items[I].Mnemonico = AClassName) then
     begin
       ALifeCycle := Items[I].LifeCycle;
-      Result := TLRDataFlashAbstractClass(Items[I].ProxyClass);
+      Result := TRpDataFlashAbstractClass(Items[I].ProxyClass);
       Exit;
     end;
 end;
@@ -1908,7 +1894,7 @@ begin
   Result := TTcpClassRegisterItem(Self.Get(Index));
 end;
 
-procedure TTcpClassRegister.Registrar(const AClass : TLRDataFlashAbstractClass;
+procedure TTcpClassRegister.Registrar(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
   const ALifeCycle : TLRDataFlashLifeCycle);
 var
@@ -1990,7 +1976,7 @@ begin
   FValor := Value;
 end;
 
-function TLRDataFlashParametrosComando.Novo(const ANome: string;
+function TRPDataFlashCommandParameters.Novo(const ANome: string;
   const ATipo : TLRDataFlashTipoParametro;
   const ATipoValor : TLRDataFlashValorParametroClass): TLRDataFlashValorParametro;
 begin
@@ -2006,7 +1992,7 @@ function TTcpClassRegisterItem.GetProxyGroup: string;
 begin
   Result := Trim( FProxyGroup );
   if Result = EmptyStr then
-    Result := C_SEM_GRUPO_DEFINIDO;
+    Result := C_WITHOUT_GROUP;
 end;
 
 { TLRDataFlashCustomDataSetProvider }
@@ -2066,7 +2052,7 @@ var
   lXmlData: string;
 begin
   FProviderClass := Parametro['ProviderClass'].AsString;
-  FOperacao := TLRDataFlashOperacaoDataSet( Parametro['Operacao'].AsInteger );
+  FOperacao := TRpDataFlashDataSetOperations( Parametro['Operacao'].AsInteger );
   FApplyMaxErrors := Parametro['MaxErrors'].AsInteger;
   FInfoQuery := Parametro['csDesigning'].AsBoolean;
 
@@ -2142,7 +2128,7 @@ end;
 
 { TFileProxy }
 
-function TFileProxy.LoadFromFile(const AFileName: string): Boolean;
+function TRpFileProxy.LoadFromFile(const AFileName: string): Boolean;
 var
   lStream: TMemoryStream;
 begin
@@ -2168,7 +2154,7 @@ begin
   Result := FFileStream.Size > 0;
 end;
 
-procedure TFileProxy.CopyInfo(const ASource: IFileProxy);
+procedure TRpFileProxy.CopyInfo(const ASource: IFileProxy);
 begin
   FFileID := ASource.FileID;
   FFileName := ASource.FileName;
@@ -2184,37 +2170,37 @@ begin
   FFileStream.Position := 0;
 end;
 
-constructor TFileProxy.Create;
+constructor TRpFileProxy.Create;
 begin
   FFileStream := TStringStream.Create('');
   FDeleteOnRecive := False;
 end;
 
-function TFileProxy.DecodeInfo(const AInfo: string): TFtpFileInfo;
+function TRpFileProxy.DecodeInfo(const AInfo: string): TFtpFileInfo;
 begin
   Result.Decode(AInfo);
 end;
 
-destructor TFileProxy.Destroy;
+destructor TRpFileProxy.Destroy;
 begin
   if FFileStream <> nil then
     FreeAndNil(FFileStream);
   inherited;
 end;
 
-function TFileProxy.DoGenerateFileID: string;
+function TRpFileProxy.DoGenerateFileID: string;
 begin
   Randomize;
   Result := FormatDateTime('hhmmnn_zzz_ddmmyy_', Now)
           + Format('%6.6d', [Random(999999)]);
 end;
 
-function TFileProxy.FileSizeFmt: string;
+function TRpFileProxy.FileSizeFmt: string;
 begin
-  Result := TFileProxy.GetFileSizeFmt(FileSize);
+  Result := TRpFileProxy.GetFileSizeFmt(FileSize);
 end;
 
-function TFileProxy.Get(const ASupport: ILRDataFlashFileTransferSupport;
+function TRpFileProxy.Get(const ASupport: ILRDataFlashFileTransferSupport;
   const AFileID: string): Boolean;
 var
   lFileStream : TFileStream;
@@ -2242,12 +2228,12 @@ begin
   end;
 end;
 
-function TFileProxy.GetDeleteOnRecive: Boolean;
+function TRpFileProxy.GetDeleteOnRecive: Boolean;
 begin
   Result := FDeleteOnRecive;
 end;
 
-function TFileProxy.GetFileID: string;
+function TRpFileProxy.GetFileID: string;
 begin
   if FFileID = EmptyStr then
     FFileID := DoGenerateFileID;
@@ -2255,12 +2241,12 @@ begin
   Result := FFileID;
 end;
 
-function TFileProxy.GetFileName: string;
+function TRpFileProxy.GetFileName: string;
 begin
   Result := FFileName;
 end;
 
-function TFileProxy.GetFileSize: Int64;
+function TRpFileProxy.GetFileSize: Int64;
 begin
   if Assigned(FFileStream) then
     Result := FFileStream.Size
@@ -2268,7 +2254,7 @@ begin
     Result := 0;
 end;
 
-class function TFileProxy.GetFileSizeFmt(const ABytes: Int64): string;
+class function TRpFileProxy.GetFileSizeFmt(const ABytes: Int64): string;
 const
   C_SIZE_DIV = 1024;
 var
@@ -2296,12 +2282,12 @@ begin
     Result := FormatFloat('#0 bytes', lSize);
 end;
 
-function TFileProxy.GetStream: TStream;
+function TRpFileProxy.GetStream: TStream;
 begin
   Result := FFileStream;
 end;
 
-function TFileProxy.Put(const ASupport: ILRDataFlashFileTransferSupport): Boolean;
+function TRpFileProxy.Put(const ASupport: ILRDataFlashFileTransferSupport): Boolean;
 var
   lDestino : TFileStream;
   lNomeDestino : string;
@@ -2321,7 +2307,7 @@ begin
   end;
 end;
 
-function TFileProxy.Remove: Boolean;
+function TRpFileProxy.Remove: Boolean;
 begin
   if (FileName <> '') and FileExists(FileName) then
     Result := DeleteFile(PChar(FFileName))
@@ -2329,19 +2315,19 @@ begin
     Result := True;
 end;
 
-function TFileProxy.Load(const AFileStream: string) : string;
+function TRpFileProxy.Load(const AFileStream: string) : string;
 begin
   FreeAndNil(FFileStream);
   FFileStream := TStringStream.Create(AFileStream);
   FFileStream.Position := 0;
 end;
 
-function TFileProxy.Save: string;
+function TRpFileProxy.Save: string;
 begin
   Result := FFileStream.DataString;
 end;
 
-function TFileProxy.SaveToFile: Boolean;
+function TRpFileProxy.SaveToFile: Boolean;
 begin
   if FFileName = EmptyStr then
     raise Exception.Create('Nenhum nome de arquivo foi informado.');
@@ -2349,7 +2335,7 @@ begin
   Result := SaveToFile(FFileName);
 end;
 
-function TFileProxy.SaveToFile(const AFileName: string): Boolean;
+function TRpFileProxy.SaveToFile(const AFileName: string): Boolean;
 var
   lMemoryStream: TMemoryStream;
 begin
@@ -2365,17 +2351,17 @@ begin
   Result := FileExists(AFileName);
 end;
 
-procedure TFileProxy.SetDeleteOnRecive(const AValue: Boolean);
+procedure TRpFileProxy.SetDeleteOnRecive(const AValue: Boolean);
 begin
   FDeleteOnRecive := AValue;
 end;
 
-procedure TFileProxy.SetFileID(const AValue: string);
+procedure TRpFileProxy.SetFileID(const AValue: string);
 begin
   FFileID := AValue;
 end;
 
-procedure TFileProxy.SetFileName(const AValue: string);
+procedure TRpFileProxy.SetFileName(const AValue: string);
 begin
   FFileName := AValue;
 end;

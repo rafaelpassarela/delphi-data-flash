@@ -1,6 +1,6 @@
 unit uRpDataFlash.Types;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -9,32 +9,37 @@ uses
   DBConsts, Variants, uRpSerialization;
 
 const
-  TAG_RET_ERRO = 'ERRO';
+  TAG_RET_ERROR = 'ERROR';
   MSG_ECHO = 'ECCHO';
-  IDENTIFICADOR_ITEM_PADRAO = 'ID_IP_GT_IT';
+  DEFAULT_ITEM_ID = 'ID_IP_GT_IT';
   TAG_RET_INVALID = '\*INVALID*\';
-  TAG_COMANDO ='Comando';
+  TAG_COMMAND ='Command';
   TAG_CALLBACK = 'CALLBACK';
   TAG_GET_CLASSES_PROXY = 'GET_CLASSES_PROXY';
   TAG_PING = '\*PING*\';
-  // comandos de controle
-  // (ao adicionar um, verificar as funcoes "isComandoDesejado" e "SeparaComando"
-  //  da unit uLRDataFlashComponent)
   C_NULL_TCPVALUE = '[::[NULL]::]';
-  C_INICIO = 'INICIO';
-  C_COMECAR = 'COMECAR';
-  C_FIM = 'FIM';
-  C_MAIS_DADOS = 'MAIS_DADOS';
-  C_SEM_GRUPO_DEFINIDO = 'UNNAMED';
+  // control commands
+  C_CMD_BEGIN = 'CMD_BEGIN';
+  C_CMD_START = 'CMD_START';
+  C_CMD_END = 'CMD_END';
+  C_CMD_MORE = 'CMD_MORE_DATA';
+
+  C_VERIFIED_COMMAND_CONTROLLER : array[0..3] of string = (
+    C_CMD_BEGIN,
+    C_CMD_START,
+    C_CMD_END,
+    C_CMD_MORE);
+
+  C_WITHOUT_GROUP = 'UNNAMED';
   C_WHERE_DATASET = 'internal_OpenWhere';
   C_TMP_UNIT_CLASS = '{uClassUnit}';
   // parametros de retorno fixos
   C_PARAM_INT_EXCEPTION = 'exec_Exception';
   C_PARAM_INT_STATUS_RET = 'exec_StatusRetorno';
   C_PARAM_INT_STATUS_PROC = 'InternalStatusProcessamento';
-  C_PARAM_INT_TIPO_FORMATO = 'internal_FormatType';
-  C_GRUPO_INTERNO = '_internal_';
-  C_GRUPO_DATASET = '_dataset_provider_';
+  C_PARAM_INT_FORMAT_TYPE = 'internal_FormatType';
+  C_GROUP_INTERNAL = '_internal_';
+  C_GROUP_DATASET = '_dataset_provider_';
   C_REST_PARAM = '_rest_prm_http_';
   C_REST_CONTENT_TYPE = 'application/delphi';
   C_FTP_DEFAULT_USER = 'tcpcomftpuser';
@@ -43,9 +48,22 @@ const
   C_FTP_SIZE_MARK = 'SIZE';
   C_FTP_DELETE_RECIVE_MARK = 'DEL';
   C_FTP_FILENAME_MARK = 'FILENAME';
-  C_COMANDO_NO_DESCRIPTION = 'Function "function DoGetDescricao: string; override;" não foi implementada';
+  C_COMMAND_NO_DESCRIPTION = 'Function "function DoGetDescricao: string; override;" is not implemented';
 
 type
+  TRpDataFlashDataSetOperations = (
+    opdsSelect,            //0
+    opdsInsert,            //1
+    opdsDelete,            //2
+    opdsUpdate,            //3
+    opdsApplyUpdates,      //4
+    opdsStartTrans,        //5
+    opdsCommit,            //6
+    opdsCommitRetaining,   //7
+    opdsRollback,          //8
+    opdsRollbackRetaining, //9
+    opdsPrepare);          //10
+
   TLRDataFlashStatusType = (stPreparingData, stSendingData, stReceivingData);
   TLRDataFlashTipoCriptografia = (tcSemCriptografia, tcCriptografiaCustomizada, tcBase64, tcBase64Compressed);
   TLRDataFlashTipoParametro = (tpEntrada, tpSaida, tpInterno, tpEntradaSemRecaregar);

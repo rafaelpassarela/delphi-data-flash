@@ -1,5 +1,7 @@
 unit uRpDataFlash.DataSetProvider;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
  
 uses
@@ -10,14 +12,14 @@ type
   TLRDataFlashCustomDataSetProvider = class;
 //  TLRDataFlashMasterDataSetProvider = class;
 
-  TLRDataFlashOnProviderSendCallback = function (const AComando: IComandoTCPInterfaced; var AParamsCallback : TLRDataFlashParametrosComando) : Boolean of object;
+  TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameters) : Boolean of object;
 
   TLRDataFlashDataSetCommandProvider = class(TLRDataFlashComandoDataSetProvider)
   protected
     FProvider: TLRDataFlashCustomDataSetProvider;
     // from TLRDataFlashComando
     function GetComando: string; override;
-    function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean; override;
+    function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameters) : Boolean; override;
     function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
     function GetLifeCycle: TLRDataFlashLifeCycle; override;
 
@@ -142,7 +144,7 @@ begin
 end;
 
 function TLRDataFlashDataSetCommandProvider.DoCallBack(
-  var AParamsCallback: TLRDataFlashParametrosComando): Boolean;
+  var AParamsCallback: TRpDataFlashCommandParameters): Boolean;
 begin
   Result := Assigned(FProvider.OnSendCallback)
         and FProvider.OnSendCallback(Self, AParamsCallback);
@@ -297,7 +299,7 @@ end;
 constructor TLRDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
 begin
   inherited;
-  FGrupo := C_SEM_GRUPO_DEFINIDO;
+  FGrupo := C_WITHOUT_GROUP;
   FTipoProcessamento := tprPonte;
   FLifeCycle := tlfInstance;
 
@@ -357,7 +359,7 @@ procedure TLRDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
 begin
   FGrupo := TLRDataFlashValidations.ValidarNome( Value );
   if FGrupo = EmptyStr then
-    FGrupo := C_SEM_GRUPO_DEFINIDO;
+    FGrupo := C_WITHOUT_GROUP;
 end;
 
 procedure TLRDataFlashCustomDataSetProvider.SetInsertSQL(const Value: TStrings);

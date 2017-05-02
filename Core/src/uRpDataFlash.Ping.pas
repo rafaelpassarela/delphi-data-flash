@@ -1,11 +1,13 @@
 unit uRpDataFlash.Ping;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types;
 
 type
-  TLRDataFlashComandoPing = class(TLRDataFlashComando)
+  TLRDataFlashComandoPing = class(TRpDataFlashCommand)
   protected
     function DoExecutar : Boolean; override;
     procedure DoRegistrarParametros; override;
@@ -62,6 +64,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoPing, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoPing, C_GROUP_INTERNAL);
 
 end.

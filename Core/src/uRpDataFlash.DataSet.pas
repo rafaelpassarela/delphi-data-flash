@@ -1,6 +1,6 @@
 unit uRpDataFlash.DataSet;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -66,12 +66,12 @@ type
     FOpenWhere: string;
     FFormatter: IFormaterMaskValues;
     FInfoQuery: Boolean;
-    function PreparaComando(const pOperacao : TLRDataFlashOperacaoDataSet) : Boolean;
+    function PreparaComando(const pOperacao : TRpDataFlashDataSetOperations) : Boolean;
     function PreparaSQL(const pSQLBase : string; const pFields : TFields;
       pFormatterMask : IFormaterMaskValues) : string;
     function PreparaSelect(const pSQLBase : string; pFormatterMask : IFormaterMaskValues) : string;
     function DoInternalApplyUpdates(MaxErrors: Integer; AFormatter : IFormaterMaskValues) : Integer;
-    function GetSQL(const pOperacao : TLRDataFlashOperacaoDataSet) : string;
+    function GetSQL(const pOperacao : TRpDataFlashDataSetOperations) : string;
     function GetProviderClass: string;
     function GetDefaultFormatter : IFormaterMaskValues; //TFormatValuesDefault;
     function ValidServer : Boolean;
@@ -129,7 +129,7 @@ type
 //    property ConnectionBroker;
 //    property FileName;
 //    property ProviderName;
-//    property RemoteServer;  
+//    property RemoteServer;
     property Active;
     property Aggregates;
     property AggregatesActive;
@@ -402,8 +402,8 @@ begin
   else
     raise ELRDataFlashDataSetConexaoResult.Create('O dataset não está aberto.');
 
-  // verificar um meio mais "elegante" de evitar o AfterRefresh do TCustomClintDataSet  
-  SysUtils.Abort;  
+  // verificar um meio mais "elegante" de evitar o AfterRefresh do TCustomClintDataSet
+  SysUtils.Abort;
 end;
 
 procedure TLRDataFlashDataSet.DoCommit(const pRetaining: Boolean);
@@ -414,7 +414,7 @@ begin
     PreparaComando(opdsCommit);
 
   FConexaoCliente.Comunicar(FComandoEnviar);
-  
+
   if not FComandoEnviar.StatusRetorno then
     raise ELRDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
 end;
@@ -447,7 +447,7 @@ begin
   Result := Trim(FProviderClass);
 end;
 
-function TLRDataFlashDataSet.GetSQL(const pOperacao: TLRDataFlashOperacaoDataSet): string;
+function TLRDataFlashDataSet.GetSQL(const pOperacao: TRpDataFlashDataSetOperations): string;
 var
   lTemProvider: Boolean;
 begin
@@ -561,7 +561,7 @@ begin
 *)
 end;
 
-function TLRDataFlashDataSet.PreparaComando(const pOperacao: TLRDataFlashOperacaoDataSet): Boolean;
+function TLRDataFlashDataSet.PreparaComando(const pOperacao: TRpDataFlashDataSetOperations): Boolean;
 begin
   // vai no servidor buscar o XML Data
   if ProviderClass <> EmptyStr then

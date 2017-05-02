@@ -1,5 +1,7 @@
 unit uRpDataFlash.GetCommandList;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses

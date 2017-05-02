@@ -1,5 +1,7 @@
 unit uRpDataFlash.ObjectReg;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
@@ -78,7 +80,7 @@ type
     procedure AddUnitComent;
     procedure AdicionarScopo(const AClassItem : TImplementationPart);
     procedure AdicionarImplementacao(const AClassItem : TImplementationPart);
-    procedure VerificarComando(const ACommandClass : TLRDataFlashComandoClass; var AGerados : string);
+    procedure VerificarComando(const ACommandClass : TRpDataFlashCommandClass; var AGerados : string);
     function GetXMLFromObject(const AObject : TCustomSerializableObject) : string;
     function DoLoadFromRegistry(const AGerados : string; const ACheckIntf : Boolean) : Boolean;
     function IsHelperSupport(const ABaseClass : TCustomSerializableObjectClass) : Boolean;
@@ -506,7 +508,7 @@ begin
     begin
       lItem := lRegistro.Items[i];
       if (ASelectedList = nil) or ComandoNaLista then
-        VerificarComando(TLRDataFlashComandoClass(lItem.ProxyClass), lGerados);
+        VerificarComando(TRpDataFlashCommandClass(lItem.ProxyClass), lGerados);
     end;
 
     // verifica quais classes possuem a interface IBaseHelper assinada
@@ -524,9 +526,9 @@ begin
 end;
 
 procedure TLRDataFlashClassSerialization.VerificarComando(
-  const ACommandClass: TLRDataFlashComandoClass; var AGerados: string);
+  const ACommandClass: TRpDataFlashCommandClass; var AGerados: string);
 var
-  lCmd: TLRDataFlashComando;
+  lCmd: TRpDataFlashCommand;
   i: Integer;
   lClass: TCustomSerializableObjectClass;
 begin

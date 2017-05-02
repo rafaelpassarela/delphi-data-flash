@@ -1,6 +1,6 @@
 unit uRpDataFlash.CommandController;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -11,13 +11,13 @@ uses
 type
   TLRDataFlashComandItemBase = class;
 
-  TLRDataFlashComandoItem = class(TLRDataFlashComando)
+  TLRDataFlashComandoItem = class(TRpDataFlashCommand)
   private
     FItem : TLRDataFlashComandItemBase;
   protected
     function GetComando: string; override;
     function DoExecutar : Boolean; override;
-    function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean; override;
+    function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; override;
     function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
     function GetLifeCycle: TLRDataFlashLifeCycle; override;
 
@@ -34,17 +34,17 @@ type
     constructor Create(const AItem : TLRDataFlashComandItemBase); reintroduce;
   end;
 
-  TLRDataFlashNotifyEvent = procedure(const AComando : IComandoTCPInterfaced) of object;
+  TLRDataFlashNotifyEvent = procedure(const AComando : IRpDataFlashCommandInterfaced) of object;
   TLRDataFlashOnCarregarEvent = TLRDataFlashNotifyEvent;
   TLRDataFlashOnSerializarEvent = TLRDataFlashNotifyEvent;
   TLRDataFlashOnValidarParametrosEvent = TLRDataFlashNotifyEvent;
-  TLRDataFlashValidateExecuteEvent = procedure (const AComando : IComandoTCPInterfaced; var AContinuar : Boolean) of object;
+  TLRDataFlashValidateExecuteEvent = procedure (const AComando : IRpDataFlashCommandInterfaced; var AContinuar : Boolean) of object;
   TLRDataFlashOnExecutarPonteInvalida = TLRDataFlashValidateExecuteEvent;
   TLRDataFlashOnExecutarPonteBemSucedidaEvent = TLRDataFlashValidateExecuteEvent;
   TLRDataFlashOnExecutarAntesComunicarPonteEvent = TLRDataFlashValidateExecuteEvent;
-  TLRDataFlashOnErroExecucaoEvent = procedure(const AComando : IComandoTCPInterfaced; const AErrorMsg : string) of object;
-  TLRDataFlashOnExecutarComandItemEvent = function(const AComando : IComandoTCPInterfaced) : Boolean of object;
-  TLRDataFlashOnSendCallback = function (const AComando: IComandoTCPInterfaced; var AParamsCallback : TLRDataFlashParametrosComando) : Boolean of object;
+  TLRDataFlashOnErroExecucaoEvent = procedure(const AComando : IRpDataFlashCommandInterfaced; const AErrorMsg : string) of object;
+  TLRDataFlashOnExecutarComandItemEvent = function(const AComando : IRpDataFlashCommandInterfaced) : Boolean of object;
+  TLRDataFlashOnSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRPDataFlashCommandParameters) : Boolean of object;
 
   TLRDataFlashBaseParametroItem = class(TCollectionItem)
   private
@@ -124,7 +124,7 @@ type
   TLRDataFlashComandItemBase = class(TCollectionItem)
   private
     FParametros: TLRDataFlashParametrosCollection;
-    FComando : IComandoTCPInterfaced;
+    FComando : IRpDataFlashCommandInterfaced;
     FNome: string;
     FDescricao: string;
     FTipoProcessamento: TLRDataFlashTipoProcessamento;
@@ -144,7 +144,7 @@ type
   public
     function IsCsDesigning : Boolean;
 
-    property Comando : IComandoTCPInterfaced read FComando write FComando;
+    property Comando : IRpDataFlashCommandInterfaced read FComando write FComando;
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
 
@@ -203,7 +203,7 @@ type
     function IsCsDesigning : Boolean;
     function Novo : TLRDataFlashComandItemBase;
     function Iterator : TIteratorComand;
-    function Localizar(const ANome : string; out AObjComando : IComandoTCPInterfaced) : Boolean;
+    function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
 
   TLRDataFlashComandListClass = class of TLRDataFlashComandList;
@@ -223,7 +223,7 @@ begin
   Result := TIteratorComand.Create(Self);
 end;
 
-function TLRDataFlashComandList.Localizar(const ANome : string; out AObjComando : IComandoTCPInterfaced) : Boolean;
+function TLRDataFlashComandList.Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
 var
   lEnum: TCollectionEnumerator;
   lItem: TLRDataFlashComandItemBase;
@@ -337,7 +337,7 @@ begin
   inherited Create;
 end;
 
-function TLRDataFlashComandoItem.DoCallBack(var AParamsCallback: TLRDataFlashParametrosComando): Boolean;
+function TLRDataFlashComandoItem.DoCallBack(var AParamsCallback: TRPDataFlashCommandParameters): Boolean;
 begin
   Result := Assigned(FItem.OnSendCallback) and FItem.OnSendCallback(Self, AParamsCallback);
 end;

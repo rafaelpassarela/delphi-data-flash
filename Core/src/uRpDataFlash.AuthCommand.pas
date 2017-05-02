@@ -1,13 +1,13 @@
 unit uRpDataFlash.AuthCommand;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, SysUtils;
 
 type
-  TLRDataFlashComandoAutenticar = class(TLRDataFlashComando)
+  TLRDataFlashComandoAutenticar = class(TRpDataFlashCommand)
   protected
     function DoExecutar : Boolean; override;
     procedure DoRegistrarParametros; override;
@@ -76,7 +76,7 @@ begin
         FConexaoItem.Password := Parametro['Password'].AsBase64;
         GetServer.OnAutenticarCliente(GetServer, FConexaoItem, lAutenticado, lMens);
 
-        FConexaoItem.Autenticado := lAutenticado;
+        FConexaoItem.Authenticated := lAutenticado;
 
         Result := True;
       except
@@ -95,7 +95,7 @@ begin
     lMens := '';
   end;
 
-  Retorno['Autenticado'].AsBoolean := lAutenticado;
+  Retorno['Authenticated'].AsBoolean := lAutenticado;
   Retorno['ResultMSG'].AsString := lMens;
 end;
 
@@ -106,13 +106,13 @@ begin
   // atualiza os dados da conexao local (quando retorna da ponte [servidor real] )
   FConexaoItem.Username := Parametro['Username'].AsString;
   FConexaoItem.Password := Parametro['Password'].AsBase64;
-  FConexaoItem.Autenticado := Retorno['Autenticado'].AsBoolean;
+  FConexaoItem.Authenticated := Retorno['Authenticated'].AsBoolean;
 end;
 
 procedure TLRDataFlashComandoAutenticar.DoExecutarPonteInvalida(var AContinuar: Boolean);
 begin
   inherited;
-  FConexaoItem.Autenticado := False;
+  FConexaoItem.Authenticated := False;
   AContinuar := False;
 end;
 
@@ -123,7 +123,7 @@ begin
   // envia a senha criptografada
   NovoParametro('Password', tvpBase64);
 
-  NovoRetorno('Autenticado', tvpBoolean);
+  NovoRetorno('Authenticated', tvpBoolean);
   NovoRetorno('ResultMSG', tvpString);
 end;
 
@@ -133,6 +133,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoAutenticar, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoAutenticar, C_GROUP_INTERNAL);
 
 end.

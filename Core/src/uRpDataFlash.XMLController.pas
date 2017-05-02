@@ -1,6 +1,6 @@
 unit uRpDataFlash.XMLController;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 

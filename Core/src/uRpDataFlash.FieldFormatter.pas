@@ -1,5 +1,7 @@
 unit uRpDataFlash.FieldFormatter;
 
+//{$I ..\..\Common\src\RpInc.inc}
+
 interface
 
 uses
