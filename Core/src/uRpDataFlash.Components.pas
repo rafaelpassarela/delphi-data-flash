@@ -47,7 +47,7 @@ type
 
   ISPITCPMonitorEventos = interface
   ['{6B2F598C-7BE8-4ABD-A00B-1CD9C145B5C6}']
-    procedure MonitorarStatus(Sender : TObject; const ASituacao : TLRDataFlashStatusType;
+    procedure MonitorarStatus(Sender : TObject; const ASituacao : TRpDataFlashStatusType;
       const AProcessamentoTotal, AProcessamentoAtual : Integer);
   end;
 
@@ -200,7 +200,7 @@ type
     FInternalOnProcessar: TLRDataFlashRecebimento;
     FOnNovoLog: TLRDataFlashOnNovoLog;
     FOnException: TLRDataFlashOnException;
-    FTipoCriptografia: TLRDataFlashTipoCriptografia;
+    FTipoCriptografia: TRpDataFlashEncryptionType;
     FIpsReconhecidos: TStringList;
     FQuebrasProtocolosRecebidos: TRpQuebraProtocoloList;
     FTipoComunicacao: TLRDataFlashTipoComunicacao;
@@ -211,7 +211,7 @@ type
     FConexaoREST: TLRDataFlashConfigConexaoREST;
     FFileTransfer: TLRDataFlashFileTransfer;
     FFileTransferList : TStrings;
-    procedure SetTipoCriptografia(const Value: TLRDataFlashTipoCriptografia);
+    procedure SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
 
     procedure CompressStream(var AEntrada : TMemoryStream); overload;
     procedure DecompressStream(var AEntrada : TMemoryStream); overload;
@@ -252,7 +252,7 @@ type
     function InternalReceber(const AHandler : TIdIOHandler) : string; overload;
     function InternalReceber(ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo) : string; overload;
 
-    procedure GerarStatus(const ASituacao : TLRDataFlashStatusType;
+    procedure GerarStatus(const ASituacao : TRpDataFlashStatusType;
       const AProcessamentoTotal, AProcessamentoAtual : Integer;
       const AStatusMens : string);
 
@@ -282,7 +282,7 @@ type
     property OnInternalProcessar : TLRDataFlashRecebimento read FInternalOnProcessar write FInternalOnProcessar;
     property Servidor : string read FServidor write SetServidor stored True;
     property Conectado : Boolean read GetConectado;
-    property TipoCriptografia : TLRDataFlashTipoCriptografia read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
+    property TipoCriptografia : TRpDataFlashEncryptionType read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
     property Identificador : string read GetIdentificador;
     property TipoComunicacao : TLRDataFlashTipoComunicacao read FTipoComunicacao write FTipoComunicacao stored True default tcTexto;
     property TipoMensagem : TLRDataFlashTipoMensagem read FTipoMensagem write FTipoMensagem stored True default tmComando;
@@ -1024,7 +1024,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.GerarStatus(const ASituacao: TLRDataFlashStatusType;
+procedure TLRDataFlashConexaoCustom.GerarStatus(const ASituacao: TRpDataFlashStatusType;
   const AProcessamentoTotal, AProcessamentoAtual: Integer; const AStatusMens : string);
 begin
   if Assigned(FOnStatus) then
@@ -1255,8 +1255,8 @@ begin
 
         // carrega os parametros do REST para o componente conseguir executar
         for i := 0 to lComando.GetParametros.Count - 1 do
-          if (lComando.GetParametros.Item[i].Tipo in [tpEntrada, tpEntradaSemRecaregar])
-          or ((lComando.GetParametros.Item[i].Tipo = tpInterno) and (lComando.GetParametros.Item[i].Nome = C_PARAM_INT_FORMAT_TYPE)) then
+          if (lComando.GetParametros.Item[i].Tipo in [tpInput, tpInputNoReload])
+          or ((lComando.GetParametros.Item[i].Tipo = tpInternal) and (lComando.GetParametros.Item[i].Nome = C_PARAM_INT_FORMAT_TYPE)) then
             lComando.GetParametros.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParametros.Item[i].Nome];
 
         Result := lComando.GetParametros.Serializar;
@@ -1568,7 +1568,7 @@ begin
 //    Delete(FServidor, Pos(':', FServidor) - 1, Length(FServidor));
 end;
 
-procedure TLRDataFlashConexaoCustom.SetTipoCriptografia(const Value: TLRDataFlashTipoCriptografia);
+procedure TLRDataFlashConexaoCustom.SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
 begin
   FTipoCriptografia := Value;
 end;
@@ -1674,7 +1674,7 @@ var
 
   function ParametroEmDesigning : Boolean;
   begin
-    Result := Assigned( AParametros.PorNome('csDesigning', tpEntrada) )
+    Result := Assigned( AParametros.PorNome('csDesigning', tpInput) )
           and AParametros.Parametro['csDesigning'].AsBoolean;
   end;
 
@@ -1953,15 +1953,15 @@ var
 
     if not lExecutado then
     begin
-      if (lComando.TipoProcessamento = tprPonte) then
+      if (lComando.TipoProcessamento = prtRemote) then
         Executar
       else
-        if (lComando.TipoProcessamento = tprSomentePonte) then
+        if (lComando.TipoProcessamento = prtRemoteOnly) then
           ExecutarPonteInvalida;
     end
     else
     begin
-      if (lComando.TipoProcessamento = tprSomentePonte) then
+      if (lComando.TipoProcessamento = prtRemoteOnly) then
         ExecutarPonteBemSucedida;
     end;
   end;
@@ -2018,7 +2018,7 @@ begin
       raise ELRDataFlashUsuarioNaoAutenticado.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
-    if lComando.TipoProcessamento = tprLocal then
+    if lComando.TipoProcessamento = prtLocal then
       lStatusProcessamento := tspLocal //tspServidor
     else
       lStatusProcessamento := CarregarStatusProcessamento(AItem, lTcpClient);
@@ -3649,7 +3649,11 @@ begin
 
       FThreadConexao := TThreadConexao.Create;
       FThreadConexao.Conexao := Self;
+      {$IFDEF UNICODE}
+      FThreadConexao.Start;
+      {$ELSE}
       FThreadConexao.Resume;
+      {$ENDIF}
 
       if FTimeOutConexao <= 0 then
         Sleep(1000)

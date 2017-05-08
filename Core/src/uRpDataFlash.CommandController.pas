@@ -18,7 +18,7 @@ type
     function GetComando: string; override;
     function DoExecutar : Boolean; override;
     function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; override;
-    function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
+    function GetTipoProcessamento : TRpDataFlashProcessType; override;
     function GetLifeCycle: TLRDataFlashLifeCycle; override;
 
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
@@ -49,15 +49,15 @@ type
   TLRDataFlashBaseParametroItem = class(TCollectionItem)
   private
     FNome: string;
-    FTipo: TLRDataFlashTipoParametro;
-    FTipoValor: TLRDataFlashTipoValorParametro;
+    FTipo: TRpDataFlashParamType;
+    FTipoValor: TRpDataFlashParamValueType;
     FBaseClass: string;
     procedure SetNome(const Value: string);
   protected
     function GetDisplayName: string; override;
     property Nome : string read FNome write SetNome;
-    property Tipo : TLRDataFlashTipoParametro read FTipo write FTipo;
-    property TipoValor : TLRDataFlashTipoValorParametro read FTipoValor write FTipoValor;
+    property Tipo : TRpDataFlashParamType read FTipo write FTipo;
+    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
     property BaseClass : string read FBaseClass write FBaseClass;
   end;
 
@@ -127,7 +127,7 @@ type
     FComando : IRpDataFlashCommandInterfaced;
     FNome: string;
     FDescricao: string;
-    FTipoProcessamento: TLRDataFlashTipoProcessamento;
+    FTipoProcessamento: TRpDataFlashProcessType;
     FOnExecute: TLRDataFlashOnExecutarComandItemEvent;
     FOnExecutarPonteInvalida: TLRDataFlashOnExecutarPonteInvalida;
     FOnExecutarPonteBemSucedida: TLRDataFlashOnExecutarPonteBemSucedidaEvent;
@@ -150,7 +150,7 @@ type
 
     property Nome : string read FNome write SetNome;
     property Descricao : string read FDescricao write FDescricao;
-    property TipoProcessamento : TLRDataFlashTipoProcessamento read FTipoProcessamento write FTipoProcessamento default tprPonte;
+    property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
     property Parametros : TLRDataFlashParametrosCollection read FParametros write FParametros;
     property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
@@ -276,7 +276,7 @@ constructor TLRDataFlashComandItemBase.Create(Collection: TCollection);
 begin
   inherited;
   FParametros := TLRDataFlashParametrosCollection.Create(Self, TLRDataFlashParametroItem);
-  FTipoProcessamento := tprPonte;
+  FTipoProcessamento := prtRemote;
   FLifeCycle := tlfInstance;
 end;
 
@@ -302,9 +302,9 @@ begin
   end;
 
   case FTipoProcessamento of
-    tprLocal: lTipo := 'Local';
-    tprPonte: lTipo := 'Ponte';
-    tprSomentePonte: lTipo := 'SomentePonte';
+    prtLocal: lTipo := 'Local';
+    prtRemote: lTipo := 'Remote';
+    prtRemoteOnly: lTipo := 'RemoteOnly';
   else
     lTipo := 'Erro TipoProc';
   end;
@@ -426,7 +426,7 @@ begin
   Result := FItem.LifeCycle;
 end;
 
-function TLRDataFlashComandoItem.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TLRDataFlashComandoItem.GetTipoProcessamento: TRpDataFlashProcessType;
 begin
   Result := FItem.TipoProcessamento;
 end;
@@ -437,8 +437,8 @@ function TLRDataFlashBaseParametroItem.GetDisplayName: string;
 begin
   Result := Format('%s - %s / %s', [
     FNome,
-    TRpStrings.EnumToStr(TypeInfo(TLRDataFlashTipoParametro), Ord(FTipo)),
-    TRpStrings.EnumToStr(TypeInfo(TLRDataFlashTipoValorParametro), Ord(FTipoValor)) ]);
+    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamType), Ord(FTipo)),
+    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamValueType), Ord(FTipoValor)) ]);
 end;
 
 procedure TLRDataFlashBaseParametroItem.SetNome(const Value: string);
@@ -478,7 +478,7 @@ end;
 
 procedure TLRDataFlashParametrosValueCollection.SetTipoParametro(Item: TCollectionItem);
 begin
-  TLRDataFlashParametroValueItem(Item).Tipo := tpEntrada;
+  TLRDataFlashParametroValueItem(Item).Tipo := tpInput;
 end;
 
 function TLRDataFlashParametrosValueCollection.StrIndexToIntIndex(
@@ -505,7 +505,7 @@ end;
 procedure TLRDataFlashRetornosValueCollection.SetTipoParametro(
   Item: TCollectionItem);
 begin
-  TLRDataFlashParametroValueItem(Item).Tipo := tpSaida;
+  TLRDataFlashParametroValueItem(Item).Tipo := tpOutput;
 end;
 
 { TLRDataFlashParametroValueItem }

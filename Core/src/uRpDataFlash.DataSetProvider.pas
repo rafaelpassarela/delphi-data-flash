@@ -20,7 +20,7 @@ type
     // from TLRDataFlashComando
     function GetComando: string; override;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameters) : Boolean; override;
-    function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
+    function GetTipoProcessamento : TRpDataFlashProcessType; override;
     function GetLifeCycle: TLRDataFlashLifeCycle; override;
 
     // all the decendents must implement this
@@ -50,7 +50,7 @@ type
     FUpdateSQL: TStrings;
     FDeleteSQL: TStrings;
     FSelectSQL: TStrings;
-    FTipoProcessamento: TLRDataFlashTipoProcessamento;
+    FTipoProcessamento: TRpDataFlashProcessType;
     FOnSendCallback: TLRDataFlashOnProviderSendCallback;
 //    FOnCommit: TLRDataFlashOnTransactionEvent;
 //    FOnRollback: TLRDataFlashOnTransactionEvent;
@@ -70,7 +70,7 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     property Server : TLRDataFlashConexaoServer read FServer write SetServer;
-    property TipoProcessamento : TLRDataFlashTipoProcessamento read FTipoProcessamento write FTipoProcessamento default tprPonte;
+    property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
     property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property InsertSQL : TStrings read FInsertSQL write SetInsertSQL;
@@ -186,7 +186,7 @@ var
 begin
   Result := True;
   lAuxSQL := pSQL;
-  
+
   if Assigned(FProvider.OnBeforeDataSetExecuteSQL) then
     FProvider.OnBeforeDataSetExecuteSQL(Self, lAuxSQL, Result);
 
@@ -219,7 +219,7 @@ begin
   Result := FProvider.SelectSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TLRDataFlashDataSetCommandProvider.GetTipoProcessamento: TRpDataFlashProcessType;
 begin
   Result := FProvider.TipoProcessamento;
 end;
@@ -300,7 +300,7 @@ constructor TLRDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
 begin
   inherited;
   FGrupo := C_WITHOUT_GROUP;
-  FTipoProcessamento := tprPonte;
+  FTipoProcessamento := prtRemote;
   FLifeCycle := tlfInstance;
 
   FInsertSQL := TStringList.Create;

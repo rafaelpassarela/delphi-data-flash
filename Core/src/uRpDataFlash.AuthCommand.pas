@@ -11,7 +11,7 @@ type
   protected
     function DoExecutar : Boolean; override;
     procedure DoRegistrarParametros; override;
-    function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
+    function GetTipoProcessamento : TRpDataFlashProcessType; override;
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
   public
@@ -127,9 +127,9 @@ begin
   NovoRetorno('ResultMSG', tvpString);
 end;
 
-function TLRDataFlashComandoAutenticar.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TLRDataFlashComandoAutenticar.GetTipoProcessamento: TRpDataFlashProcessType;
 begin
-  Result := tprSomentePonte;
+  Result := prtRemoteOnly;
 end;
 
 initialization

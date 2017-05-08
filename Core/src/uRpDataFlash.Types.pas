@@ -64,13 +64,14 @@ type
     opdsRollbackRetaining, //9
     opdsPrepare);          //10
 
-  TLRDataFlashStatusType = (stPreparingData, stSendingData, stReceivingData);
-  TLRDataFlashTipoCriptografia = (tcSemCriptografia, tcCriptografiaCustomizada, tcBase64, tcBase64Compressed);
-  TLRDataFlashTipoParametro = (tpEntrada, tpSaida, tpInterno, tpEntradaSemRecaregar);
-  TLRDataFlashTipoValorParametro = (
+  TRpDataFlashStatusType = (stPreparingData, stSendingData, stReceivingData);
+  TRpDataFlashEncryptionType = (ecNone, ecCustom, tcBase64, tcBase64Compressed);
+  TRpDataFlashParamType = (tpInput, tpOutput, tpInternal, tpInputNoReload);
+  TRpDataFlashParamValueType = (
     tvpInteger, tvpString, tvpBoolean, tvpFloat, tvpBase64, tvpDAO, tvpBase,
     tvpDateTime, tvpFile, tvpJSON, tvpBinaryFile);
-  TLRDataFlashTipoProcessamento = (tprLocal, tprPonte, tprSomentePonte);
+  TRpDataFlashProcessType = (prtLocal, prtRemote, prtRemoteOnly);
+
   TLRDataFlashStatusProcessamento = (tspServidor, tspPonteOnline, tspPonteOffLine, tspLocal, tspNenhum);
   TLRDataFlashTipoCarga = (tcEnvio, tcRetorno);
   TLRDataFlashTipoExecucao = (teExecucao, tePonteInvalida, tePonteBemSucedida, teAntesComunicarPonte);
@@ -89,7 +90,7 @@ type
   TLRDataFlashOnSemServico = procedure(Sender : TObject; var AServidor : string; var APorta : Integer;
     const AException : Exception; var AReconectar : Boolean) of object;
   TLRDataFlashOnExecutarMensagem = function (Sender : TObject) : Boolean;
-  TLRDataFlashOnStatus = procedure(Sender : TObject; const ASituacao : TLRDataFlashStatusType;
+  TLRDataFlashOnStatus = procedure(Sender : TObject; const ASituacao : TRpDataFlashStatusType;
     const AProcessamentoTotal, AProcessamentoAtual : Integer; const AStatusStr : string) of object;
   TLRDataFlashExecucaoInternaComando = function : Boolean of object;
   TLRDataFlashExecucaoExternaComando = function : string of object;
@@ -131,7 +132,7 @@ type
     function GetRestPort : Integer;
     function GetFTPPort: Integer;
     function GetModoComunicacao: TLRDataFlashTipoComunicacao;
-    function GetModoCriptografia : TLRDataFlashTipoCriptografia;
+    function GetModoCriptografia : TRpDataFlashEncryptionType;
     function GetLocalHostToIP : Boolean;
 
     property ServerName : string read GetServerName;
@@ -139,7 +140,7 @@ type
     property RestPort : Integer read GetRestPort;
     property FTPPort : Integer read GetFTPPort;
     property ModoComunicacao : TLRDataFlashTipoComunicacao read GetModoComunicacao;
-    property ModoCriptografia : TLRDataFlashTipoCriptografia read GetModoCriptografia;
+    property ModoCriptografia : TRpDataFlashEncryptionType read GetModoCriptografia;
     property LocalHostToIP : Boolean read GetLocalHostToIP;
   end;
 

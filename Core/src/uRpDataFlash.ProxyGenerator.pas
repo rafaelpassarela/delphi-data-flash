@@ -34,13 +34,13 @@ type
   TProxyParametroComandoItem = class
   private
     FNome: string;
-    FTipoParametro: TLRDataFlashTipoParametro;
-    FTipoValor: TLRDataFlashTipoValorParametro;
+    FTipoParametro: TRpDataFlashParamType;
+    FTipoValor: TRpDataFlashParamValueType;
     FBaseClass: string;
   public
     property Nome : string read FNome write FNome;
-    property TipoParametro : TLRDataFlashTipoParametro read FTipoParametro write FTipoParametro;
-    property TipoValor : TLRDataFlashTipoValorParametro read FTipoValor write FTipoValor;
+    property TipoParametro : TRpDataFlashParamType read FTipoParametro write FTipoParametro;
+    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
     property BaseClass : string read FBaseClass write FBaseClass;
     function TipoValorAsString(const pNatural : Boolean = True) : string;
   end;
@@ -1433,7 +1433,7 @@ begin
   begin
     // cria a lista de parametros de entrada
     for i := 0 to lCmd.GetParametros.Count - 1 do
-      if lCmd.GetParametros[i].Tipo <> tpInterno then
+      if lCmd.GetParametros[i].Tipo <> tpInternal then
         ListaParametros.AddParametro(lCmd.GetParametros[i]);
   end;
 end;
@@ -1531,7 +1531,7 @@ begin
       // para o tipo tvpBinaryFile, o arquivo deve ser enviado antes por FTP
       lEnviaArquivo := False;
       for j := 0 to Self[i].ListaParametros.Count - 1 do
-        if  (Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar])
+        if  (Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload])
         and (Self[i].ListaParametros[j].TipoValor = tvpBinaryFile) then
         begin
           lEnviaArquivo := True;
@@ -1541,7 +1541,7 @@ begin
       // passa os parâmetros para o TcpClient
       // lCmd.Parametros.Novo('VAL1', pVAL1, tpEntrada, tvpFloat);
       for j := 0 to Self[i].ListaParametros.Count - 1 do
-        if Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar] then
+        if Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload] then
         begin
           lValorFuncao := 'p' + Self[i].ListaParametros[j].Nome;
 
@@ -1574,7 +1574,7 @@ begin
       lNumeroRetornos := 0;
       for j := 0 to Self[i].ListaParametros.Count - 1 do
       begin
-        if Self[i].ListaParametros[j].TipoParametro = tpSaida then
+        if Self[i].ListaParametros[j].TipoParametro = tpOutput then
         begin
           Inc(lNumeroRetornos);
           if lNumeroRetornos = 1 then
@@ -1616,7 +1616,7 @@ begin
         end
         else
         begin
-          if (Self[i].ListaParametros[j].TipoParametro <> tpEntradaSemRecaregar)
+          if (Self[i].ListaParametros[j].TipoParametro <> tpInputNoReload)
           and (Self[i].ListaParametros[j].TipoValor in [tvpBase, tvpDAO]) then
           begin
             Inc(lNumeroRetornos);
@@ -1645,7 +1645,7 @@ begin
         lTexto.Add('    try');
         // para o tipo tvpBinaryFile, envia confirmacao de recebimento para o servidor
         for j := 0 to Self[i].ListaParametros.Count - 1 do
-          if  (Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar])
+          if  (Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload])
           and (Self[i].ListaParametros[j].TipoValor = tvpBinaryFile) then
           begin
             lTexto.Add('      FClient.ConfirmFileReceipt(p' + Self[i].ListaParametros[j].Nome + '.FileID, True, False, nil);');
@@ -1720,14 +1720,14 @@ begin
   // cria a lista de parametros de entrada
   for i := 0 to Self.Count - 1 do
   begin
-    if Self[i].TipoParametro in [tpEntrada, tpEntradaSemRecaregar] then
+    if Self[i].TipoParametro in [tpInput, tpInputNoReload] then
       Result := Result + '; const p' + Self[i].Nome + ': ' + Self[i].TipoValorAsString;
   end;
 
   // cria a lista de parametros de entrada
   for i := 0 to Self.Count - 1 do
   begin
-    if Self[i].TipoParametro = tpSaida then
+    if Self[i].TipoParametro = tpOutput then
     begin
       if Self[i].TipoValor in [tvpFile, tvpBinaryFile] then
         lAux := ''

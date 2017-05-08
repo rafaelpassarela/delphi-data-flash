@@ -11,7 +11,7 @@ type
   protected
     function DoExecutar : Boolean; override;
     procedure DoRegistrarParametros; override;
-    function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;    
+    function GetTipoProcessamento : TRpDataFlashProcessType; override;
   public
     class function Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string) : Boolean;
   end;
@@ -36,9 +36,9 @@ begin
   NovoRetorno('Msg', tvpString);
 end;
 
-function TLRDataFlashComandoPing.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TLRDataFlashComandoPing.GetTipoProcessamento: TRpDataFlashProcessType;
 begin
-  Result := tprLocal;
+  Result := prtLocal;
 end;
 
 class function TLRDataFlashComandoPing.Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string): Boolean;

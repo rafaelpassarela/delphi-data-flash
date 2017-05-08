@@ -12,8 +12,8 @@ type
   TLRDFParametrosInfoComando = class(TCustomSerializableObject)
   private
     FNome: string;
-    FTipoValor: TLRDataFlashTipoValorParametro;
-    FTipo: TLRDataFlashTipoParametro;
+    FTipoValor: TRpDataFlashParamValueType;
+    FTipo: TRpDataFlashParamType;
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode: IXMLNode); override;
@@ -22,8 +22,8 @@ type
     procedure FromOther(const AOther: ISerializableBase); override;
 
     property Nome : string read FNome write FNome;
-    property Tipo : TLRDataFlashTipoParametro read FTipo write FTipo;
-    property TipoValor : TLRDataFlashTipoValorParametro read FTipoValor write FTipoValor;
+    property Tipo : TRpDataFlashParamType read FTipo write FTipo;
+    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
   end;
 
   TLRDFParametrosTransportList = class(TCustomSerializableList)
@@ -116,10 +116,10 @@ begin
   inherited;
   FromNode('Nome', FNome);
   FromNode('TipoValor', lIntAux);
-  FTipoValor := TLRDataFlashTipoValorParametro(lIntAux);
+  FTipoValor := TRpDataFlashParamValueType(lIntAux);
 
   FromNode('Tipo', lIntAux);
-  FTipo := TLRDataFlashTipoParametro(lIntAux);
+  FTipo := TRpDataFlashParamType(lIntAux);
 end;
 
 procedure TLRDFParametrosInfoComando.DoSaveToNode;
@@ -144,7 +144,7 @@ procedure TLRDFParametrosInfoComando.Reset;
 begin
   inherited;
   FNome := '';
-  FTipo := tpEntrada;
+  FTipo := tpInput;
   FTipoValor := tvpInteger;
 end;
 

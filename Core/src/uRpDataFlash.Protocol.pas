@@ -65,7 +65,7 @@ type
     function GetQuantidadeQuebrasPrevistas: Integer;
     function GetAtual: string;
     function GetValida: Boolean;
-    procedure GerarStatus(const ASituacao : TLRDataFlashStatusType; const AProcessamentoTotal, AProcessamentoAtual : Integer;
+    procedure GerarStatus(const ASituacao : TRpDataFlashStatusType; const AProcessamentoTotal, AProcessamentoAtual : Integer;
       const AStatusMens : string);
   public
     constructor Create;
@@ -121,7 +121,7 @@ type
 
     function RemoverFlagCriptografia(const Value : string) : string;
   public
-    constructor Create(const ATipoCriptografia : TLRDataFlashTipoCriptografia); reintroduce;
+    constructor Create(const ATipoCriptografia : TRpDataFlashEncryptionType); reintroduce;
     destructor Destroy; override;
     property Mensagem : string read FMensagem write SetMensagem;
 
@@ -152,7 +152,7 @@ type
     function ToErro(const pMensagem : string) : string;
     function IsErro : Boolean;
 
-    class function NovoErro(const ATipoCriptografia : TLRDataFlashTipoCriptografia; const pMensagem : string) : string;
+    class function NovoErro(const ATipoCriptografia : TRpDataFlashEncryptionType; const pMensagem : string) : string;
     class function GetErrorTag : string;
   end;
 
@@ -235,16 +235,16 @@ begin
   inherited;
 end;
 
-constructor TProtocolo.Create(const ATipoCriptografia : TLRDataFlashTipoCriptografia);
+constructor TProtocolo.Create(const ATipoCriptografia : TRpDataFlashEncryptionType);
 begin
   FIdentificador := EmptyStr;
   FMensagem := EmptyStr;
   FNomeNodoMsgRetorno := EmptyStr;
-  FTipoMensagem := tmComando;  
-  
+  FTipoMensagem := tmComando;
+
   case ATipoCriptografia of
-    tcSemCriptografia : SetTipoCriptografia(nil);
-    tcCriptografiaCustomizada : SetTipoCriptografia(nil);
+    ecNone : SetTipoCriptografia(nil);
+    ecCustom : SetTipoCriptografia(nil);
     tcBase64 : SetTipoCriptografia(TRpEncryptionBase64);
     tcBase64Compressed : SetTipoCriptografia(TRpEncryptionBase64Compressed);
   end;
@@ -351,7 +351,7 @@ begin
   end;
 end;
 
-class function TProtocolo.NovoErro(const ATipoCriptografia: TLRDataFlashTipoCriptografia;
+class function TProtocolo.NovoErro(const ATipoCriptografia: TRpDataFlashEncryptionType;
   const pMensagem: string): string;
 var
   lProtocolo: TProtocolo;
@@ -639,7 +639,7 @@ begin
   inherited;
 end;
 
-procedure TLRDataFlashQuebraProtocolo.GerarStatus(const ASituacao: TLRDataFlashStatusType;
+procedure TLRDataFlashQuebraProtocolo.GerarStatus(const ASituacao: TRpDataFlashStatusType;
   const AProcessamentoTotal, AProcessamentoAtual: Integer; const AStatusMens : string);
 begin
   if Assigned(FOnStatus) then
