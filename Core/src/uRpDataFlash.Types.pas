@@ -76,11 +76,10 @@ type
   TRpDataFlashMessageType = (mtCommand, mtText);
   TRpDataFlashValidationOrigin = (voReceiving, voSending);
   TRpDataFlashLoadType = (loSend, loReceive);
+  TRpDataFlashProcessingStatus = (psServer, psBridgeOnLine, psBridgeOffLine, psLocal, psNone);
+  TRpDataFlashExecutionType = (etExecution, etBridgeInvalid, etBridgeDone, etBeforeExecBridge);
 //  TRpDataFlashServerType = (stServer, stBridge);
 
-  TLRDataFlashStatusProcessamento = (tspServidor, tspPonteOnline, tspPonteOffLine, tspLocal, tspNenhum);
-
-  TLRDataFlashTipoExecucao = (teExecucao, tePonteInvalida, tePonteBemSucedida, teAntesComunicarPonte);
 
   TLRDataFlashTipoLogService = (tlsConexao, tlsDesconexao, tlsEnvio, tlsRecebimento,
     tlsErro, tlsStatus, tlsPonte, tlsComando, tlsRegra, tlsArquivo, tlsSync, tlsSyncXml);

@@ -346,7 +346,7 @@ type
     procedure SetPonte(const Value: TLRDataFlashConexaoClienteCustom);
     function CarregarConexaoCliente(const AConexaoItem : TLRDataFlashConexaoItem; out AConexao: TLRDataFlashConexaoClienteCustom) : Boolean;
     function CarregarStatusProcessamento(const AConexaoItem : TLRDataFlashConexaoItem;
-      out AConexao: TLRDataFlashConexaoClienteCustom) : TLRDataFlashStatusProcessamento;
+      out AConexao: TLRDataFlashConexaoClienteCustom) : TRpDataFlashProcessingStatus;
     function GetNumeroClientesConectados: Integer;
     // controllers e providers
     function CarregarComandoViaControllers(const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
@@ -659,7 +659,7 @@ type
   protected
     FClient: TLRDataFlashConexaoClienteCustom;
     FLastError: string;
-    FStatusProcessamento: TLRDataFlashStatusProcessamento;
+    FStatusProcessamento: TRpDataFlashProcessingStatus;
     FEventoStatus : TLRDataFlashOnStatus;
     FSharedClient : Boolean;
     FBusyCallback : TLRDataFlashBusyCallback;
@@ -672,7 +672,7 @@ type
       ABusyCallback : TLRDataFlashBusyCallback; const ASharedClient : Boolean = False);
     procedure SetEvents(const AEventoStatus : TLRDataFlashOnStatus);
     function GetLastError : string;
-    function GetStatusProcessamento : TLRDataFlashStatusProcessamento;
+    function GetStatusProcessamento : TRpDataFlashProcessingStatus;
     property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
   end;
 
@@ -1646,16 +1646,16 @@ end;
 
 function TLRDataFlashConexaoServer.CarregarStatusProcessamento(
   const AConexaoItem: TLRDataFlashConexaoItem;
-  out AConexao: TLRDataFlashConexaoClienteCustom): TLRDataFlashStatusProcessamento;
+  out AConexao: TLRDataFlashConexaoClienteCustom): TRpDataFlashProcessingStatus;
 begin
   AConexao := nil;
-  Result := tspServidor;
+  Result := psServer;
   if IsPonte then
   begin
    if CarregarConexaoCliente(AConexaoItem, AConexao) then
-     Result := tspPonteOnline
+     Result := psBridgeOnline
    else
-     Result := tspPonteOffLine;
+     Result := psBridgeOffLine;
   end;
 end;
 
@@ -1852,7 +1852,7 @@ var
   lParametros: TRpDataFlashCommandParameters;
   lTcpClient: TLRDataFlashConexaoClienteCustom;
   lContinuar: Boolean;
-  lStatusProcessamento: TLRDataFlashStatusProcessamento;
+  lStatusProcessamento: TRpDataFlashProcessingStatus;
   lNomeComando: string;
   lCarregado: Boolean;
 
@@ -1931,7 +1931,7 @@ var
     if lTcpClient = nil then
       raise ELRDataFlashException.Create('Cliente da Ponte = nil');
 
-    if lStatusProcessamento = tspPonteOnline then
+    if lStatusProcessamento = psBridgeOnLine then
     begin
       try
         if DoValidarAntesComunicar then
@@ -1939,7 +1939,7 @@ var
           ASaida := lTcpClient.Comunicar(lComando, lParametros);
           // se vai comunicar, a ponte deve estar onLine (quando processa no servidor,
           // o status muda para tspServidor, então volta para a ponte com o sinal de OnLine)
-          lParametros.StatusProcessamento := tspPonteOnline;
+          lParametros.StatusProcessamento := psBridgeOnLine;
           lComando.DoCarregar(loReceive, lParametros);
           ASaida := lParametros.Serializar;
 
@@ -2019,13 +2019,13 @@ begin
 
     lComando.Executor := AItem.Executor;
     if lComando.TipoProcessamento = prtLocal then
-      lStatusProcessamento := tspLocal //tspServidor
+      lStatusProcessamento := psLocal //tspServidor
     else
       lStatusProcessamento := CarregarStatusProcessamento(AItem, lTcpClient);
 
     lParametros.StatusProcessamento := lStatusProcessamento;
 
-    if lStatusProcessamento in [tspServidor, tspLocal] then
+    if lStatusProcessamento in [psServer, psLocal] then
       Executar
     else
       Comunicar;
@@ -3516,7 +3516,7 @@ var
 begin
   FBusyCallback(True);
   FLastError := EmptyStr;
-  FStatusProcessamento := tspNenhum;
+  FStatusProcessamento := psNone;
   lCmd := TLRDataFlashComandoEnvio.Create;
   try
     lCmd.SetComando( ANomeComando );
@@ -3548,7 +3548,7 @@ begin
     Result := 'Erro de retorno. ' + Result;
 end;
 
-function TCustomProxyClient.GetStatusProcessamento: TLRDataFlashStatusProcessamento;
+function TCustomProxyClient.GetStatusProcessamento: TRpDataFlashProcessingStatus;
 begin
   Result := FStatusProcessamento;
 end;

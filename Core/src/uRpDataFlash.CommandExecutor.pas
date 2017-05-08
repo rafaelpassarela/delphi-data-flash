@@ -25,7 +25,7 @@ type
     FComando: string;
     FLastError: string;
     FOnError: TLRDFErrorExecucao;
-    FLastStatusProcessamento : TLRDataFlashStatusProcessamento;
+    FLastStatusProcessamento : TRpDataFlashProcessingStatus;
     FParametros: TLRDataFlashParametrosValueCollection;
     FRetornos: TLRDataFlashRetornosValueCollection;
     FOnAfterExecute: TLRDFExecCmdAfterExecute;
@@ -40,7 +40,7 @@ type
 
     function Execute : Boolean;
     function LastError : string;
-    function LastStatusProcessamento : TLRDataFlashStatusProcessamento;
+    function LastStatusProcessamento : TRpDataFlashProcessingStatus;
   published
     property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
     property VerificarConexao : Boolean read FVerificarConexao write FVerificarConexao default True;
@@ -63,7 +63,7 @@ begin
 
   FVerificarConexao := True;
   FComando := '';
-  FLastStatusProcessamento := tspNenhum;
+  FLastStatusProcessamento := psNone;
 
   FParametros := TLRDataFlashParametrosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
   FRetornos := TLRDataFlashRetornosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
@@ -132,7 +132,7 @@ begin
   lRaise := True;
   lContinue := True;
   Result := False;
-  FLastStatusProcessamento := tspNenhum;
+  FLastStatusProcessamento := psNone;
   try
     if Assigned(FOnBeforeExecute) then
       FOnBeforeExecute(Self, lContinue);
@@ -183,7 +183,7 @@ begin
   Result := FLastError;
 end;
 
-function TLRDataFlashExecutorComando.LastStatusProcessamento: TLRDataFlashStatusProcessamento;
+function TLRDataFlashExecutorComando.LastStatusProcessamento: TRpDataFlashProcessingStatus;
 begin
   Result := FLastStatusProcessamento;
 end;
