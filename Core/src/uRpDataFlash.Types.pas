@@ -71,18 +71,20 @@ type
     tvpInteger, tvpString, tvpBoolean, tvpFloat, tvpBase64, tvpDAO, tvpBase,
     tvpDateTime, tvpFile, tvpJSON, tvpBinaryFile);
   TRpDataFlashProcessType = (prtLocal, prtRemote, prtRemoteOnly);
+  TRpDataFlashLifeCycle = (tlfInstance, tlfSession, tlfServer, tlfInternal);
+  TRpDataFlashHelperAction = (haSave, haLoad, haDelete, haExecute);
+  TRpDataFlashMessageType = (mtCommand, mtText);
+  TRpDataFlashValidationOrigin = (voReceiving, voSending);
+  TRpDataFlashLoadType = (loSend, loReceive);
+//  TRpDataFlashServerType = (stServer, stBridge);
 
   TLRDataFlashStatusProcessamento = (tspServidor, tspPonteOnline, tspPonteOffLine, tspLocal, tspNenhum);
-  TLRDataFlashTipoCarga = (tcEnvio, tcRetorno);
+
   TLRDataFlashTipoExecucao = (teExecucao, tePonteInvalida, tePonteBemSucedida, teAntesComunicarPonte);
-  TLRDataFlashTipoMensagem = (tmComando, tmTexto);
-  TLRDataFlashOrigemValidacao = (cmdRecebimento, cmdEnvio);
+
   TLRDataFlashTipoLogService = (tlsConexao, tlsDesconexao, tlsEnvio, tlsRecebimento,
     tlsErro, tlsStatus, tlsPonte, tlsComando, tlsRegra, tlsArquivo, tlsSync, tlsSyncXml);
-  TLRDataFlashTipoServer = (tsServidor, tsPonte);
   TLRDataFlashTipoComunicacao = (tcTexto, tcStream, tcCompressedStream, tcChar);
-  TLRDataFlashLifeCycle = (tlfInstance, tlfSession, tlfServer, tlfInternal);
-  TLRDataFlashHelperAction = (haSave, haLoad, haDelete, haExecute);
 
   TLRDataFlashDoConectarEvent = procedure of object;
   TLRDataFlashExeptionHandler = procedure(const E: Exception) of object;
@@ -95,7 +97,8 @@ type
   TLRDataFlashExecucaoInternaComando = function : Boolean of object;
   TLRDataFlashExecucaoExternaComando = function : string of object;
   TLRDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
-  TLRDataFlashOnObjectRequest = procedure(const AOperacao : TLRDataFlashHelperAction; const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
+  TLRDataFlashOnObjectRequest = procedure(const AOperacao : TRpDataFlashHelperAction;
+    const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
 
   // Exceptions
   ELRDataFlashException = class(Exception);

@@ -25,7 +25,7 @@ var
   lClass: TCustomSerializableObjectClass;
   lObjeto: TCustomSerializableObject;
   lClassName: string;
-  lOperacao: TLRDataFlashHelperAction;
+  lOperacao: TRpDataFlashHelperAction;
   lIntf : ISerializableBaseHelper;
   lDataComponent: TComponent;
 begin
@@ -42,7 +42,7 @@ begin
     try
       lObjeto := lClass.Create(nil);
       lObjeto.LoadFromString(Parametro['Object'].AsBase64);
-      lOperacao := TLRDataFlashHelperAction(Parametro['Operacao'].AsInteger);
+      lOperacao := TRpDataFlashHelperAction(Parametro['Operacao'].AsInteger);
 
       if Assigned(GetServer.OnObjectRequest) then
         GetServer.OnObjectRequest(lOperacao, lObjeto, lContinuar);

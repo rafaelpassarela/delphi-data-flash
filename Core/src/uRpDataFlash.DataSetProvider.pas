@@ -21,7 +21,7 @@ type
     function GetComando: string; override;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameters) : Boolean; override;
     function GetTipoProcessamento : TRpDataFlashProcessType; override;
-    function GetLifeCycle: TLRDataFlashLifeCycle; override;
+    function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
     // all the decendents must implement this
     function ExecSQL(const pSQL : string) : Boolean; override; final;
@@ -56,7 +56,7 @@ type
 //    FOnRollback: TLRDataFlashOnTransactionEvent;
 //    FOnStartTransaction: TLRDataFlashOnStartTransactionEvent;
 //    FMasterProvider: TLRDataFlashMasterDataSetProvider;
-    FLifeCycle: TLRDataFlashLifeCycle;
+    FLifeCycle: TRpDataFlashLifeCycle;
     FOnBeforeDataSetSelectSQL: TLRDataFlashOnSelect;
     FOnBeforeDataSetExecuteSQL: TLRDataFlashOnExecSQL;
     FDescricao: string;
@@ -71,7 +71,7 @@ type
 
     property Server : TLRDataFlashConexaoServer read FServer write SetServer;
     property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
-    property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
+    property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property InsertSQL : TStrings read FInsertSQL write SetInsertSQL;
     property UpdateSQL : TStrings read FUpdateSQL write SetUpdateSQL;
@@ -209,7 +209,7 @@ begin
   Result := FProvider.InsertSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetLifeCycle: TLRDataFlashLifeCycle;
+function TLRDataFlashDataSetCommandProvider.GetLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := FProvider.LifeCycle;
 end;

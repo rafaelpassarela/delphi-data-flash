@@ -19,7 +19,7 @@ type
     function DoExecutar : Boolean; override;
     function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; override;
     function GetTipoProcessamento : TRpDataFlashProcessType; override;
-    function GetLifeCycle: TLRDataFlashLifeCycle; override;
+    function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
@@ -132,7 +132,7 @@ type
     FOnExecutarPonteInvalida: TLRDataFlashOnExecutarPonteInvalida;
     FOnExecutarPonteBemSucedida: TLRDataFlashOnExecutarPonteBemSucedidaEvent;
     FOnSendCallback: TLRDataFlashOnSendCallback;
-    FLifeCycle: TLRDataFlashLifeCycle;
+    FLifeCycle: TRpDataFlashLifeCycle;
     FOnExecutarAntesComunicarPonte: TLRDataFlashOnExecutarAntesComunicarPonteEvent;
     FOnCarregar: TLRDataFlashOnCarregarEvent;
     FOnSerializar: TLRDataFlashOnSerializarEvent;
@@ -152,7 +152,7 @@ type
     property Descricao : string read FDescricao write FDescricao;
     property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
     property Parametros : TLRDataFlashParametrosCollection read FParametros write FParametros;
-    property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
+    property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property OnExecute : TLRDataFlashOnExecutarComandItemEvent read FOnExecute write FOnExecute;
     property OnExecutarPonteInvalida : TLRDataFlashOnExecutarPonteInvalida read FOnExecutarPonteInvalida write FOnExecutarPonteInvalida;
@@ -421,7 +421,7 @@ begin
   Result := FItem.Nome;
 end;
 
-function TLRDataFlashComandoItem.GetLifeCycle: TLRDataFlashLifeCycle;
+function TLRDataFlashComandoItem.GetLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := FItem.LifeCycle;
 end;

@@ -103,7 +103,7 @@ type
     FMensagem : string;
     FNomeNodoMsgRetorno: string;
     FCriptografia : TRpEncryption;
-    FTipoMensagem: TLRDataFlashTipoMensagem;
+    FTipoMensagem: TRpDataFlashMessageType;
     function GetIdentificadorInicialCompleto: string;
     function GetIdentificadorFinalCompleta: string;
     procedure SetMensagem(const Value: string);
@@ -128,7 +128,7 @@ type
     property Identificador : string read FIdentificador  write SetIdentificador;
     property IdentificadorInicialCompleto : string read GetIdentificadorInicialCompleto;
     property IdentificadorFinalCompleto : string read GetIdentificadorFinalCompleta;
-    property TipoMensagem : TLRDataFlashTipoMensagem read FTipoMensagem write FTipoMensagem;
+    property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem;
 
     property NomeNodoMsgRetorno : string read FNomeNodoMsgRetorno write SetNomeNodoMsgRetorno;
     procedure SetTipoCriptografia(const pTipoCriptografia : TRpEncryptionClass);
@@ -207,7 +207,7 @@ var
   lPosicaoFinalMensagem: Integer;
   lMensagem: string;
 begin
-  if FTipoMensagem = tmTexto then
+  if FTipoMensagem = mtText then
     Result := pMensagemCompleta
   else
   begin
@@ -240,7 +240,7 @@ begin
   FIdentificador := EmptyStr;
   FMensagem := EmptyStr;
   FNomeNodoMsgRetorno := EmptyStr;
-  FTipoMensagem := tmComando;
+  FTipoMensagem := mtCommand;
 
   case ATipoCriptografia of
     ecNone : SetTipoCriptografia(nil);
@@ -336,7 +336,7 @@ function TProtocolo.Montar: string;
 var
   lMensagem: string;
 begin
-  if FTipoMensagem = tmTexto then
+  if FTipoMensagem = mtText then
     Result := FMensagem
   else
   begin
@@ -476,7 +476,7 @@ procedure TProtocolo.SetMensagem(const Value: string);
 var
   lMensagem: string;
 begin
-  if FTipoMensagem = tmTexto then
+  if FTipoMensagem = mtText then
   begin
     FIdentificador := '';
     FMensagem := Value;

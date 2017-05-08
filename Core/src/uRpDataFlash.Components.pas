@@ -32,7 +32,7 @@ type
   TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AItemConexao : TLRDataFlashConexaoItem) of object;
   TLRDataFlashOnCriarExecutor             = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
   TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AItemConexao : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
-  TLRDataFlashOnTimeOutCheck              = procedure(Sender : TObject; const AOrigem : TLRDataFlashOrigemValidacao; var AContinue : Boolean) of object;
+  TLRDataFlashOnTimeOutCheck              = procedure(Sender : TObject; const AOrigem : TRpDataFlashValidationOrigin; var AContinue : Boolean) of object;
   TLRDataFlashOnBeforeExecuteCommand      = procedure(Sender : TObject; const AItemConexao : TLRDataFlashConexaoItem; var AContinue : Boolean; out AMessage : string) of object;
   // DataSet
   TLRDataFlashOnExecSQL = function (const AComando: IRpDataFlashCommandInterfaced; var ASQL: string; var AContinue : Boolean) : Boolean of object;
@@ -204,7 +204,7 @@ type
     FIpsReconhecidos: TStringList;
     FQuebrasProtocolosRecebidos: TRpQuebraProtocoloList;
     FTipoComunicacao: TLRDataFlashTipoComunicacao;
-    FTipoMensagem: TLRDataFlashTipoMensagem;
+    FTipoMensagem: TRpDataFlashMessageType;
     FOnTimeOutCheck: TLRDataFlashOnTimeOutCheck;
     FOnStatus: TLRDataFlashOnStatus;
     FConexaoTCPIP: TLRDataFlashConfigConexaoTCPIP;
@@ -285,7 +285,7 @@ type
     property TipoCriptografia : TRpDataFlashEncryptionType read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
     property Identificador : string read GetIdentificador;
     property TipoComunicacao : TLRDataFlashTipoComunicacao read FTipoComunicacao write FTipoComunicacao stored True default tcTexto;
-    property TipoMensagem : TLRDataFlashTipoMensagem read FTipoMensagem write FTipoMensagem stored True default tmComando;
+    property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem stored True default mtCommand;
     property FileTransfer : TLRDataFlashFileTransfer read FFileTransfer write FFileTransfer;
 
     property OnNovoLog : TLRDataFlashOnNovoLog read FOnNovoLog write FOnNovoLog;
@@ -1100,7 +1100,7 @@ procedure TLRDataFlashConexaoCustom.InternalEnviar(const AHandler: TIdIOHandler;
 
         if Assigned(FOnTimeOutCheck) and (not lErro) then
         begin
-          FOnTimeOutCheck(Self, cmdEnvio, lContinue);
+          FOnTimeOutCheck(Self, voSending, lContinue);
           if not lContinue then
             raise Exception.Create('Erro de comunicação (E). Tempo limite atingido.');
         end;
@@ -1185,7 +1185,7 @@ var
   lLinha: string;
   lNomeClasseComando: string;
   lComando: IRpDataFlashCommandInterfaced;
-  lLifeCycle: TLRDataFlashLifeCycle;
+  lLifeCycle: TRpDataFlashLifeCycle;
   i: Integer;
   lComandos : TStringList;
 
@@ -1298,7 +1298,7 @@ function TLRDataFlashConexaoCustom.InternalReceber(const AHandler: TIdIOHandler)
 
         if Assigned(FOnTimeOutCheck) and (not lErro) then
         begin
-          FOnTimeOutCheck(Self, cmdRecebimento, lContinue);
+          FOnTimeOutCheck(Self, voReceiving, lContinue);
           if not lContinue then
             raise Exception.Create('Erro de comunicação (R). Tempo limite atingido.');
         end;
@@ -1595,7 +1595,7 @@ begin
   if FControllers <> nil then
   begin
     if FControllers.Localizar(AParametros.Comando, AObjComando) then
-      AObjComando.DoCarregar(tcEnvio, AParametros);
+      AObjComando.DoCarregar(loSend, AParametros);
   end;
 
   Result := AObjComando <> nil;
@@ -1613,7 +1613,7 @@ begin
   if FProviders <> nil then
   begin
     if FProviders.Localizar(AParametros.Comando, AObjComando) then
-      AObjComando.DoCarregar(tcEnvio, AParametros);
+      AObjComando.DoCarregar(loSend, AParametros);
   end;
 
   Result := AObjComando <> nil;
@@ -1940,7 +1940,7 @@ var
           // se vai comunicar, a ponte deve estar onLine (quando processa no servidor,
           // o status muda para tspServidor, então volta para a ponte com o sinal de OnLine)
           lParametros.StatusProcessamento := tspPonteOnline;
-          lComando.DoCarregar(tcRetorno, lParametros);
+          lComando.DoCarregar(loReceive, lParametros);
           ASaida := lParametros.Serializar;
 
           NovoLog(tlsPonte, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
@@ -2355,7 +2355,7 @@ begin
         FOnProcessamentoManual(Self, lItem)
       else
       begin
-        if FTipoMensagem = tmComando then
+        if FTipoMensagem = mtCommand then
         begin
           lProtocolo := TProtocolo.Create(TipoCriptografia);
           try
@@ -2837,7 +2837,7 @@ begin
   AComando.DoSerializar(AParametros);
   Result := Comunicar(TAG_COMMAND, AParametros.Serializar);
   AParametros.Carregar(Result);
-  AComando.DoCarregar(tcRetorno, AParametros);
+  AComando.DoCarregar(loReceive, AParametros);
 end;
 
 function TLRDataFlashConexaoClienteCustom.Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string;

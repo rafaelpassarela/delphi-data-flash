@@ -55,8 +55,8 @@ type
   IRpDataFlashCommandInterfaced = interface
     ['{4EE3E304-8FAE-42C8-9830-488C67BC3135}']
     function GetTipoProcessamento : TRpDataFlashProcessType;
-    function GetLifeCycle : TLRDataFlashLifeCycle;
-    procedure SetLifeCycle(const Value : TLRDataFlashLifeCycle);
+    function GetLifeCycle : TRpDataFlashLifeCycle;
+    procedure SetLifeCycle(const Value : TRpDataFlashLifeCycle);
     function GetSessionInstanceController: ISessionInstanceController;
     procedure SetServerInstanceController(const Value: IServerInstanceController);
     function GetServerInstanceController: IServerInstanceController;
@@ -68,7 +68,7 @@ type
     function GetParametros: TRPDataFlashCommandParameters;
     function GetDescricao: string;
     procedure DoRegistrarParametros(const AParametros : TRPDataFlashCommandParameters);
-    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TRPDataFlashCommandParameters);
+    procedure DoCarregar(const ATipoCarga : TRpDataFlashLoadType; const AParametros : TRPDataFlashCommandParameters);
     procedure DoSerializar(const AParametros : TRPDataFlashCommandParameters);
     procedure DoErroExecucao(const AParametros : TRPDataFlashCommandParameters);
     function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean;
@@ -82,7 +82,7 @@ type
       AExecutor: IRpPackageCommandExecutor; var AContinuar: Boolean): string;
 
     property TipoProcessamento : TRpDataFlashProcessType read GetTipoProcessamento;
-    property LifeCycle : TLRDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
+    property LifeCycle : TRpDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
     property ServerInstanceController : IServerInstanceController read GetServerInstanceController write SetServerInstanceController;
     property SessionInstanceController : ISessionInstanceController read GetSessionInstanceController write SetSessionInstanceController;
 
@@ -284,7 +284,7 @@ type
     FParametros: TRPDataFlashCommandParameters;
     FContext: TIdContext;
     FOnCallBackEvent: TRpDataFlashCallBackEvent;
-    FLifeCycle: TLRDataFlashLifeCycle;
+    FLifeCycle: TRpDataFlashLifeCycle;
     FServerInstanceController: IServerInstanceController;
     FSessionInstanceController: ISessionInstanceController;
     FLock: Boolean;
@@ -295,7 +295,7 @@ type
     function GetStatusProcessamento: TLRDataFlashStatusProcessamento;
     function GetDescricao: string;
     procedure SetStatusProcessamento(const Value: TLRDataFlashStatusProcessamento);
-    procedure DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga; const AParametros : TRPDataFlashCommandParameters); overload; virtual;
+    procedure DoCarregar(const ATipoCarga : TRpDataFlashLoadType; const AParametros : TRPDataFlashCommandParameters); overload; virtual;
     procedure DoSerializar(const AParametros : TRPDataFlashCommandParameters); overload;
     procedure DoErroExecucao(const AParametros: TRPDataFlashCommandParameters); overload;
     procedure DoRegistrarParametros(const AParametros: TRPDataFlashCommandParameters); overload;
@@ -338,7 +338,7 @@ type
       out AObjComando : IRpDataFlashCommandInterfaced;
       out AParametros : TRPDataFlashCommandParameters) : Boolean;
     function GetObject: TObject;
-    function GetLifeCycle: TLRDataFlashLifeCycle; virtual;
+    function GetLifeCycle: TRpDataFlashLifeCycle; virtual;
     function GetResponseFileName: string; virtual;
     function DoGetParametrosSerializados : string; virtual;
 
@@ -355,7 +355,7 @@ type
     procedure NovoRetorno(const ANome : string; const ATipo : TRpDataFlashParamValueType); overload;
     procedure NovoRetorno(const ANome : string; const ABaseClass : TCustomSerializableObjectClass; const ARecarregar : Boolean = True); overload;
     procedure NovoParamInterno(const ANome : string; const ATipo : TRpDataFlashParamValueType); overload;
-    procedure SetLifeCycle(const ALifeCycle: TLRDataFlashLifeCycle);
+    procedure SetLifeCycle(const ALifeCycle: TRpDataFlashLifeCycle);
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -387,7 +387,7 @@ type
     property ServerInstanceController : IServerInstanceController read GetServerInstanceController write SetServerInstanceController;
     property SessionInstanceController : ISessionInstanceController read GetSessionInstanceController write SetSessionInstanceController;
 
-    property LifeCycle : TLRDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
+    property LifeCycle : TRpDataFlashLifeCycle read GetLifeCycle write SetLifeCycle;
     property Lock : Boolean read GetLock write SetLock;
     property SerializationFormat : TSerializationFormat read GetSerializationFormat write SetSerializationFormat;
     property RequestInfo  : TIdHTTPRequestInfo read GetRequestInfo write SetRequestInfo;
@@ -404,7 +404,7 @@ type
     class function CarregarComando(
       const ACommandClass : string;
       out AObjComando : IRpDataFlashCommandInterfaced;
-      out ALifeCycle: TLRDataFlashLifeCycle;
+      out ALifeCycle: TRpDataFlashLifeCycle;
       const AServerInstanceController : IServerInstanceController;
       const ASessionInstanceController : ISessionInstanceController) : Boolean; overload;
   end;
@@ -554,14 +554,14 @@ type
   private
     FClass : TRpDataFlashAbstractClass;
     FProxyGroup : string;
-    FLifeCycle: TLRDataFlashLifeCycle;
+    FLifeCycle: TRpDataFlashLifeCycle;
     FPublicItem: Boolean;
     FMnemonico: string;
     function GetProxyGroup: string;
   public
     property ProxyClass : TRpDataFlashAbstractClass read FClass write FClass;
     property ProxyGroup : string read GetProxyGroup write FProxyGroup;
-    property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle;
+    property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle;
     property PublicItem : Boolean read FPublicItem write FPublicItem;
     property Mnemonico : string read FMnemonico write FMnemonico;
   end;
@@ -573,9 +573,9 @@ type
     class var TcpClassRegister: TTcpClassRegister;
     procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
-      const ALifeCycle : TLRDataFlashLifeCycle = tlfInstance);
+      const ALifeCycle : TRpDataFlashLifeCycle = tlfInstance);
     function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
-    function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
+    function GetClass(const AClassName : string; out ALifeCycle : TRpDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
     property Items[const Index: Integer]: TTcpClassRegisterItem read GetItem; default;
   end;
 
@@ -584,12 +584,12 @@ type
     class procedure Destruir;
     class procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
-      const ALifeCycle : TLRDataFlashLifeCycle = tlfInstance);
+      const ALifeCycle : TRpDataFlashLifeCycle = tlfInstance);
     class procedure RegistrarDSProvider(const AClass : TRpDataFlashAbstractClass;
-      const ALifeCycle : TLRDataFlashLifeCycle);
+      const ALifeCycle : TRpDataFlashLifeCycle);
     class procedure Registrados(out ARegistrados : TTcpClassRegister; const ASomentePublicos : Boolean = False);
     class function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
-    class function GetClass(const AClassName : string; out ALifeCycle : TLRDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
+    class function GetClass(const AClassName : string; out ALifeCycle : TRpDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
 //    class procedure Instanciar(const AClass : TLRDataFlashAbstractClass; const ANomeInstancia : string);
   end;
 
@@ -1248,7 +1248,7 @@ class function TRpDataFlashCommand.CarregarComando(
   const ASessionInstanceController :ISessionInstanceController;
   const ALoadParams : Boolean): Boolean;
 var
-  lLifeCycle: TLRDataFlashLifeCycle;
+  lLifeCycle: TRpDataFlashLifeCycle;
 begin
   AParametros := TRPDataFlashCommandParameters.Create(nil);
   AParametros.Carregar(AComando);
@@ -1263,14 +1263,14 @@ begin
     ASessionInstanceController);
 
   if ALoadParams and Assigned(AObjComando) then
-    AObjComando.DoCarregar(tcEnvio, AParametros);
+    AObjComando.DoCarregar(loSend, AParametros);
 
   Result := AObjComando <> nil;
 end;
 
 class function TRpDataFlashCommand.CarregarComando(const ACommandClass: string;
   out AObjComando: IRpDataFlashCommandInterfaced;
-  out ALifeCycle: TLRDataFlashLifeCycle;
+  out ALifeCycle: TRpDataFlashLifeCycle;
   const AServerInstanceController: IServerInstanceController;
   const ASessionInstanceController: ISessionInstanceController): Boolean;
 var
@@ -1394,7 +1394,7 @@ begin
   DoRegistrarParametros;
 end;
 
-procedure TRpDataFlashCommand.DoCarregar(const ATipoCarga : TLRDataFlashTipoCarga;
+procedure TRpDataFlashCommand.DoCarregar(const ATipoCarga : TRpDataFlashLoadType;
   const AParametros: TRPDataFlashCommandParameters);
 begin
 //  FParametros := AParametros;
@@ -1564,7 +1564,7 @@ begin
   Result := FSessionInstanceController;
 end;
 
-function TRpDataFlashCommand.GetLifeCycle: TLRDataFlashLifeCycle;
+function TRpDataFlashCommand.GetLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := FLifeCycle;
 end;
@@ -1708,7 +1708,7 @@ begin
   FExecutor := AExecutor;
 end;
 
-procedure TRpDataFlashCommand.SetLifeCycle(const ALifeCycle: TLRDataFlashLifeCycle);
+procedure TRpDataFlashCommand.SetLifeCycle(const ALifeCycle: TRpDataFlashLifeCycle);
 begin
   FLifeCycle := ALifeCycle;
 end;
@@ -1805,7 +1805,7 @@ begin
 end;
 
 class function TCPClassRegistrer.GetClass(const AClassName: string;
-  out ALifeCycle: TLRDataFlashLifeCycle): TRpDataFlashAbstractClass;
+  out ALifeCycle: TRpDataFlashLifeCycle): TRpDataFlashAbstractClass;
 begin
   Result := TTcpClassRegister.TcpClassRegister.GetClass(AClassName, ALifeCycle);
 end;
@@ -1840,7 +1840,7 @@ end;
 
 class procedure TCPClassRegistrer.Registrar(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
-  const ALifeCycle : TLRDataFlashLifeCycle);
+  const ALifeCycle : TRpDataFlashLifeCycle);
 var
   lGrupoProxy: string;
 begin
@@ -1855,7 +1855,7 @@ begin
 end;
 
 class procedure TCPClassRegistrer.RegistrarDSProvider(const AClass: TRpDataFlashAbstractClass;
-  const ALifeCycle : TLRDataFlashLifeCycle);
+  const ALifeCycle : TRpDataFlashLifeCycle);
 begin
   if TTcpClassRegister.TcpClassRegister = nil then
     TTcpClassRegister.TcpClassRegister := TTcpClassRegister.Create;
@@ -1866,13 +1866,13 @@ end;
 
 function TTcpClassRegister.GetClass(const AClassName: string): TRpDataFlashAbstractClass;
 var
-  lLifeCycle: TLRDataFlashLifeCycle;
+  lLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := GetClass(AClassName, lLifeCycle);
 end;
 
 function TTcpClassRegister.GetClass(const AClassName: string;
-  out ALifeCycle: TLRDataFlashLifeCycle): TRpDataFlashAbstractClass;
+  out ALifeCycle: TRpDataFlashLifeCycle): TRpDataFlashAbstractClass;
 var
   I: Integer;
 begin
@@ -1894,7 +1894,7 @@ end;
 
 procedure TTcpClassRegister.Registrar(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
-  const ALifeCycle : TLRDataFlashLifeCycle);
+  const ALifeCycle : TRpDataFlashLifeCycle);
 var
   lItem : TTcpClassRegisterItem;
 begin
