@@ -78,12 +78,11 @@ type
   TRpDataFlashLoadType = (loSend, loReceive);
   TRpDataFlashProcessingStatus = (psServer, psBridgeOnLine, psBridgeOffLine, psLocal, psNone);
   TRpDataFlashExecutionType = (etExecution, etBridgeInvalid, etBridgeDone, etBeforeExecBridge);
+  TRpDataFlashCommunicationType = (ctText, ctStream, ctCompressedStream, ctChar);
 //  TRpDataFlashServerType = (stServer, stBridge);
+  TRpDataFlashServiceLog = (slOnConnection, slOnDisconnection, slOnSend, slOnReceive,
+    slOnError, slOnStatus, slOnBridge, slOnCommand, slOnApplyRule, slOnFile, slOnSync, slOnSyncXml);
 
-
-  TLRDataFlashTipoLogService = (tlsConexao, tlsDesconexao, tlsEnvio, tlsRecebimento,
-    tlsErro, tlsStatus, tlsPonte, tlsComando, tlsRegra, tlsArquivo, tlsSync, tlsSyncXml);
-  TLRDataFlashTipoComunicacao = (tcTexto, tcStream, tcCompressedStream, tcChar);
 
   TLRDataFlashDoConectarEvent = procedure of object;
   TLRDataFlashExeptionHandler = procedure(const E: Exception) of object;
@@ -133,7 +132,7 @@ type
     function GetServerPort: Integer;
     function GetRestPort : Integer;
     function GetFTPPort: Integer;
-    function GetModoComunicacao: TLRDataFlashTipoComunicacao;
+    function GetModoComunicacao: TRpDataFlashCommunicationType;
     function GetModoCriptografia : TRpDataFlashEncryptionType;
     function GetLocalHostToIP : Boolean;
 
@@ -141,7 +140,7 @@ type
     property ServerPort : Integer read GetServerPort;
     property RestPort : Integer read GetRestPort;
     property FTPPort : Integer read GetFTPPort;
-    property ModoComunicacao : TLRDataFlashTipoComunicacao read GetModoComunicacao;
+    property ModoComunicacao : TRpDataFlashCommunicationType read GetModoComunicacao;
     property ModoCriptografia : TRpDataFlashEncryptionType read GetModoCriptografia;
     property LocalHostToIP : Boolean read GetLocalHostToIP;
   end;

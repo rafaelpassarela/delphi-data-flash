@@ -21,7 +21,7 @@ type
   TLRDataFlashComandControllerList = class;
   TLRDataFlashProviderControllerList = class;
 
-  TLRDataFlashOnNovoLog                   = procedure(Sender : TObject; ATipoLog : TLRDataFlashTipoLogService; const ALog : string; const AClientInfo : TLRDataFlashClientInfo) of object;
+  TLRDataFlashOnNovoLog                   = procedure(Sender : TObject; ATipoLog : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TLRDataFlashClientInfo) of object;
   TLRDataFlashOnException                 = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
   TLRDataFlashOnAntesConexaoClienteEvento = procedure(Sender : TObject; var APermitir : Boolean) of object;
   TLRDataFlashOnConexaoCliente            = procedure(Sender : TObject; const AConexaoItem : TLRDataFlashConexaoItem) of object;
@@ -89,7 +89,7 @@ type
   private
     FLRDataFlashIP : TLRDataFlashConexaoCustom;
     FEvento : TLRDataFlashOnNovoLog;
-    FTipoLog : TLRDataFlashTipoLogService;
+    FTipoLog : TRpDataFlashServiceLog;
     FLog : string;
     FClientInfo : TLRDataFlashClientInfo;
   protected
@@ -203,7 +203,7 @@ type
     FTipoCriptografia: TRpDataFlashEncryptionType;
     FIpsReconhecidos: TStringList;
     FQuebrasProtocolosRecebidos: TRpQuebraProtocoloList;
-    FTipoComunicacao: TLRDataFlashTipoComunicacao;
+    FTipoComunicacao: TRpDataFlashCommunicationType;
     FTipoMensagem: TRpDataFlashMessageType;
     FOnTimeOutCheck: TLRDataFlashOnTimeOutCheck;
     FOnStatus: TLRDataFlashOnStatus;
@@ -236,9 +236,9 @@ type
     procedure DoSalvarConfiguracoes(const ANode : IXMLNode); virtual;
     procedure DoCarregarConfiguracoes(const ANode : IXMLNode); virtual;
 
-    procedure NovoLog(const ATipoLog : TLRDataFlashTipoLogService; const ALog : string;
+    procedure NovoLog(const ATipoLog : TRpDataFlashServiceLog; const ALog : string;
       const AContext : TIdContext); overload;
-    procedure NovoLog(const ATipoLog : TLRDataFlashTipoLogService; const ALog : string;
+    procedure NovoLog(const ATipoLog : TRpDataFlashServiceLog; const ALog : string;
       const AIP : string); overload;
     procedure Limpar; virtual;
 
@@ -284,7 +284,7 @@ type
     property Conectado : Boolean read GetConectado;
     property TipoCriptografia : TRpDataFlashEncryptionType read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
     property Identificador : string read GetIdentificador;
-    property TipoComunicacao : TLRDataFlashTipoComunicacao read FTipoComunicacao write FTipoComunicacao stored True default tcTexto;
+    property TipoComunicacao : TRpDataFlashCommunicationType read FTipoComunicacao write FTipoComunicacao stored True default ctText;
     property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem stored True default mtCommand;
     property FileTransfer : TLRDataFlashFileTransfer read FFileTransfer write FFileTransfer;
 
@@ -1064,7 +1064,7 @@ end;
 
 procedure TLRDataFlashConexaoCustom.Inicializar;
 begin
-  FTipoComunicacao := tcTexto;
+  FTipoComunicacao := ctText;
   FTipoCriptografia := tcBase64Compressed;
 end;
 
@@ -1168,13 +1168,13 @@ procedure TLRDataFlashConexaoCustom.InternalEnviar(const AHandler: TIdIOHandler;
   end;
 
 begin
-  NovoLog(tlsEnvio, AValor, EmptyStr);
+  NovoLog(slOnSend, AValor, EmptyStr);
 
   case FTipoComunicacao of
-    tcTexto            : EnviarComoTexto;
-    tcStream           : EnviarComoStringStream;
-    tcCompressedStream : EnviarComoCompressedStream;
-    tcChar             : EnviarComoChar;
+    ctText             : EnviarComoTexto;
+    ctStream           : EnviarComoStringStream;
+    ctCompressedStream : EnviarComoCompressedStream;
+    ctChar             : EnviarComoChar;
   end;
 end;
 
@@ -1362,12 +1362,12 @@ function TLRDataFlashConexaoCustom.InternalReceber(const AHandler: TIdIOHandler)
 
 begin
   case FTipoComunicacao of
-    tcTexto             : ReceberComoTexto;
-    tcStream            : ReceberComoStringStream;
-    tcCompressedStream  : ReceberComoCompressedStream;
-    tcChar              : ReceberComoChar;
+    ctText              : ReceberComoTexto;
+    ctStream            : ReceberComoStringStream;
+    ctCompressedStream  : ReceberComoCompressedStream;
+    ctChar              : ReceberComoChar;
   end;
-  NovoLog(tlsRecebimento, Result, EmptyStr);
+  NovoLog(slOnReceive, Result, EmptyStr);
 end;
 
 function TLRDataFlashConexaoCustom.isComandoDesejado(const pComando,
@@ -1413,7 +1413,7 @@ begin
     FOnException(Self, AException, lExpandir);
 end;
 
-procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TLRDataFlashTipoLogService;
+procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TRpDataFlashServiceLog;
   const ALog: string; const AContext: TIdContext);
 var
   lIP: string;
@@ -1424,7 +1424,7 @@ begin
   NovoLog(ATipoLog, ALog, lIP);
 end;
 
-procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TLRDataFlashTipoLogService;
+procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TRpDataFlashServiceLog;
   const ALog: string; const AIP : string);
 var
   lLog: TLRDataFlashSyncLogEvent;
@@ -1480,7 +1480,7 @@ end;
 
 procedure TLRDataFlashConexaoCustom.OnFileTransferLog(const ALogMessage: string);
 begin
-  NovoLog(tlsStatus, ALogMessage, nil);
+  NovoLog(slOnStatus, ALogMessage, nil);
 end;
 
 function TLRDataFlashConexaoCustom.PutFile(const AArquivo: IFileProxy): Boolean;
@@ -1869,10 +1869,10 @@ var
       PrepararExecucaoComando;
       ASaida := lComando.Executar(lParametros, AItem.Executor);
       lComando.SetConexaoItem( nil );
-      NovoLog(tlsComando, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' executado !', AContext);
+      NovoLog(slOnCommand, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' executado !', AContext);
     except on E:Exception do
       begin
-        NovoLog(tlsErro, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' Erro -> ' + E.Message, AContext);
+        NovoLog(slOnError, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' Erro -> ' + E.Message, AContext);
         AItem.Executor.DisconnectDataComponent;
         raise;
       end;
@@ -1895,10 +1895,10 @@ var
 
       ASaida := lMsg;
 
-      NovoLog(tlsPonte, lMsg, AContext);
+      NovoLog(slOnBridge, lMsg, AContext);
     end
     else
-      NovoLog(tlsPonte, 'Executado como Ponte inválida ', AContext);
+      NovoLog(slOnBridge, 'Executado como Ponte inválida ', AContext);
   end;
 
   procedure ExecutarPonteBemSucedida;
@@ -1910,10 +1910,10 @@ var
     if not lContinuar then
     begin
       ASaida := 'Ponte Online com execução bem sucedida, mas execucao local falhou!';
-      NovoLog(tlsPonte, 'Ponte Online com execução bem sucedida, mas execucao local falhou!', AContext);
+      NovoLog(slOnBridge, 'Ponte Online com execução bem sucedida, mas execucao local falhou!', AContext);
     end
     else
-      NovoLog(tlsPonte, 'Executado como Ponte bem-sucedida ', AContext);
+      NovoLog(slOnBridge, 'Executado como Ponte bem-sucedida ', AContext);
   end;
 
   function DoValidarAntesComunicar : Boolean;
@@ -1943,7 +1943,7 @@ var
           lComando.DoCarregar(loReceive, lParametros);
           ASaida := lParametros.Serializar;
 
-          NovoLog(tlsPonte, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
+          NovoLog(slOnBridge, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
             [lComando.Comando, lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]), AContext);
           lExecutado := lComando.StatusRetorno;
         end;
@@ -2220,7 +2220,7 @@ begin
     lFileName := FFileTransferList.Values[lFileID];
     if FileExists(lFileName) then
     begin
-      NovoLog(tlsStatus, 'FTP: Remover arquivo ID[' + lFileID + '] nome[' + lFileName + ']', ASender);
+      NovoLog(slOnStatus, 'FTP: Remover arquivo ID[' + lFileID + '] nome[' + lFileName + ']', ASender);
       DeleteFile(PChar(lFileName));
     end;
   end;
@@ -2230,7 +2230,7 @@ begin
     lFileName := FFileTransfer.TempDir + lFileID + '.tmp';
     if FileExists(lFileName) then
     begin
-      NovoLog(tlsStatus, 'FTP: Remover arquivo temp ID[' + lFileID + '] nome[' + lFileName + ']', ASender);
+      NovoLog(slOnStatus, 'FTP: Remover arquivo temp ID[' + lFileID + '] nome[' + lFileName + ']', ASender);
       DeleteFile(PChar(lFileName));
     end;
   end;
@@ -2239,7 +2239,7 @@ end;
 procedure TLRDataFlashConexaoServer.OnFTPServerException(AContext: TIdContext;
   AException: Exception);
 begin
-  NovoLog(tlsErro, 'Erro no servidor FTP. ' + AException.Message, AContext);
+  NovoLog(slOnError, 'Erro no servidor FTP. ' + AException.Message, AContext);
 end;
 
 procedure TLRDataFlashConexaoServer.OnFTPServerRetrieveFile(
@@ -2260,13 +2260,13 @@ begin
     FreeAndNil(lList);
   end;
 
-  NovoLog(tlsStatus, 'FTP: Arquivo solicitado ID[' + lID + ']', ASender);
+  NovoLog(slOnStatus, 'FTP: Arquivo solicitado ID[' + lID + ']', ASender);
 
   lFile := TRpFileProxy.Create;
   try
     lFile.Get(Self, lID);
 
-    NovoLog(tlsStatus, 'FTP: Tamanho do arquivo solicitado ID [' + lID + '] ' + lFile.FileSizeFmt, ASender);
+    NovoLog(slOnStatus, 'FTP: Tamanho do arquivo solicitado ID [' + lID + '] ' + lFile.FileSizeFmt, ASender);
 
     if lFile.FileName = EmptyStr then
       lFile.FileName := FileTransfer.TempDir + lFile.FileID + '.tmp';
@@ -2277,7 +2277,7 @@ begin
     VStream.CopyFrom(lFile.FileStream, lFile.FileStream.Size);
 //    lFile.Remove;
 
-    NovoLog(tlsStatus, 'FTP: Arquivo ID [' + lID + '] ' + lFile.FileName + ' removido ', ASender);
+    NovoLog(slOnStatus, 'FTP: Arquivo ID [' + lID + '] ' + lFile.FileName + ' removido ', ASender);
 
   finally
     if Assigned(VStream) then
@@ -2303,7 +2303,7 @@ begin
     ftpAborted:      lMens := 'Aborted';
   end;
 
-  NovoLog(tlsStatus, 'Status FTP ' + lMens + ' ' + AStatusText, '');
+  NovoLog(slOnStatus, 'Status FTP ' + lMens + ' ' + AStatusText, '');
 end;
 
 procedure TLRDataFlashConexaoServer.OnFTPServerStoreFile(
@@ -2316,7 +2316,7 @@ begin
   lFileID := StringReplace(AFileName, ASender.CurrentDir, '', [rfIgnoreCase]);
   lFileID := StringReplace(lFileID, '/', '', []);
 
-  NovoLog(tlsStatus, 'FTP: Receber arquivo ID[' + lFileID + ']', ASender);
+  NovoLog(slOnStatus, 'FTP: Receber arquivo ID[' + lFileID + ']', ASender);
 
   lFileName := FFileTransfer.TempDir + lFileID + '.tmp';
 
@@ -2475,12 +2475,12 @@ begin
 
     NotificarConexaoCliente(lConexao, FOnConexaoCliente);
 
-    NovoLog(tlsConexao, 'Cliente Conectou: ' + AContext.Binding.PeerIP, AContext);
+    NovoLog(slOnConnection, 'Cliente Conectou: ' + AContext.Binding.PeerIP, AContext);
   end
   else
   begin
     AContext.Connection.Disconnect;
-    NovoLog(tlsDesconexao, 'Desconectando Cliente: ' + AContext.Binding.PeerIP, AContext);
+    NovoLog(slOnDisconnection, 'Desconectando Cliente: ' + AContext.Binding.PeerIP, AContext);
   end;
 end;
 
@@ -2491,7 +2491,7 @@ begin
   if (AContext.Data <> nil) then
   begin
     lItemConexao := TLRDataFlashConexaoItem(AContext.Data);
-    NovoLog(tlsDesconexao, 'Desconectando Cliente ' + AContext.Binding.PeerIP, AContext);
+    NovoLog(slOnDisconnection, 'Desconectando Cliente ' + AContext.Binding.PeerIP, AContext);
     Dec(FNumeroConectados);
     if (not FDesconectandoServer) and (Assigned(FOnDesconexaoCliente)) then
       NotificarConexaoCliente(lItemConexao, FOnDesconexaoCliente);
@@ -2513,7 +2513,7 @@ begin
       on E:EIdNotConnected do
       begin
         // ocorre quando o servidor é fechado com clientes conectador
-        NovoLog(tlsErro, 'Uma conexão foi encerrada. ' + E.Message, AContext);
+        NovoLog(slOnError, 'Uma conexão foi encerrada. ' + E.Message, AContext);
       end;
       on E:Exception do
       begin
@@ -3097,13 +3097,13 @@ begin
   if Assigned(FAoErroEnvio) then
     FAoErroEnvio(Self, AProtocolo, AException);
 
-  NovoLog(tlsErro, AException.Message, nil);
+  NovoLog(slOnError, AException.Message, nil);
 end;
 
 procedure TLRDataFlashConexaoClienteCustom.OnFTPClientStatus(ASender: TObject;
   const AStatus: TIdStatus; const AStatusText: string);
 begin
-  NovoLog(tlsStatus, IntToStr(Integer(AStatus)) + ' - ' + AStatusText, '');
+  NovoLog(slOnStatus, IntToStr(Integer(AStatus)) + ' - ' + AStatusText, '');
 end;
 
 function TLRDataFlashConexaoClienteCustom.PodeConectar: Boolean;
@@ -3718,7 +3718,7 @@ begin
   inherited;
   Porta := 9088;
   FConfigurarConexao := False;
-  FTipoComunicacao := tcTexto;
+  FTipoComunicacao := ctText;
 end;
 
 function TLRDataFlashConexaoREST.DoComunicarComThred(
@@ -3859,13 +3859,13 @@ procedure TLRDataFlashConexaoREST.InternalEnviar(const AHandler: TIdHTTP;
   end;
 
 begin
-  NovoLog(tlsEnvio, AValor, '');
+  NovoLog(slOnSend, AValor, '');
 
   case FTipoComunicacao of
-    tcTexto,
-    tcChar : EnviarComoTexto;
-    tcStream,
-    tcCompressedStream : raise ELRDataFlashComunicacao.Create('Conexões REST não permitem envios de stream.');
+    ctText,
+    ctChar : EnviarComoTexto;
+    ctStream,
+    ctCompressedStream : raise ELRDataFlashComunicacao.Create('Conexões REST não permitem envios de stream.');
   end;
 end;
 
