@@ -25,7 +25,7 @@ type
     FQuebras : TStringList;
     FGUID: string;
     FUltimaParteQuebra : Integer;
-    FOnStatus: TLRDataFlashOnStatus;
+    FOnStatus: TRpDataFlashOnStatus;
     function IndexExiste(const pIndex : Integer) : Boolean;
 
     function ValorMarcador(const pMarcador, pValor : string) : Integer;
@@ -85,7 +85,7 @@ type
     property Continua : Boolean read GetContinua;
     property Proxima : Boolean read GetProxima;
     property Atual : string read GetAtual;
-    property OnStatus : TLRDataFlashOnStatus read FOnStatus write FOnStatus;
+    property OnStatus : TRpDataFlashOnStatus read FOnStatus write FOnStatus;
 
     class function GuidValor(const pValor : string) : TGuid;
   end;

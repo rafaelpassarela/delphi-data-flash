@@ -206,7 +206,7 @@ type
     FTipoComunicacao: TRpDataFlashCommunicationType;
     FTipoMensagem: TRpDataFlashMessageType;
     FOnTimeOutCheck: TLRDataFlashOnTimeOutCheck;
-    FOnStatus: TLRDataFlashOnStatus;
+    FOnStatus: TRpDataFlashOnStatus;
     FConexaoTCPIP: TLRDataFlashConfigConexaoTCPIP;
     FConexaoREST: TLRDataFlashConfigConexaoREST;
     FFileTransfer: TLRDataFlashFileTransfer;
@@ -290,7 +290,7 @@ type
 
     property OnNovoLog : TLRDataFlashOnNovoLog read FOnNovoLog write FOnNovoLog;
     property OnException : TLRDataFlashOnException read FOnException write FOnException;
-    property OnStatus : TLRDataFlashOnStatus read FOnStatus write FOnStatus;
+    property OnStatus : TRpDataFlashOnStatus read FOnStatus write FOnStatus;
     property OnTimeOutCheck : TLRDataFlashOnTimeOutCheck read FOnTimeOutCheck write FOnTimeOutCheck;
   end;
 
@@ -319,7 +319,7 @@ type
     FComandosSemAutenticacao: string;
     FPrefixoBaseComandos: string;
     FNumeroConectados: Integer;
-    FOnObjectRequest: TLRDataFlashOnObjectRequest;
+    FOnObjectRequest: TRpDataFlashOnObjectRequest;
     function EnviarCallBack(const AContext: TIdContext; const AMensagem : string) : Boolean;
     procedure NotificarConexaoCliente(const AConexaoItem : TLRDataFlashConexaoItem;
       const AEvento : TLRDataFlashOnConexaoCliente);
@@ -411,7 +411,7 @@ type
     property OnProcessamentoManual : TLRDataFlashOnProcessamentoManual read FOnProcessamentoManual write FOnProcessamentoManual;
     property OnAutenticarCliente : TLRDataFlashOnAutenticarCliente read FOnAutenticarCliente write FOnAutenticarCliente;
     property OnBeforeExecuteCommand : TLRDataFlashOnBeforeExecuteCommand read FOnBeforeExecuteCommand write FOnBeforeExecuteCommand;
-    property OnObjectRequest : TLRDataFlashOnObjectRequest read FOnObjectRequest write FOnObjectRequest;
+    property OnObjectRequest : TRpDataFlashOnObjectRequest read FOnObjectRequest write FOnObjectRequest;
 
     property Ponte : TLRDataFlashConexaoClienteCustom read FPonte write SetPonte;
     property Servidor : string read GetServidor;
@@ -430,9 +430,9 @@ type
   private
     FThreadConexao: TThreadConexao;
     FConnectionHelper: TLRDataFlashConnectionHelperCustom;
-    FAoDesconectar: TLRDataFlashOnConexaoNoServidor;
-    FOnConnect: TLRDataFlashOnConexaoNoServidor;
-    FAoSemServico: TLRDataFlashOnSemServico;
+    FAoDesconectar: TRpDataFlashOnConnectOnServer;
+    FOnConnect: TRpDataFlashOnConnectOnServer;
+    FAoSemServico: TRpDataFlashOnNoService;
     FConfigurarConexao: Boolean;
     FAoErroEnvio: TLRDataFlashOnErroEnvio;
     FTimeOutLeitura: Integer;
@@ -446,8 +446,8 @@ type
     FExecutorCallBackClass: string;
     FExecutorCallBackInterfaced: ILRDataFlashExecutorCallBack;
 
-    FOnAfterConnect: TLRDataFlashOnConexaoNoServidor;
-    FOnBeforeConnect: TLRDataFlashOnConexaoNoServidor;
+    FOnAfterConnect: TRpDataFlashOnConnectOnServer;
+    FOnBeforeConnect: TRpDataFlashOnConnectOnServer;
     FConvertLocalHostToIP: Boolean;
     function Enviar(const AIdentificador, AMensagem, ANomeComando : string) : string; virtual;
     function PodeConectar : Boolean;
@@ -512,12 +512,12 @@ type
     property Password : string read FPassword write FPassword;
     property ConvertLocalHostToIP : Boolean read FConvertLocalHostToIP write FConvertLocalHostToIP default False;
 
-    property OnBeforeConnect : TLRDataFlashOnConexaoNoServidor read FOnBeforeConnect write FOnBeforeConnect;
-    property OnConnect : TLRDataFlashOnConexaoNoServidor read FOnConnect write FOnConnect;
-    property OnAfterConnect : TLRDataFlashOnConexaoNoServidor read FOnAfterConnect write FOnAfterConnect;
+    property OnBeforeConnect : TRpDataFlashOnConnectOnServer read FOnBeforeConnect write FOnBeforeConnect;
+    property OnConnect : TRpDataFlashOnConnectOnServer read FOnConnect write FOnConnect;
+    property OnAfterConnect : TRpDataFlashOnConnectOnServer read FOnAfterConnect write FOnAfterConnect;
 
-    property AoDesconectar : TLRDataFlashOnConexaoNoServidor read FAoDesconectar write FAoDesconectar;
-    property AoSemServico : TLRDataFlashOnSemServico read FAoSemServico write FAoSemServico;
+    property AoDesconectar : TRpDataFlashOnConnectOnServer read FAoDesconectar write FAoDesconectar;
+    property AoSemServico : TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
     property AoErroEnvio : TLRDataFlashOnErroEnvio read FAoErroEnvio write FAoErroEnvio;
   end;
 
@@ -660,7 +660,7 @@ type
     FClient: TLRDataFlashConexaoClienteCustom;
     FLastError: string;
     FStatusProcessamento: TRpDataFlashProcessingStatus;
-    FEventoStatus : TLRDataFlashOnStatus;
+    FEventoStatus : TRpDataFlashOnStatus;
     FSharedClient : Boolean;
     FBusyCallback : TLRDataFlashBusyCallback;
     procedure ProcessaErroComunicacao(const pMessage : string);
@@ -670,7 +670,7 @@ type
   public
     constructor Create(ATcpClient: TLRDataFlashConexaoClienteCustom;
       ABusyCallback : TLRDataFlashBusyCallback; const ASharedClient : Boolean = False);
-    procedure SetEvents(const AEventoStatus : TLRDataFlashOnStatus);
+    procedure SetEvents(const AEventoStatus : TRpDataFlashOnStatus);
     function GetLastError : string;
     function GetStatusProcessamento : TRpDataFlashProcessingStatus;
     property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
@@ -3581,7 +3581,7 @@ begin
   end;
 end;
 
-procedure TCustomProxyClient.SetEvents(const AEventoStatus: TLRDataFlashOnStatus);
+procedure TCustomProxyClient.SetEvents(const AEventoStatus: TRpDataFlashOnStatus);
 begin
   FEventoStatus := AEventoStatus;
   if (FClient <> nil) and (not FSharedClient) then

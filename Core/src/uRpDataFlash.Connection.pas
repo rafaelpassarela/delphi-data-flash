@@ -15,11 +15,11 @@ type
   private
     class var _LocalHostIP : string;
   private
-    FDoConectar: TLRDataFlashDoConectarEvent;
-    FDoDesconectar: TLRDataFlashDoConectarEvent;
-    FAoConectar: TLRDataFlashOnConexaoNoServidor;
-    FAoSemServico: TLRDataFlashOnSemServico;
-    FNovaExcecao: TLRDataFlashExeptionHandler;
+    FDoConectar: TRpDataFlashOnConnectEvent;
+    FDoDesconectar: TRpDataFlashOnConnectEvent;
+    FAoConectar: TRpDataFlashOnConnectOnServer;
+    FAoSemServico: TRpDataFlashOnNoService;
+    FNovaExcecao: TRpDataFlashOnExceptionHandler;
     FConector: TIdTCPClientCustom;
     FOwner: TComponent;
     FServidor: string;
@@ -46,11 +46,11 @@ type
 
     property Conector : TIdTCPClientCustom read GetConector;
     property IsConectado : Boolean read GetIsConectado;
-    property AoConectar: TLRDataFlashOnConexaoNoServidor read FAoConectar write FAoConectar;
-    property AoSemServico: TLRDataFlashOnSemServico read FAoSemServico write FAoSemServico;
-    property DoConectar: TLRDataFlashDoConectarEvent read FDoConectar write FDoConectar;
-    property DoDesconectar : TLRDataFlashDoConectarEvent read FDoDesconectar write FDoDesconectar;
-    property NovaExcecao: TLRDataFlashExeptionHandler read FNovaExcecao write FNovaExcecao;
+    property AoConectar: TRpDataFlashOnConnectOnServer read FAoConectar write FAoConectar;
+    property AoSemServico: TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
+    property DoConectar: TRpDataFlashOnConnectEvent read FDoConectar write FDoConectar;
+    property DoDesconectar : TRpDataFlashOnConnectEvent read FDoDesconectar write FDoDesconectar;
+    property NovaExcecao: TRpDataFlashOnExceptionHandler read FNovaExcecao write FNovaExcecao;
     property URL : string read GetURL;
   end;
 

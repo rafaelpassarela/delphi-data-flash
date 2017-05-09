@@ -83,20 +83,22 @@ type
   TRpDataFlashServiceLog = (slOnConnection, slOnDisconnection, slOnSend, slOnReceive,
     slOnError, slOnStatus, slOnBridge, slOnCommand, slOnApplyRule, slOnFile, slOnSync, slOnSyncXml);
 
+  TRpDataFlashOnConnectEvent = procedure of object;
+  TRpDataFlashOnExceptionHandler = procedure(const E: Exception) of object;
+  TRpDataFlashOnNoService = procedure(Sender : TObject; var AServer: string; var APort : Integer;
+    const AException : Exception; var AReConnect : Boolean) of object;
+  TRpDataFlashOnConnectOnServer = procedure(Sender : TObject; const AServer: string;
+    const APort : Integer) of object;
+  TRpDataFlashOnExecuteMessage = function (Sender : TObject) : Boolean;
+  TRpDataFlashOnStatus = procedure(Sender : TObject; const AStatus: TRpDataFlashStatusType;
+    const AProcTotal, AProcCurrent : Integer; const AStatusStr : string) of object;
+  TRpDataFlashOnObjectRequest = procedure(const AAction : TRpDataFlashHelperAction;
+    const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
 
-  TLRDataFlashDoConectarEvent = procedure of object;
-  TLRDataFlashExeptionHandler = procedure(const E: Exception) of object;
-  TLRDataFlashOnConexaoNoServidor = procedure(Sender : TObject; const AServidor : string; const APorta : Integer) of object;
-  TLRDataFlashOnSemServico = procedure(Sender : TObject; var AServidor : string; var APorta : Integer;
-    const AException : Exception; var AReconectar : Boolean) of object;
-  TLRDataFlashOnExecutarMensagem = function (Sender : TObject) : Boolean;
-  TLRDataFlashOnStatus = procedure(Sender : TObject; const ASituacao : TRpDataFlashStatusType;
-    const AProcessamentoTotal, AProcessamentoAtual : Integer; const AStatusStr : string) of object;
   TLRDataFlashExecucaoInternaComando = function : Boolean of object;
   TLRDataFlashExecucaoExternaComando = function : string of object;
   TLRDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
-  TLRDataFlashOnObjectRequest = procedure(const AOperacao : TRpDataFlashHelperAction;
-    const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
+
 
   // Exceptions
   ELRDataFlashException = class(Exception);

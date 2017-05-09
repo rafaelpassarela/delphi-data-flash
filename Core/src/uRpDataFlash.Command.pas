@@ -428,11 +428,11 @@ type
 
   TLRDataFlashComandoTexto = class(TRpDataFlashCommand)
   private
-    FOnExecutarMensagem: TLRDataFlashOnExecutarMensagem;
+    FOnExecutarMensagem: TRpDataFlashOnExecuteMessage;
   protected
     function DoExecutar : Boolean; override;
   public
-    property OnExecutarMensagem : TLRDataFlashOnExecutarMensagem read FOnExecutarMensagem write FOnExecutarMensagem;
+    property OnExecutarMensagem : TRpDataFlashOnExecuteMessage read FOnExecutarMensagem write FOnExecutarMensagem;
   end;
 
   IFileProxy = interface
