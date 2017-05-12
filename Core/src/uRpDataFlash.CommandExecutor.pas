@@ -140,13 +140,13 @@ begin
     if lContinue then
     begin
       if not Assigned(FConexaoCliente) then
-        raise ELRDataFlashConexaoInvalida.Create('Conexão cliente não foi configurada.');
+        raise ERpDataFlashInvalidConnection.Create('Conexão cliente não foi configurada.');
 
       if FVerificarConexao and (not FConexaoCliente.Conectado) then
-        raise ELRDataFlashConexaoInvalida.Create('A conexão ainda não foi estabelecida.');
+        raise ERpDataFlashInvalidConnection.Create('A conexão ainda não foi estabelecida.');
 
       if Trim(FComando) = EmptyStr then
-        raise ELRDataFlashConexaoInvalida.Create('O comando não foi informado.');
+        raise ERpDataFlashInvalidConnection.Create('O comando não foi informado.');
 
       Result := DoInternalExecute;
 

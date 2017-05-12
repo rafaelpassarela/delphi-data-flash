@@ -662,14 +662,14 @@ type
     FStatusProcessamento: TRpDataFlashProcessingStatus;
     FEventoStatus : TRpDataFlashOnStatus;
     FSharedClient : Boolean;
-    FBusyCallback : TLRDataFlashBusyCallback;
+    FBusyCallback : TRpDataFlashBusyCallback;
     procedure ProcessaErroComunicacao(const pMessage : string);
     procedure DoAoProcessarErroComunicacao; virtual;
     procedure DoComunicar(const AComando : TLRDataFlashComandoEnvio);
     function DoEnviar(const ANomeComando: string; const AParams: TRpDataFlashCommandParameters) : Boolean;
   public
     constructor Create(ATcpClient: TLRDataFlashConexaoClienteCustom;
-      ABusyCallback : TLRDataFlashBusyCallback; const ASharedClient : Boolean = False);
+      ABusyCallback : TRpDataFlashBusyCallback; const ASharedClient : Boolean = False);
     procedure SetEvents(const AEventoStatus : TRpDataFlashOnStatus);
     function GetLastError : string;
     function GetStatusProcessamento : TRpDataFlashProcessingStatus;
@@ -1244,7 +1244,7 @@ begin
       Delete(lNomeClasseComando, 1, 1);
 
       if lNomeClasseComando = '' then
-        raise ELRDataFlashException.Create('Um comando deve ser passado. Para obter a lista de comandos utilizar /PublicList');
+        raise ERpDataFlashException.Create('Um comando deve ser passado. Para obter a lista de comandos utilizar /PublicList');
 
       //if TLRDataFlashComando.CarregarComando(lNomeClasseComando, lComando, lLifeCycle, nil, nil) then
       if TentaCarregarComando then
@@ -1262,7 +1262,7 @@ begin
         Result := lComando.GetParametros.Serializar;
       end
       else
-        raise ELRDataFlashException.Create('Comando não suportado: ' + sLineBreak + 'Comando: ''' + lNomeClasseComando + '''');
+        raise ERpDataFlashException.Create('Comando não suportado: ' + sLineBreak + 'Comando: ''' + lNomeClasseComando + '''');
     end;
   finally
     FreeAndNil(lComandos);
@@ -1578,7 +1578,7 @@ var
   lException: string;
 begin
   if (AProtocolo.IsErro) and (TentaGerarException(AProtocolo.Mensagem, lException)) then
-    raise ELRDataFlashException.Create(lException);
+    raise ERpDataFlashException.Create(lException);
 end;
 
 { TLRDataFlashConexaoServer }
@@ -1712,7 +1712,7 @@ begin
     begin
       FConectorTCP := TIdTCPServer.Create(Self);
       if FConexaoTCPIP.Port = 0 then
-        raise ELRDataFlashFalhaConexao.Create('Porta TCP não informada!');
+        raise ERpDataFlashConnectionError.Create('Porta TCP não informada!');
 
       Conector.OnExecute    := AoExecutarNoServidor;
       Conector.OnConnect    := AoConectarCliente;
@@ -1723,14 +1723,14 @@ begin
         Conector.Active := True;
 
       if not Conector.Active then
-        raise ELRDataFlashFalhaConexao.Create('Não foi possível iniciar a conexão do servidor TCP!');
+        raise ERpDataFlashConnectionError.Create('Não foi possível iniciar a conexão do servidor TCP!');
     end;
 
     if FConexaoREST.Enabled then
     begin
       FConectorREST := TIdHTTPServer.Create(Self);
       if FConexaoREST.Port = 0 then
-        raise ELRDataFlashFalhaConexao.Create('Porta REST não informada!');
+        raise ERpDataFlashConnectionError.Create('Porta REST não informada!');
 
       FConectorREST.OnConnect := AoConectarCliente;
       FConectorREST.OnDisconnect := AoDesconectarCliente;
@@ -1742,7 +1742,7 @@ begin
         FConectorREST.Active := True;
 
       if not FConectorREST.Active then
-        raise ELRDataFlashFalhaConexao.Create('Não foi possível iniciar a conexão do servidor TCP!');
+        raise ERpDataFlashConnectionError.Create('Não foi possível iniciar a conexão do servidor TCP!');
     end;
 
     if (FFileTransfer.Port > 0) and FFileTransfer.Enabled then
@@ -1929,7 +1929,7 @@ var
     lExecutado := False;
 
     if lTcpClient = nil then
-      raise ELRDataFlashException.Create('Cliente da Ponte = nil');
+      raise ERpDataFlashException.Create('Cliente da Ponte = nil');
 
     if lStatusProcessamento = psBridgeOnLine then
     begin
@@ -1979,7 +1979,7 @@ begin
   lTcpClient := nil;
   try
     if AProtocolo.Identificador <> TAG_COMMAND then
-      raise ELRDataFlashException.Create('Identificador não é um comando: ' + sLineBreak +
+      raise ERpDataFlashException.Create('Identificador não é um comando: ' + sLineBreak +
         'Identificador: ' + AProtocolo.Identificador);
 
     lCarregado := False;
@@ -2007,7 +2007,7 @@ begin
       lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocolo.Mensagem, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
-      raise ELRDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Comando]);
+      raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Comando]);
 
     lNomeComando := lComando.Comando;
     lComando.RequestInfo := ARequestInfo;
@@ -2015,7 +2015,7 @@ begin
 
     // se tem rotina de autenticacao e o comando recebido nao é para autenticar, aborta o processo
     if Assigned(FOnAutenticarCliente) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParametros) then
-      raise ELRDataFlashUsuarioNaoAutenticado.Create('Este servidor requer autenticação para execução de comandos.');
+      raise ERpDataFlashUserNotFound.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
     if lComando.TipoProcessamento = prtLocal then
@@ -2380,7 +2380,7 @@ begin
               FOnBeforeExecuteCommand(Self, lItem, lContinue, lMessage);
 
             if not lContinue then
-              raise ELRDataFlashBeforeExecuteCommandError.Create(lMessage);
+              raise ERpDataFlashBeforeExecuteCommandError.Create(lMessage);
 
             ExecutarComando(lItem, AContext, lProtocolo, lResultado, lNomeArquivo, ARequestInfo, AResponseInfo);
 
@@ -2740,10 +2740,10 @@ begin
       begin
         FreeAndNil(ACliente);
         if Pos('Socket Error # 10061', E.Message) > 0 then
-          raise ELRDataFlashFTPError.CreateFmt('Não foi possível estabelecer a conexão FTP com %s:%d. %s',
+          raise ERpDataFlashFTPError.CreateFmt('Não foi possível estabelecer a conexão FTP com %s:%d. %s',
             [ACliente.Host, ACliente.Port, E.Message])
         else
-          raise ELRDataFlashFTPError.Create('Erro de FTP. ' + E.Message);
+          raise ERpDataFlashFTPError.Create('Erro de FTP. ' + E.Message);
       end;
     end;
   end;
@@ -2925,7 +2925,7 @@ begin
         until (lProtocolo.Identificador <> TAG_CALLBACK);
 
         if AIdentificador <> lProtocolo.Identificador then
-          raise ELRDataFlashEnvio.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
+          raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
 
         Result := lProtocolo.Mensagem;
       finally
@@ -3487,7 +3487,7 @@ end;
 { TCustomProxyClient }
 
 constructor TCustomProxyClient.Create(ATcpClient: TLRDataFlashConexaoClienteCustom;
-  ABusyCallback : TLRDataFlashBusyCallback; const ASharedClient : Boolean);
+  ABusyCallback : TRpDataFlashBusyCallback; const ASharedClient : Boolean);
 begin
   FSharedClient := ASharedClient;
   FClient := ATcpClient;
@@ -3808,7 +3808,7 @@ begin
 //    until (lProtocolo.Identificador <> TAG_CALLBACK);
 
       if AIdentificador <> lProtocolo.Identificador then
-        raise ELRDataFlashEnvio.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
+        raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
 
       Result := lProtocolo.Mensagem;
     finally
@@ -3865,7 +3865,7 @@ begin
     ctText,
     ctChar : EnviarComoTexto;
     ctStream,
-    ctCompressedStream : raise ELRDataFlashComunicacao.Create('Conexões REST não permitem envios de stream.');
+    ctCompressedStream : raise ERpDataFlashException.Create('Conexões REST não permitem envios de stream.');
   end;
 end;
 

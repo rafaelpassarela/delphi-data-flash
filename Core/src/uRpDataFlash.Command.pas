@@ -1059,7 +1059,7 @@ begin
   lParametro := PorNome(ANome, ATipo);
 
   if lParametro = nil then
-    raise ELRDataFlashParametroNaoEncontrado.Create('Parâmetro ''' + ANome + ''' não encontrado!');
+    raise ERpDataFlashParamNotFound.Create('Parâmetro ''' + ANome + ''' não encontrado!');
 
   Result := lParametro;
 end;

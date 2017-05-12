@@ -94,30 +94,29 @@ type
     const AProcTotal, AProcCurrent : Integer; const AStatusStr : string) of object;
   TRpDataFlashOnObjectRequest = procedure(const AAction : TRpDataFlashHelperAction;
     const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
-
-  TLRDataFlashExecucaoInternaComando = function : Boolean of object;
-  TLRDataFlashExecucaoExternaComando = function : string of object;
-  TLRDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
-
+  TRpDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
+//  TRpDataFlashInternalCommandExecution = function : Boolean of object;
+//  TRpDataFlashExternalCommandExecution = function : string of object;
 
   // Exceptions
-  ELRDataFlashException = class(Exception);
-  ELRDataFlashComunicacao = class(ELRDataFlashException);
-  ELRDataFlashRecebimento = class(ELRDataFlashException);
-  ELRDataFlashEnvio = class(ELRDataFlashException);
-  ELRDataFlashExceptionClass = class of ELRDataFlashException;
-  ELRDataFlashFalhaConexao = class(ELRDataFlashException);
-  ELRDataFlashMensagemInvalida = class(ELRDataFlashException);
-  ELRDataFlashMensagemDivergente = class(ELRDataFlashException);
-  ELRDataFlashSemPermissao = class(ELRDataFlashException);
-  ELRDataFlashParametroNaoEncontrado = class(ELRDataFlashException);
-  ELRDataFlashConexaoInvalida = class(ELRDataFlashException);
-  ELRDataFlashExecucao = class(ELRDataFlashException);
-  ELRDataFlashFalhaAutenticacao = class(ELRDataFlashException);
-  ELRDataFlashUsuarioNaoAutenticado = class(ELRDataFlashException);
-  ELRDataFlashBeforeExecuteCommandError = class(ELRDataFlashException);
-  ELRDataFlashFileTransferError = class(ELRDataFlashException);
-  ELRDataFlashFTPError = class(ELRDataFlashException);
+  ERpDataFlashException = class(Exception);
+  ERpDataFlashSending = class(ERpDataFlashException);
+  ERpDataFlashConnectionError = class(ERpDataFlashException);
+  ERpDataFlashParamNotFound = class(ERpDataFlashException);
+  ERpDataFlashInvalidConnection = class(ERpDataFlashException);
+  ERpDataFlashAuthError = class(ERpDataFlashException);
+  ERpDataFlashUserNotFound = class(ERpDataFlashException);
+  ERpDataFlashBeforeExecuteCommandError = class(ERpDataFlashException);
+  ERpDataFlashFTPError = class(ERpDataFlashException);
+//  ERpDataFlashFileTransferError = class(ERpDataFlashException);
+//  ERpDataFlashCommunication = class(ERpDataFlashException);
+//  ERpDataFlashReceive = class(ERpDataFlashException);
+//  ERpDataFlashInvalidMessage = class(ERpDataFlashException);
+//  ERpDataFlashDivergentMessage = class(ERpDataFlashException);
+//  ERpDataFlashNotAllowed = class(ERpDataFlashException);
+//  ERpDataFlashExecution = class(ERpDataFlashException);
+
+//  ERpDataFlashExceptionClass = class of ERpDataFlashException;
 
   TLRDataFlashClientInfo = packed record
     DisplayName: string;

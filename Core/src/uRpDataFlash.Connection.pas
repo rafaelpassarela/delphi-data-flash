@@ -88,7 +88,7 @@ begin
   Result := False;
   try
     if (FServidor = EmptyStr) or (FPorta <= 0) then
-      raise ELRDataFlashConexaoInvalida.Create('Servidor/Porta não foi informado.');
+      raise ERpDataFlashInvalidConnection.Create('Servidor/Porta não foi informado.');
 
     InternalConectar;
 
@@ -101,7 +101,7 @@ begin
       begin
         if lAutMessage = '' then
           lAutMessage := 'Usuário e Senha inválidos.';
-        raise ELRDataFlashFalhaAutenticacao.Create(lAutMessage);
+        raise ERpDataFlashAuthError.Create(lAutMessage);
       end;
     end
     else
@@ -110,10 +110,10 @@ begin
     if Assigned(FAoConectar) then
       FAoConectar(Self, FServidor, FPorta);
   except
-    on E: ELRDataFlashConexaoInvalida do
+    on E: ERpDataFlashInvalidConnection do
       raise;
 
-    on E: ELRDataFlashFalhaAutenticacao do
+    on E: ERpDataFlashAuthError do
     begin
       // pode estar conectado, neste caso desconecta o cliente
       NovaExcecao(E);
