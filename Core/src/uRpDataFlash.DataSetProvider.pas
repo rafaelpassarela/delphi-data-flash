@@ -3,10 +3,10 @@ unit uRpDataFlash.DataSetProvider;
 //{$I ..\..\Common\src\RpInc.inc}
 
 interface
- 
+
 uses
   uRpDataFlash.Command, Classes, uRpDataFlash.Components, SysUtils,
-  uRpDataFlash.Types;
+  uRpDataFlash.Types, uRpDataFlash.Utils;
 
 type
   TLRDataFlashCustomDataSetProvider = class;
@@ -357,7 +357,7 @@ end;
 
 procedure TLRDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
 begin
-  FGrupo := TLRDataFlashValidations.ValidarNome( Value );
+  FGrupo := TRpDataFlashValidations.NameValidation( Value );
   if FGrupo = EmptyStr then
     FGrupo := C_WITHOUT_GROUP;
 end;

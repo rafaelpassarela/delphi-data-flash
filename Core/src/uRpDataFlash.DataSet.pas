@@ -62,7 +62,7 @@ type
     FProviderClass: string;
     FPrepared: Boolean;
     FAutoCreateParams: Boolean;
-    FParams: TDataSetParams;
+    FParams: TRpDataSetParams;
     FOpenWhere: string;
     FFormatter: IFormaterMaskValues;
     FInfoQuery: Boolean;
@@ -76,8 +76,8 @@ type
     function GetDefaultFormatter : IFormaterMaskValues; //TFormatValuesDefault;
     function ValidServer : Boolean;
     procedure Prepare;
-    procedure SetParams(const Value: TDataSetParams);
-    function GetParams: TDataSetParams;
+    procedure SetParams(const Value: TRpDataSetParams);
+    function GetParams: TRpDataSetParams;
     procedure PrepararComandoEnvio;
   protected
     // override to init fields on designing
@@ -191,7 +191,7 @@ type
     property ProviderCustom : TLRDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
-    property Params : TDataSetParams read GetParams write SetParams;
+    property Params : TRpDataSetParams read GetParams write SetParams;
     property Formatter : IFormaterMaskValues read FFormatter write FFormatter;
   end;
 
@@ -225,7 +225,7 @@ begin
   inherited Create(AOwner);
   FLockData := False;
   AutoCreateParams := True;
-  FParams := TDataSetParams.Create(Self);
+  FParams := TRpDataSetParams.Create(Self);
   FOpenWhere := EmptyStr;
   FProviderCustom := TLRDataFlashCustomProvider.Create;
   FInternalProvider := TLRDataFlashCustomProvider.Create;
@@ -436,7 +436,7 @@ begin
     Result := TFormatValuesDefault.Create;
 end;
 
-function TLRDataFlashDataSet.GetParams: TDataSetParams;
+function TLRDataFlashDataSet.GetParams: TRpDataSetParams;
 begin
   FParams.AutoCreateParam := FAutoCreateParams;
   Result := FParams;
@@ -639,7 +639,7 @@ begin
         if Pos(':' + UpperCase(FParams[i].Name), UpperCase(lSqlTratado)) > 0 then
         begin
           // quando ja existir, troca somente o valor
-          lSqlTratado := TStringReplace.StringReplaceWholeWord(
+          lSqlTratado := TRpStrings.StringReplaceWholeWord(
             lSqlTratado, ':' + FParams[i].Name, lFormatter.SQLValue, [rfIgnoreCase, rfReplaceAll]);
         end
         else
@@ -689,7 +689,7 @@ var
 
       lValue := lFormatter.SQLValue;
 
-      Result := TStringReplace.StringReplaceWholeWord(
+      Result := TRpStrings.StringReplaceWholeWord(
         Result, ':' + pFieldName, lValue, [rfIgnoreCase, rfReplaceAll]);
     end;
   end;
@@ -754,7 +754,7 @@ begin
   DoRollback(True);
 end;
 
-procedure TLRDataFlashDataSet.SetParams(const Value: TDataSetParams);
+procedure TLRDataFlashDataSet.SetParams(const Value: TRpDataSetParams);
 begin
 //  FParams := Value;
   FParams.Assign(Value);

@@ -235,7 +235,7 @@ type
     FParametros : TObjectList;
     FComando: string;
     FSerializationFormat: TSerializationFormat;
-    FFileTransferSupport: ILRDataFlashFileTransferSupport;
+    FFileTransferSupport: IRpDataFlashFileTransferSupport;
     function GetParametro(const ANome: string; const ATipo : TRpDataFlashParamType): TLRDataFlashParametroComando;
     function GetParametroIdx(const Index: Integer) : TLRDataFlashParametroComando;
     function GetStatusProcessamento: TRpDataFlashProcessingStatus;
@@ -247,7 +247,7 @@ type
     function ParaJson : string;
     procedure DeJson(const AJsonPair : TJSONPair); virtual;
   public
-    constructor Create(const AFileTransferSupport : ILRDataFlashFileTransferSupport); virtual;
+    constructor Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport); virtual;
     destructor Destroy; override;
     procedure Assign(const Source: TRPDataFlashCommandParameters); reintroduce;
 
@@ -444,9 +444,9 @@ type
     function SaveToFile : Boolean; overload;   // salva em um arquivo
     function LoadFromFile(const AFileName : string) : Boolean; // carrega o conteudo de um arquivo
 
-    function Get(const ASupport: ILRDataFlashFileTransferSupport;
+    function Get(const ASupport: IRpDataFlashFileTransferSupport;
       const AFileID : string = ''): Boolean; // busca o arquivo no servidor
-    function Put(const ASupport : ILRDataFlashFileTransferSupport) : Boolean; // prepara o arquivo para envio
+    function Put(const ASupport : IRpDataFlashFileTransferSupport) : Boolean; // prepara o arquivo para envio
     function Remove : Boolean; // apaga o arquivo temporario
 
     function GetFileName : string;
@@ -468,7 +468,7 @@ type
     function GetStream : TStream;
     property Stream : TStream read GetStream;
 
-    function DecodeInfo(const AInfo : string) : TFtpFileInfo;
+    function DecodeInfo(const AInfo : string) : TRpDataFlashFtpFileInfo;
     procedure CopyInfo(const ASource : IFileProxy);
   end;
 
@@ -498,10 +498,10 @@ type
     function SaveToFile : Boolean; overload;
     function LoadFromFile(const AFileName : string) : Boolean;
 
-    function Get(const ASupport: ILRDataFlashFileTransferSupport; const AFileID : string = ''): Boolean;
-    function Put(const ASupport: ILRDataFlashFileTransferSupport): Boolean;
+    function Get(const ASupport: IRpDataFlashFileTransferSupport; const AFileID : string = ''): Boolean;
+    function Put(const ASupport: IRpDataFlashFileTransferSupport): Boolean;
     function Remove : Boolean;
-    function DecodeInfo(const AInfo : string) : TFtpFileInfo;
+    function DecodeInfo(const AInfo : string) : TRpDataFlashFtpFileInfo;
     procedure CopyInfo(const ASource : IFileProxy);
 
     property FileName : string read GetFileName write SetFileName;
@@ -968,7 +968,7 @@ begin
     raise Exception.Create('Nenhum parâmetro foi recebido.');
 end;
 
-constructor TRPDataFlashCommandParameters.Create(const AFileTransferSupport : ILRDataFlashFileTransferSupport);
+constructor TRPDataFlashCommandParameters.Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport);
 begin
   FParametros := TObjectList.Create;
   FFileTransferSupport := AFileTransferSupport;
@@ -2174,7 +2174,7 @@ begin
   FDeleteOnRecive := False;
 end;
 
-function TRpFileProxy.DecodeInfo(const AInfo: string): TFtpFileInfo;
+function TRpFileProxy.DecodeInfo(const AInfo: string): TRpDataFlashFtpFileInfo;
 begin
   Result.Decode(AInfo);
 end;
@@ -2198,7 +2198,7 @@ begin
   Result := TRpFileProxy.GetFileSizeFmt(FileSize);
 end;
 
-function TRpFileProxy.Get(const ASupport: ILRDataFlashFileTransferSupport;
+function TRpFileProxy.Get(const ASupport: IRpDataFlashFileTransferSupport;
   const AFileID: string): Boolean;
 var
   lFileStream : TFileStream;
@@ -2285,7 +2285,7 @@ begin
   Result := FFileStream;
 end;
 
-function TRpFileProxy.Put(const ASupport: ILRDataFlashFileTransferSupport): Boolean;
+function TRpFileProxy.Put(const ASupport: IRpDataFlashFileTransferSupport): Boolean;
 var
   lDestino : TFileStream;
   lNomeDestino : string;

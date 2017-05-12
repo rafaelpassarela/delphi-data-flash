@@ -10,7 +10,8 @@ uses
   IdExceptionCore, IdCustomHTTPServer, IdHTTPServer, IdFTPServer, IdComponent,
   IdHTTP, uRpJsonBase, IdTCPClient, IdURI, uRpSerialization, uRpDataFlash.Types,
   uRpDataFlash.Protocol, uRpDataFlash.Command, uRpDataFlash.ThreadConnection,
-  uRpDataFlash.Connection, uRpDataFlash.CommandController, uRpDataFlash.ConvertUtils;
+  uRpDataFlash.Connection, uRpDataFlash.CommandController, uRpDataFlash.ConvertUtils,
+  uRpDataFlash.Utils;
 
 type
   TLRDataFlashConexaoItem = class;
@@ -21,14 +22,13 @@ type
   TLRDataFlashComandControllerList = class;
   TLRDataFlashProviderControllerList = class;
 
-  TLRDataFlashOnNovoLog                   = procedure(Sender : TObject; ATipoLog : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TLRDataFlashClientInfo) of object;
+  TLRDataFlashOnNovoLog                   = procedure(Sender : TObject; ATipoLog : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TRpDataFlashClientInfo) of object;
   TLRDataFlashOnException                 = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
   TLRDataFlashOnAntesConexaoClienteEvento = procedure(Sender : TObject; var APermitir : Boolean) of object;
   TLRDataFlashOnConexaoCliente            = procedure(Sender : TObject; const AConexaoItem : TLRDataFlashConexaoItem) of object;
   TLRDataFlashOnRecebimentoGenerico       = function(Sender : TObject; const AMensagem : string; AItemConexao : TLRDataFlashConexaoItem) : string of object;
   TLRDataFlashRecebimento                 = function(Sender : TObject; AItemConexao : TLRDataFlashConexaoItem) : string of object;
-  TLRDataFlashOnErroEnvio                 = procedure(Sender : TObject; const AProtocolo : TProtocolo;
-    const AException : Exception) of object;
+  TLRDataFlashOnErroEnvio                 = procedure(Sender : TObject; const AProtocolo : TProtocolo; const AException : Exception) of object;
   TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AItemConexao : TLRDataFlashConexaoItem) of object;
   TLRDataFlashOnCriarExecutor             = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
   TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AItemConexao : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
@@ -91,7 +91,7 @@ type
     FEvento : TLRDataFlashOnNovoLog;
     FTipoLog : TRpDataFlashServiceLog;
     FLog : string;
-    FClientInfo : TLRDataFlashClientInfo;
+    FClientInfo : TRpDataFlashClientInfo;
   protected
     procedure DoNotify; override;
   end;
@@ -194,7 +194,7 @@ type
     property Enabled : Boolean read FEnabled write FEnabled default True;
   end;
 
-  TLRDataFlashConexaoCustom = class(TComponent, ILRDataFlashFileTransferSupport)
+  TLRDataFlashConexaoCustom = class(TComponent, IRpDataFlashFileTransferSupport)
   private
     FServidor : string;
     FInternalOnProcessar: TLRDataFlashRecebimento;
@@ -1059,7 +1059,7 @@ end;
 
 function TLRDataFlashConexaoCustom.GetNomeComputadorLocal: string;
 begin
-  Result := TLRDataFlashUtils.GetNomeComputadorLocal;
+  Result := TRpDataFlashUtils.GetLocalComputerName;
 end;
 
 procedure TLRDataFlashConexaoCustom.Inicializar;
@@ -2985,7 +2985,7 @@ function TLRDataFlashConexaoClienteCustom.GetFile(const AFileID: string;
   AArquivo: IFileProxy): Boolean;
 var
   lClienteFtp: TIdFTP;
-  lFileInfo: TFtpFileInfo;
+  lFileInfo: TRpDataFlashFtpFileInfo;
 begin
   Result := False;
   lFileInfo.Decode(AFileID);
@@ -3302,7 +3302,7 @@ end;
 
 procedure TLRDataFlashComandController.SetGrupo(const Value: string);
 begin
-  FGrupo := TLRDataFlashValidations.ValidarNome(Value);
+  FGrupo := TRpDataFlashValidations.NameValidation(Value);
   if FGrupo = EmptyStr then
     FGrupo := C_WITHOUT_GROUP;
 end;

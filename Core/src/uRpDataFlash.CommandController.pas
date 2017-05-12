@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, Contnrs, SysUtils, uRpDataFlash.Command, uRpDataFlash.Types, Variants,
-  uRpAlgorithms, uRpStringFunctions;
+  uRpAlgorithms, uRpStringFunctions, uRpDataFlash.Utils;
 
 type
   TLRDataFlashComandItemBase = class;
@@ -326,7 +326,7 @@ end;
 
 procedure TLRDataFlashComandItemBase.SetNome(const Value: string);
 begin
-  FNome := TLRDataFlashValidations.ValidarNome( Value );
+  FNome := TRpDataFlashValidations.NameValidation( Value );
 end;
 
 { TLRDataFlashComandoItem }
@@ -443,7 +443,7 @@ end;
 
 procedure TLRDataFlashBaseParametroItem.SetNome(const Value: string);
 begin
-  FNome := TLRDataFlashValidations.ValidarNome( Value );
+  FNome := TRpDataFlashValidations.NameValidation( Value );
 end;
 
 { TLRDataFlashParametrosValueCollection }

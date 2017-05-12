@@ -6,7 +6,7 @@ interface
 
 uses
   IdTCPClient, Classes, uRpDataFlash.Types, IdExceptionCore, IdStack, SysUtils,
-  IdHTTP;
+  IdHTTP, uRpDataFlash.Utils;
 
 type
   TLRDataFlashConnectionHelperCustomClass = class of TLRDataFlashConnectionHelperCustom;
@@ -185,7 +185,7 @@ begin
   if AConvert and ((UpperCase(AHost) = 'LOCALHOST') or (AHost = '127.0.0.1')) then
   begin
     if TLRDataFlashConnectionHelperCustom._LocalHostIP = EmptyStr then
-      TLRDataFlashConnectionHelperCustom._LocalHostIP := TLRDataFlashUtils.GetIpComputadorLocal;
+      TLRDataFlashConnectionHelperCustom._LocalHostIP := TRpDataFlashUtils.GetLocalComputerIp;
     Result := TLRDataFlashConnectionHelperCustom._LocalHostIP;
   end else
     Result := AHost;

@@ -5,7 +5,7 @@ unit uRpDataFlash.Types;
 interface
 
 uses
-  SysUtils, IdStackWindows, Classes, Contnrs, DB, uRpAlgorithms, StrUtils,
+  SysUtils, Classes, Contnrs, DB, uRpAlgorithms, StrUtils,
   DBConsts, Variants, uRpSerialization;
 
 const
@@ -118,7 +118,7 @@ type
 
 //  ERpDataFlashExceptionClass = class of ERpDataFlashException;
 
-  TLRDataFlashClientInfo = packed record
+  TRpDataFlashClientInfo = packed record
     DisplayName: string;
     IP: string;
     PeerIP: string;
@@ -127,26 +127,26 @@ type
     procedure Initialize;
   end;
 
-  IFileControlConfig = interface
+  IRpDataFlashConfig = interface
   ['{5C8BB3EE-988F-4F17-8376-23055FADBCA0}']
     function GetServerName : string;
     function GetServerPort: Integer;
     function GetRestPort : Integer;
     function GetFTPPort: Integer;
-    function GetModoComunicacao: TRpDataFlashCommunicationType;
-    function GetModoCriptografia : TRpDataFlashEncryptionType;
+    function GetCommunicationType: TRpDataFlashCommunicationType;
+    function GetEncryptionType: TRpDataFlashEncryptionType;
     function GetLocalHostToIP : Boolean;
 
     property ServerName : string read GetServerName;
     property ServerPort : Integer read GetServerPort;
     property RestPort : Integer read GetRestPort;
     property FTPPort : Integer read GetFTPPort;
-    property ModoComunicacao : TRpDataFlashCommunicationType read GetModoComunicacao;
-    property ModoCriptografia : TRpDataFlashEncryptionType read GetModoCriptografia;
+    property CommunicationType : TRpDataFlashCommunicationType read GetCommunicationType;
+    property EncryptionType : TRpDataFlashEncryptionType read GetEncryptionType;
     property LocalHostToIP : Boolean read GetLocalHostToIP;
   end;
 
-  ILRDataFlashFileTransferSupport = interface
+  IRpDataFlashFileTransferSupport = interface
     ['{801E5FDB-875A-434C-AF58-DA050D1EBE57}']
     function GetFileTransfer_TempDir : string;
     function GetFileTransfer_Port : Integer;
@@ -154,26 +154,13 @@ type
     procedure OnFileTransferLog(const ALogMessage : string);
   end;
 
-  TFtpFileInfo = packed record
+  TRpDataFlashFtpFileInfo = packed record
     FileID: string;
     FileName:  string;
     FileSize: Int64;
     FileDelete: Boolean;
   public
     procedure Decode(const AString : string);
-  end;
-
-  TLRDataFlashUtils = class
-  public
-    class function GetNomeComputadorLocal : string;
-    class function GetIpComputadorLocal : string;
-  end;
-
-  TLRDataFlashValidations = class
-  protected
-    class function RemoveInvalidChars(const Value : string) : string;
-  public
-    class function ValidarNome(const Value : string) : string;
   end;
 
   TLRDataFlashCustomProvider = class(TPersistent)
@@ -202,18 +189,12 @@ type
     property CustomCommand : string read FCustomCommand write FCustomCommand;
   end;
 
-  TStringReplace = class
-  public
-    class function StringReplaceWholeWord(const text, SearchText, ReplaceText: string;
-      ReplaceFlags: TReplaceFlags): String;
-  end;
-
-  TDataSetParamItem = class(TParam)
+  TRpDataSetParamItem = class(TParam)
   public
     function Serializar : string;
   end;
 
-  TDataSetParams = class(TParams)
+  TRpDataSetParams = class(TParams)
   private
     FAutoCreateParam: Boolean;
   public
@@ -227,34 +208,12 @@ implementation
 
 { TLRDataFlashClientInfo }
 
-procedure TLRDataFlashClientInfo.Initialize;
+procedure TRpDataFlashClientInfo.Initialize;
 begin
   PeerIP := EmptyStr;
   DisplayName := EmptyStr;
   IP := EmptyStr;
   GUIDComando := EmptyStr;
-end;
-
-{ TLRDataFlashValidations }
-
-class function TLRDataFlashValidations.RemoveInvalidChars(
-  const Value: string): string;
-var
-  i : Integer;
-begin;
-  Result := EmptyStr;
-  for i := 1 to Length(Value) do
-  {$IFDEF UNICODE}
-    if CharInSet(Value[i], ['A'..'Z', 'a'..'z', '0'..'9', '_']) then
-  {$ELSE}
-    if Value[i] in ['A'..'Z', 'a'..'z', '0'..'9', '_'] then
-  {$ENDIF}
-      Result := Result + Value[i];
-end;
-
-class function TLRDataFlashValidations.ValidarNome(const Value: string): string;
-begin
-  Result := RemoveInvalidChars(Value);
 end;
 
 { TLRDataFlashCustomProvider }
@@ -339,86 +298,21 @@ begin
   FUpdateSQL.Assign( Value );
 end;
 
-{ TStringReplace }
-
-class function TStringReplace.StringReplaceWholeWord(const text, SearchText,
-  ReplaceText: string; ReplaceFlags: TReplaceFlags): String;
-const
-  separators : set of AnsiChar = [' ', '.', ',', '?', '!',#13, #10, #09, '(', ')'];
-
-var
-  StartPos, EndPos : Integer;
-  Left, Right : widestring;
-
-  function isWordThere(const text, word: string; ReplaceFlags: TReplaceFlags; var StartPos, EndPos: integer) : Boolean;
-  var
-     Before, After: boolean;
-  begin
-    Result:= false;
-    StartPos:=0;
-    while (not Result) do
-    begin
-      inc(startPos);
-      if (rfIgnoreCase in ReplaceFlags) then
-        StartPos := PosEx(lowercase(word), Lowercase(text), StartPos)
-      else
-        StartPos := PosEx(word, text, StartPos);
-
-      if StartPos = 0 then
-        Exit;
-
-      EndPos := StartPos + Length(word) -1;
-      {$IFDEF UNICODE}
-      if (StartPos = 1) or (CharInSet(Text[StartPos-1], Separators)) then
-      {$ELSE}
-      if (StartPos = 1) or ((Text[StartPos-1] in Separators)) then
-      {$ENDIF}
-        Before := true
-      else
-        Before := false;
-
-      {$IFDEF UNICODE}
-      if (EndPos = Length(text)) or CharInSet(Text[EndPos+1], Separators) then
-      {$ELSE}
-      if (EndPos = Length(text)) or (Text[EndPos+1] in Separators) then
-      {$ENDIF}
-        After := true
-      else
-        After := false;
-
-      Result:=Before and After;
-    end;
-  end;
-
-begin
-  Result := Text;
-  if not isWordThere(Text, SearchText, ReplaceFlags, StartPos, EndPos) then
-    Exit;
-
-  Left := LeftStr(Text, StartPos-1);
-  Right := RightStr(Text, Length(Text)-EndPos);
-
-  if rfReplaceAll in ReplaceFlags then
-    Right := StringReplaceWholeWord(Right, SearchText, ReplaceText, ReplaceFlags);
-
-  Result := Left + ReplaceText + Right;
-end;
-
 { TDataSetParams }
 
-function TDataSetParams.GetAsString: string;
+function TRpDataSetParams.GetAsString: string;
 var
   lLista : TStrings;
   i: Integer;
 begin
   lLista := TStringList.Create;
   for i := 0 to Self.Count - 1 do
-    lLista.Add( TDataSetParamItem(Self[i]).Serializar );
+    lLista.Add( TRpDataSetParamItem(Self[i]).Serializar );
   Result := Trim( lLista.Text );
   FreeAndNil(lLista);
 end;
 
-function TDataSetParams.ParamByName(const Value: string): TParam;
+function TRpDataSetParams.ParamByName(const Value: string): TParam;
 begin
   Result := FindParam(Value);
   if Result = nil then
@@ -434,7 +328,7 @@ begin
   end;
 end;
 
-procedure TDataSetParams.SetFromString(const Value: string);
+procedure TRpDataSetParams.SetFromString(const Value: string);
 var
   lLista : TStrings;
   i: Integer;
@@ -457,7 +351,7 @@ begin
 
   lOldAutoCreate := Self.AutoCreateParam;
   Self.AutoCreateParam := True;
-  
+
   Self.Clear;
   try
     for i := 0 to lLista.Count - 1 do
@@ -484,7 +378,7 @@ end;
 
 { TDataSetParamItem }
 
-function TDataSetParamItem.Serializar: string;
+function TRpDataSetParamItem.Serializar: string;
 var
   lStr : string;
 begin
@@ -496,35 +390,9 @@ begin
   Result := Format('<TYPE>%3.3d</TYPE><NAME>%s</NAME><VALUE>%s</VALUE>', [Ord(Self.DataType), Name, lStr] );
 end;
 
-{ TLRDataFlashUtils }
-
-class function TLRDataFlashUtils.GetIpComputadorLocal: string;
-var
-  lStackWin : TIdStackWindows;
-begin
-  lStackWin := TIdStackWindows.Create;
-  try
-    Result := lStackWin.LocalAddress;
-  finally
-    lStackWin.Free;
-  end;
-end;
-
-class function TLRDataFlashUtils.GetNomeComputadorLocal: string;
-var
-  lStackWin : TIdStackWindows;
-begin
-  lStackWin := TIdStackWindows.Create;
-  try
-    Result := lStackWin.HostByAddress(lStackWin.LocalAddress);
-  finally
-    lStackWin.Free;
-  end;
-end;
-
 { TFtpFileInfo }
 
-procedure TFtpFileInfo.Decode(const AString: string);
+procedure TRpDataFlashFtpFileInfo.Decode(const AString: string);
 var
   lInfo: TStrings;
 begin

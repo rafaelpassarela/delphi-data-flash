@@ -7,7 +7,8 @@ interface
 uses
   Classes, uRpDataFlash.Command, SysUtils, Contnrs, uRpDataFlash.Types,
   uRpDataFlash.Components, uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
-  uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg;
+  uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg,
+  uRpDataFlash.Utils;
 
 const
   C_DEFAULT_PROXY_NAME = 'uClassesProxyGenerator';
@@ -261,7 +262,7 @@ begin
     lHint.Add('// TCP buscando as classes de serviço registradas no servidor.');
     lHint.Add('// - Gerado em...: '  + FormatDateTime('dd/mm/yyyy hh:nn:ss', Now) );
     lHint.Add('// - App Servidor: "' + Application.ExeName + '"');
-    lHint.Add('// - Server......: '  + TLRDataFlashUtils.GetNomeComputadorLocal);
+    lHint.Add('// - Server......: '  + TRpDataFlashUtils.GetLocalComputerName);
 
     Result := TrimRight(lHint.Text);
   finally

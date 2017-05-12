@@ -107,6 +107,7 @@
 			<DCCReference Include="src\uRpDataFlash.ConvertUtils.pas"/>
 			<DCCReference Include="src\uRpDataFlash.ObjectReg.pas"/>
 			<DCCReference Include="src\uRpDataFlash.CommandHelper.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Utils.pas"/>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

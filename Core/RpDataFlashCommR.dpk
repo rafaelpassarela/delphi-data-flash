@@ -60,6 +60,7 @@ contains
   uRpDataFlash.GetCommandList in 'src\uRpDataFlash.GetCommandList.pas',
   uRpDataFlash.ConvertUtils in 'src\uRpDataFlash.ConvertUtils.pas',
   uRpDataFlash.ObjectReg in 'src\uRpDataFlash.ObjectReg.pas',
-  uRpDataFlash.CommandHelper in 'src\uRpDataFlash.CommandHelper.pas';
+  uRpDataFlash.CommandHelper in 'src\uRpDataFlash.CommandHelper.pas',
+  uRpDataFlash.Utils in 'src\uRpDataFlash.Utils.pas';
 
 end.

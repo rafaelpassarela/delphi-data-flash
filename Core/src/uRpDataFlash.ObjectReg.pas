@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, Dialogs, Forms, Variants,
-  uRpSerialization, uRpAlgorithms, uRpDataFlash.Types, uRpDataFlash.Command;
+  uRpSerialization, uRpAlgorithms, uRpDataFlash.Types, uRpDataFlash.Command,
+  uRpDataFlash.Utils;
 
 type
   TPropType = (ptNone, ptNative, ptSet, ptEnum, ptClass);
@@ -459,7 +460,7 @@ begin
   FUnit.Add('// IFileBaseHelper ou ser utilizada por um comando TCP registrado.' );
   FUnit.Add('// - Gerado em...: '  + FormatDateTime('dd/mm/yyyy hh:nn:ss', Now) );
   FUnit.Add('// - App Servidor: "' + Application.ExeName + '"');
-  FUnit.Add('// - Server......: '  + TLRDataFlashUtils.GetNomeComputadorLocal);
+  FUnit.Add('// - Server......: '  + TRpDataFlashUtils.GetLocalComputerName);
 end;
 
 function TLRDataFlashClassSerialization.LoadClassFromMetadata(const AXMLString: string): Boolean;

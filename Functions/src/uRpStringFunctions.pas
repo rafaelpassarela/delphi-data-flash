@@ -41,6 +41,8 @@ type
     {$ENDIF}
 
     class function InsertWhereCondition(const ASQL, AWhereCondition : string) : string;
+    class function StringReplaceWholeWord(const AText, ASearchText, AReplaceText: string;
+      const AReplaceFlags: TReplaceFlags): String;
   end;
 
 implementation
@@ -209,6 +211,70 @@ begin
 end;
 
 {$IFNDEF ANDROID}
+class function TRpStrings.StringReplaceWholeWord(const AText, ASearchText, AReplaceText: string;
+  const AReplaceFlags: TReplaceFlags): String;
+const
+  C_SEPARATORS : set of AnsiChar = [' ', '.', ',', '?', '!',#13, #10, #09, '(', ')'];
+
+var
+  lStartPos, lEndPos : Integer;
+  lLeft, lRight : WideString;
+
+  function isWordThere(const AText, AWord: string; AReplaceFlags: TReplaceFlags;
+    var AStartPos, AEndPos: Integer) : Boolean;
+  var
+     Before, After: boolean;
+  begin
+    Result:= false;
+    AStartPos := 0;
+    while (not Result) do
+    begin
+      Inc(AStartPos);
+      if (rfIgnoreCase in AReplaceFlags) then
+        AStartPos := PosEx(lowercase(AWord), Lowercase(AText), AStartPos)
+      else
+        AStartPos := PosEx(AWord, AText, AStartPos);
+
+      if AStartPos = 0 then
+        Exit;
+
+      AEndPos := AStartPos + Length(AWord) -1;
+      {$IFDEF UNICODE}
+      if (AStartPos = 1) or (CharInSet(AText[AStartPos-1], C_SEPARATORS)) then
+      {$ELSE}
+      if (AStartPos = 1) or ((Text[AStartPos-1] in C_SEPARATORS)) then
+      {$ENDIF}
+        Before := true
+      else
+        Before := false;
+
+      {$IFDEF UNICODE}
+      if (AEndPos = Length(AText)) or CharInSet(AText[AEndPos+1], C_SEPARATORS) then
+      {$ELSE}
+      if (AEndPos = Length(AText)) or (AText[AEndPos+1] in C_SEPARATORS) then
+      {$ENDIF}
+        After := True
+      else
+        After := False;
+
+      Result := Before and After;
+    end;
+  end;
+
+begin
+  Result := AText;
+  if not isWordThere(AText, ASearchText, AReplaceFlags, lStartPos, lEndPos) then
+    Exit;
+
+  lLeft := LeftStr(AText, lStartPos-1);
+  lRight := RightStr(AText, Length(AText)-lEndPos);
+
+  if rfReplaceAll in AReplaceFlags then
+    lRight := StringReplaceWholeWord(lRight, ASearchText, AReplaceText, AReplaceFlags);
+
+  Result := lLeft + AReplaceText + lRight;
+end;
+
 class procedure TRpStrings.StringToSet(Info: PTypeInfo; var SetParam;
   const Value: string);
 var
