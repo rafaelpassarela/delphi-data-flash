@@ -1074,7 +1074,7 @@ procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandl
 
   procedure EnviarComoTexto;
   var
-    lQuebra: TLRDataFlashQuebraProtocolo;
+    lQuebra: TRpDataFlashProtocolBreaker;
     lContinue: Boolean;
     lLinha: string;
     lErro: Boolean;
@@ -1082,19 +1082,19 @@ procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandl
     lProcessamentoAtual: Integer;
   begin
     AHandler.LargeStream := False;
-    lQuebra := TLRDataFlashQuebraProtocolo.Create;
+    lQuebra := TRpDataFlashProtocolBreaker.Create;
     try
-      lProcessamentoTotal := lQuebra.QuantidadeQuebrasCalculada(AValor);
+      lProcessamentoTotal := lQuebra.BreaksCalcCount(AValor);
       lProcessamentoAtual := lProcessamentoTotal;
 
       lQuebra.OnStatus := FOnStatus;
-      lQuebra.AdicionarValor(AValor);
+      lQuebra.AddValue(AValor);
 
       lContinue := True;
       lErro := False;
-      while lQuebra.Proxima do
+      while lQuebra.Next do
       begin
-        lLinha := lQuebra.Atual;
+        lLinha := lQuebra.Current;
 
         lErro := lErro
               or (Pos(TProtocolo.GetErrorTag, lLinha) > 0);
@@ -1182,7 +1182,7 @@ end;
 function TRpDataFlashCustomConnection.InternalReceber(
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo): string;
 var
-  lQuebra: TLRDataFlashQuebraProtocolo;
+  lQuebra: TRpDataFlashProtocolBreaker;
   lLinha: string;
   lNomeClasseComando: string;
   lComando: IRpDataFlashCommandInterfaced;
@@ -1227,7 +1227,7 @@ var
 
 begin
   lComandos := TStringList.Create;
-  lQuebra := TLRDataFlashQuebraProtocolo.Create;
+  lQuebra := TRpDataFlashProtocolBreaker.Create;
   try
     // quando vem do componente ja esta correto
     if ARequestInfo.ContentType = C_REST_CONTENT_TYPE then
@@ -1275,24 +1275,24 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
 
   procedure ReceberComoTexto;
   var
-    lQuebra: TLRDataFlashQuebraProtocolo;
+    lQuebra: TRpDataFlashProtocolBreaker;
     lContinue : Boolean;
     lLinha: string;
     lErro: Boolean;
     lProcessamentoTotal: Integer;
     lProcessamentoAtual: Integer;
   begin
-    lQuebra := TLRDataFlashQuebraProtocolo.Create;
+    lQuebra := TRpDataFlashProtocolBreaker.Create;
     try
       lProcessamentoTotal := 0;
       lProcessamentoAtual := 0;
 
       lContinue := True;
       lErro := False;
-      while not lQuebra.Valida do
+      while not lQuebra.Valid do
       begin
         lLinha := AHandler.ReadLn;
-        lQuebra.AdicionarValor(lLinha);
+        lQuebra.AddValue(lLinha);
 
         lErro := lErro
               or (Pos(TProtocolo.GetErrorTag, lLinha) > 0);
@@ -1305,12 +1305,12 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
         end;
 
         if lProcessamentoTotal = 0 then
-          lProcessamentoTotal := lQuebra.QuantidadeQuebrasPrevistas;
+          lProcessamentoTotal := lQuebra.BreakCountPreview;
 
         Inc(lProcessamentoAtual);
         GerarStatus(stReceivingData, lProcessamentoTotal, lProcessamentoAtual, 'Recebendo informações...');
       end;
-      Result := lQuebra.Valor;
+      Result := lQuebra.Value;
     finally
       FreeAndNil(lQuebra);
     end;
@@ -2916,7 +2916,7 @@ begin
         repeat
           lResultado := InternalReceber(FConnectionHelper.Conector.IOHandler);
 
-          lProtocolo.Limpar;
+          lProtocolo.Clear;
           lProtocolo.Mensagem := lResultado;
 
           TentaGerarException(lProtocolo);
@@ -3799,7 +3799,7 @@ begin
 
       lResultado.Position := 0;
 
-      lProtocolo.Limpar;
+      lProtocolo.Clear;
       lProtocolo.Mensagem := lResultado.DataString;
 
       TentaGerarException(lProtocolo);
@@ -3838,14 +3838,14 @@ procedure TLRDataFlashConexaoREST.InternalEnviar(const AHandler: TIdHTTP;
   const AValor, ANomeComando: string; out AResponse: TStringStream);
   procedure EnviarComoTexto;
   var
-    lQuebra: TLRDataFlashQuebraProtocolo;
+    lQuebra: TRpDataFlashProtocolBreaker;
     lPutParams : TStringStream;
   begin
-    lQuebra := TLRDataFlashQuebraProtocolo.Create;
+    lQuebra := TRpDataFlashProtocolBreaker.Create;
     lPutParams := nil;
     try
       lQuebra.OnStatus := FOnStatus;
-      lQuebra.AdicionarValor(AValor);
+      lQuebra.AddValue(AValor);
 
       if AResponse = nil then
         AResponse := TStringStream.Create('');

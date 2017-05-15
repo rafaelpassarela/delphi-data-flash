@@ -33,7 +33,10 @@ resourcestring
   R_CLASS_ID_NOT_FOUND             = 'The class identifier was not found!';
 
   // DataFlash
-  R_DATAFLASH_CMD_NO_DESCRIPTION = 'Function "function DoGetDescricao: string; override;" is not implemented';
+  R_DATAFLASH_CMD_NO_DESCRIPTION  = 'Function "function DoGetDescricao: string; override;" is not implemented';
+  R_DATAFLASH_PROT_PREPARING_DATA = 'Preparing Message Protocol';
+  R_DATAFLASH_PROT_GUID_ERROR     = 'Guid Expected: %s - Guid Received: %s';
+  R_DATAFLASH_PROT_GUID_ORDER     = 'Sequence item %d not received or out of order!';
 
 implementation
 

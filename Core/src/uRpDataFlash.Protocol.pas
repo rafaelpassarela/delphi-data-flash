@@ -6,93 +6,93 @@ interface
 
 uses
   SysUtils, Classes, DBClient, Variants, Contnrs, ActiveX, uRpEncryption,
-  uRpDataFlash.XMLController, uRpDataFlash.Types;
+  uRpDataFlash.XMLController, uRpDataFlash.Types, uRpResourceString;
 
 type
-  TLRDataFlashQuebraProtocolo = class
+  TRpDataFlashProtocolBreaker = class
   strict private const
-    FORMATADOR = '%s';
-    MARCADOR_QUEBRA = '\::%s::/';
-    MARCADOR_TOTAL_QUEBRA = '@#*%s*#@';
-    MARCADOR_GUID = '\$id*%s*di$/';
-    MARCADOR_INICIO = '\*{INICIO}*/';
-    MARCADOR_FINAL = '\*{FINAL}*/';
-    TAMANHO_MAXIMO = 1000;
+    FORMATTER = '%s';
+    MARKER_BREAKS = '\::%s::/';
+    MARKER_TOTAL_BREAKS = '@#*%s*#@';
+    MARKER_GUID = '\$id*%s*di$/';
+    MARKER_BEGIN = '\*{BEGIN}*/';
+    MARKER_END = '\*{END}*/';
+    MAX_SIZE = 1000;
   private
-    FInicio : Boolean;
-    FFinal : Boolean;
-    FIndexAtual : Integer;
-    FQuebras : TStringList;
+    FIsBegin : Boolean;
+    FIsEnd : Boolean;
+    FCurrentIndex : Integer;
+    FBreaks : TStringList;
     FGUID: string;
-    FUltimaParteQuebra : Integer;
+    FLastBreakPart : Integer;
     FOnStatus: TRpDataFlashOnStatus;
-    function IndexExiste(const pIndex : Integer) : Boolean;
+    function IndexExists(const AIndex : Integer) : Boolean;
 
-    function ValorMarcador(const pMarcador, pValor : string) : Integer;
-    function ValorParteDeQuebra(const pValor : string) : Integer;
-    function ValorTotalDeQuebra : Integer;
+    function GetMarkValue(const AMark, AValue : string) : Integer;
+    function GetBreakValue(const AValue : string) : Integer;
+    function GetTotalBreakValue : Integer;
 
-    function GetMarcadorCompleto(const pMarcador : string; const pIndex : Integer) : string; overload;
-    function GetMarcadorQuebraCompleto: string;
-    function GetMarcadorTotalQuebraCompleto(const pIndex : integer): string;
-    function GetMarcadorGuidCompleto: string;
-    function GetMarcadorInicioCompleto : string;
-    function GetMarcadorFinalCompleto: string;
+    function GetMarkComplete(const AMark : string; const AIndex : Integer) : string; overload;
+    function GetMarkBreakComplete: string;
+    function GetMarkBreakTotalComplete(const AIndex : integer): string;
+    function GetMarkGuidComplete: string;
+    function GetMarkBeginComplete : string;
+    function GetMarkEndComplete: string;
 
-    function AdicionarMarcadorQuebra(const pValor : string) : string;
-    function RemoverMarcadorQuebra(const pValor : string) : string;
+    function AddBreakMark(const AValue : string) : string;
+    function RemoveBreakMark(const AValue : string) : string;
 
-    procedure AdicionarMarcadorTotalQuebra;
-    function RemoverMarcadorTotalQuebra(const pValor : string) : string;
+    procedure AddMarkBreakTotal;
+    function RemoveMarkBreakTotal(const AValue : string) : string;
 
-    function AdicionarMarcadorGuid(const pValor : string) : string;
-    function RemoverMarcadorGuid(const pValor : string) : string;
+    function AddGuidMark(const AValue : string) : string;
+    function RemoveGuidMark(const AValue : string) : string;
 
-    procedure AdicionarMarcadorFinalMensagem;
-    function RemoverMarcadorFinalMensagem(const pValor : string) : string;
-    function IsFinalMensagem(const pValor : string) : Boolean;
+    procedure AddMarkEndMenssage;
+    function RemoveMarkEndMenssage(const AValue : string) : string;
+    function IsFinalMenssage(const AValue : string) : Boolean;
 
-    procedure AdicionarMarcadorInicioMensagem;
-    function RemoverMarcadorInicioMensagem(const pValor : string) : string;
-    function IsInicioMensagem(const pValor : string) : Boolean;
+    procedure AddMarkBeginMessage;
+    function RemoveMarkBeginMessage(const AValue : string) : string;
+    function IsBeginMessage(const AValue : string) : Boolean;
 
-    function GetQuantidadeQuebras: Integer;
-    function GetQuebra(const pIndex: Integer): string;
-    function GetProxima : Boolean;
-    function GetContinua: Boolean;
-    function GetValor: string;
-    function Quebrar(const pValor : string): Integer;
-    function GetQuantidadeQuebrasPrevistas: Integer;
-    function GetAtual: string;
-    function GetValida: Boolean;
-    procedure GerarStatus(const ASituacao : TRpDataFlashStatusType; const AProcessamentoTotal, AProcessamentoAtual : Integer;
-      const AStatusMens : string);
+    function GetBreakCount: Integer;
+    function GetBreakMessage(const AIndex: Integer): string;
+    function GetNext : Boolean;
+    function GetContinue: Boolean;
+    function GetValue: string;
+    function DoBreak(const AValue : string): Integer;
+    function GetBreakCountPreview: Integer;
+    function GetCurrent: string;
+    function GetValid: Boolean;
+    procedure DoStatus(const AStatus : TRpDataFlashStatusType;
+      const ATotalProc, ACurrentProc : Integer; const AStatusMessage : string);
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Limpar;
-    procedure AdicionarValor(const pValor : string);
-    function QuantidadeQuebrasCalculada(const pValor : string) : Integer;
+    procedure Clear;
+    procedure AddValue(const AValue : string);
+    function BreaksCalcCount(const AValue : string) : Integer;
 
     property GUID: string read FGUID;
-    property Valor : string read GetValor;
-    property QuantidadeQuebras : Integer read GetQuantidadeQuebras;
-    property QuantidadeQuebrasPrevistas : Integer read GetQuantidadeQuebrasPrevistas;
-    property Valida : Boolean read GetValida;
+    property Value : string read GetValue;
+    property BreakCount : Integer read GetBreakCount;
+    property BreakCountPreview : Integer read GetBreakCountPreview;
+    property Valid : Boolean read GetValid;
 
-    property Quebra[const pIndex : Integer] : string read GetQuebra;
-    property Primeira : string index 0 read GetQuebra;
-    property Continua : Boolean read GetContinua;
-    property Proxima : Boolean read GetProxima;
-    property Atual : string read GetAtual;
+    property BreakMessage[const AIndex : Integer] : string read GetBreakMessage;
+    property First : string index 0 read GetBreakMessage;
+    property Continue : Boolean read GetContinue;
+    property Next : Boolean read GetNext;
+    property Current : string read GetCurrent;
     property OnStatus : TRpDataFlashOnStatus read FOnStatus write FOnStatus;
 
-    class function GuidValor(const pValor : string) : TGuid;
+    class function GuidValue(const AValue : string) : TGuid;
   end;
 
   TProtocolo = class
   private const
-    FORMATADOR = '%s';
+    FORMATTER = '%s';
     LIMITADOR = '|';
     IDENTIFICADOR_INI_FORMAT = '@>%s|';
     IDENTIFICADOR_FIM_FORMAT = '|%s<@';
@@ -107,15 +107,15 @@ type
     function GetIdentificadorInicialCompleto: string;
     function GetIdentificadorFinalCompleta: string;
     procedure SetMensagem(const Value: string);
-    function MensagemComIdentificadorExistente(const pValor : string): Integer;
-    function MensagemCriptografada(const pValor : string): Integer;
-    function RemoverEspacosInicio(const pValor : string) : string;
-    function RemoverEspacosFinal(const pValor : string) : string;
+    function MensagemComIdentificadorExistente(const AValue : string): Integer;
+    function MensagemCriptografada(const AValue : string): Integer;
+    function RemoverEspacosInicio(const AValue : string) : string;
+    function RemoverEspacosFinal(const AValue : string) : string;
 
     function DescobrirIDentificador(const pMensagemCompleta : string) : string;
 
-    function SubstituirInvalidos(const pValor : string) : string;
-    function RetornarInvalidos(const pValor : string) : string;
+    function SubstituirInvalidos(const AValue : string) : string;
+    function RetornarInvalidos(const AValue : string) : string;
     procedure SetIdentificador(const Value: string);
     procedure SetNomeNodoMsgRetorno(const Value: string);
 
@@ -143,7 +143,7 @@ type
     function Montar : string;
     function Desmontar(const pMensagemCompleta : string) : string;
 
-    procedure Limpar;
+    procedure Clear;
 
     function ToTexto : string;
     function ToData : Olevariant;
@@ -158,18 +158,18 @@ type
 
   TRpQuebraProtocoloList = class(TObjectList)
   private
-    function GetItem(Index: Integer): TLRDataFlashQuebraProtocolo;
-    procedure SetItem(Index: Integer; const Value: TLRDataFlashQuebraProtocolo);
-    function AddQuebra : TLRDataFlashQuebraProtocolo;
+    function GetItem(Index: Integer): TRpDataFlashProtocolBreaker;
+    procedure SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);
+    function AddQuebra : TRpDataFlashProtocolBreaker;
   public
-    function Find(const AGuid : string) : TLRDataFlashQuebraProtocolo;
+    function Find(const AGuid : string) : TRpDataFlashProtocolBreaker;
 
-    procedure Delete(const AQuebra : TLRDataFlashQuebraProtocolo); overload;
+    procedure Delete(const AQuebra : TRpDataFlashProtocolBreaker); overload;
 
-    property Item[Index : Integer]: TLRDataFlashQuebraProtocolo read GetItem write SetItem; default;
+    property Item[Index : Integer]: TRpDataFlashProtocolBreaker read GetItem write SetItem; default;
 
-    function Quebrar(const AValor : string) : TLRDataFlashQuebraProtocolo;
-    function Carregar(const AValor : string) : TLRDataFlashQuebraProtocolo;
+    function DoBreak(const AValor : string) : TRpDataFlashProtocolBreaker;
+    function Carregar(const AValor : string) : TRpDataFlashProtocolBreaker;
   end;
 
 
@@ -263,8 +263,8 @@ begin
 
   if lValido then
   begin
-    lPrimeiroCaractereAntesIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(FORMATADOR, IDENTIFICADOR_INI_FORMAT) - 1];
-    lPrimeiroCaractereDepoisIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(lPrimeiroCaractereAntesIdentificador, IDENTIFICADOR_INI_FORMAT) + Length(FORMATADOR) + 1];
+    lPrimeiroCaractereAntesIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(FORMATTER, IDENTIFICADOR_INI_FORMAT) - 1];
+    lPrimeiroCaractereDepoisIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(lPrimeiroCaractereAntesIdentificador, IDENTIFICADOR_INI_FORMAT) + Length(FORMATTER) + 1];
 
     lPosicaoInicialIdentificador := Pos(lPrimeiroCaractereAntesIdentificador, pMensagemCompleta) + 1;
     lValido := lPosicaoInicialIdentificador > 0;
@@ -325,7 +325,7 @@ begin
   Result := (FIdentificador = NME_PROTOCOLO_ERRO);
 end;
 
-procedure TProtocolo.Limpar;
+procedure TProtocolo.Clear;
 begin
   FNomeNodoMsgRetorno := EmptyStr;
   FMensagem := EmptyStr;
@@ -364,11 +364,11 @@ begin
   end;
 end;
 
-function TProtocolo.RemoverEspacosFinal(const pValor: string): string;
+function TProtocolo.RemoverEspacosFinal(const AValue: string): string;
 var
   lMensagem: string;
 begin
-  lMensagem := pValor;
+  lMensagem := AValue;
   while (Length(lMensagem) > 0) and CharInSet(lMensagem[Length(lMensagem)], [#10, #13]) do
   begin
     Delete(lMensagem, Length(lMensagem), 1);
@@ -376,11 +376,11 @@ begin
   Result := lMensagem;
 end;
 
-function TProtocolo.RemoverEspacosInicio(const pValor: string): string;
+function TProtocolo.RemoverEspacosInicio(const AValue: string): string;
 var
   lMensagem: string;
 begin
-  lMensagem := pValor;
+  lMensagem := AValue;
   while (Length(lMensagem) > 0) and CharInSet(lMensagem[1], [#10, #13]) do
   begin
     Delete(lMensagem, 1, 1);
@@ -400,22 +400,22 @@ begin
   Result := lMensagem;
 end;
 
-function TProtocolo.RetornarInvalidos(const pValor: string): string;
+function TProtocolo.RetornarInvalidos(const AValue: string): string;
 var
   lResultado: string;
 begin
-  lResultado := pValor;
+  lResultado := AValue;
   lResultado := StringReplace(lResultado, '%CRLF%', #13#10, [rfReplaceAll]);
   lResultado := StringReplace(lResultado, '%LF%', #10, [rfReplaceAll]);
   lResultado := StringReplace(lResultado, '%CR%', #13, [rfReplaceAll]);
   Result := lResultado;
 end;
 
-function TProtocolo.SubstituirInvalidos(const pValor: string): string;
+function TProtocolo.SubstituirInvalidos(const AValue: string): string;
 var
   lResultado: string;
 begin
-  lResultado := pValor;
+  lResultado := AValue;
   lResultado := StringReplace(lResultado, #13#10, '%CRLF%', [rfReplaceAll]);
   lResultado := StringReplace(lResultado, #10, '%LF%', [rfReplaceAll]);
   lResultado := StringReplace(lResultado, #13, '%CR%', [rfReplaceAll]);
@@ -530,22 +530,22 @@ begin
     FCriptografia := pTipoCriptografia.Create;
 end;
 
-function TProtocolo.MensagemComIdentificadorExistente(const pValor : string): Integer;
+function TProtocolo.MensagemComIdentificadorExistente(const AValue : string): Integer;
 var
   lPosicaoInicial: Integer;
 begin
-  lPosicaoInicial := Pos(GetIdentificadorInicialCompleto, pValor);
+  lPosicaoInicial := Pos(GetIdentificadorInicialCompleto, AValue);
   if lPosicaoInicial <> 0 then
     Result := lPosicaoInicial
   else
     Result := -1;
 end;
 
-function TProtocolo.MensagemCriptografada(const pValor: string): Integer;
+function TProtocolo.MensagemCriptografada(const AValue: string): Integer;
 var
   lPosicaoInicial: Integer;
 begin
-  lPosicaoInicial := Pos(IDENTIFICADOR_CRIPTO, pValor);
+  lPosicaoInicial := Pos(IDENTIFICADOR_CRIPTO, AValue);
   if lPosicaoInicial <> 0 then
     Result := lPosicaoInicial
   else
@@ -554,463 +554,460 @@ end;
 
 { TListaRetornos }
 
-procedure TLRDataFlashQuebraProtocolo.AdicionarMarcadorFinalMensagem;
+procedure TRpDataFlashProtocolBreaker.AddMarkEndMenssage;
 begin
-  if QuantidadeQuebras > 0 then
+  if BreakCount > 0 then
   begin
-    FQuebras[FQuebras.Count - 1] := FQuebras[FQuebras.Count - 1] + GetMarcadorFinalCompleto;
-    FFinal := True;
+    FBreaks[FBreaks.Count - 1] := FBreaks[FBreaks.Count - 1] + GetMarkEndComplete;
+    FIsEnd := True;
   end;
 end;
 
-function TLRDataFlashQuebraProtocolo.AdicionarMarcadorGuid(const pValor : string) : string;
+function TRpDataFlashProtocolBreaker.AddGuidMark(const AValue : string) : string;
 begin
-  Result := pValor + GetMarcadorGuidCompleto;
+  Result := AValue + GetMarkGuidComplete;
 end;
 
-procedure TLRDataFlashQuebraProtocolo.AdicionarMarcadorInicioMensagem;
+procedure TRpDataFlashProtocolBreaker.AddMarkBeginMessage;
 begin
-  if QuantidadeQuebras > 0 then
+  if BreakCount > 0 then
   begin
-    FQuebras[0] := GetMarcadorInicioCompleto +  FQuebras[0];
-    FInicio := True;
+    FBreaks[0] := GetMarkBeginComplete +  FBreaks[0];
+    FIsBegin := True;
   end;
 end;
 
-function TLRDataFlashQuebraProtocolo.AdicionarMarcadorQuebra(const pValor: string): string;
+function TRpDataFlashProtocolBreaker.AddBreakMark(const AValue: string): string;
 begin
-  Result := pValor + GetMarcadorQuebraCompleto;
-  Result := AdicionarMarcadorGuid(Result);
+  Result := AValue + GetMarkBreakComplete;
+  Result := AddGuidMark(Result);
 end;
 
-procedure TLRDataFlashQuebraProtocolo.AdicionarMarcadorTotalQuebra;
+procedure TRpDataFlashProtocolBreaker.AddMarkBreakTotal;
 begin
-  if QuantidadeQuebras > 0 then
+  if BreakCount > 0 then
   begin
-    FQuebras[0] := RemoverMarcadorTotalQuebra(FQuebras[0]);
-    FQuebras[0] := GetMarcadorTotalQuebraCompleto(QuantidadeQuebras) + FQuebras[0];
+    FBreaks[0] := RemoveMarkBreakTotal(FBreaks[0]);
+    FBreaks[0] := GetMarkBreakTotalComplete(BreakCount) + FBreaks[0];
   end;
 end;
 
-procedure TLRDataFlashQuebraProtocolo.AdicionarValor(const pValor: string);
+procedure TRpDataFlashProtocolBreaker.AddValue(const AValue: string);
 var
-  lParteQuebra: Integer;
-  lGuidRecebida: string;
+  lBrokenParts: Integer;
+  lReceiveGuid: string;
 begin
-  lGuidRecebida := GuidToString(GuidValor(pValor));
+  lReceiveGuid := GuidToString(GuidValue(AValue));
   if FGuid = '' then
-    FGuid := lGuidRecebida;
-  if FGuid <> lGuidRecebida then
-    raise Exception.Create('Guid esperada : ' + FGUID + ' - Guid recebida : ' + lGuidRecebida);
+    FGuid := lReceiveGuid;
+  if FGuid <> lReceiveGuid then
+    raise ERpDataFlashProtocolGuid.CreateFmt(R_DATAFLASH_PROT_GUID_ERROR, [FGUID, lReceiveGuid]);
 
-  lParteQuebra := ValorParteDeQuebra(pValor);
-  if lParteQuebra <> - 1 then
+  lBrokenParts := GetBreakValue(AValue);
+  if lBrokenParts <> - 1 then
   begin
-    if IsInicioMensagem(pValor) then
+    if IsBeginMessage(AValue) then
     begin
-      FInicio := True;
-      FFinal := False;
+      FIsBegin := True;
+      FIsEnd := False;
     end;
 
-    if lParteQuebra = FUltimaParteQuebra + 1 then
-      FUltimaParteQuebra := lParteQuebra
+    if lBrokenParts = FLastBreakPart + 1 then
+      FLastBreakPart := lBrokenParts
     else
-      raise Exception.Create('Item de sequencia ' + IntToStr(FUltimaParteQuebra) + ' não recebido ou fora da ordem !');
+      raise ERpDataFlashProtocolGuid.CreateFmt(R_DATAFLASH_PROT_GUID_ORDER, [FLastBreakPart]);
 
-    FQuebras.Insert(lParteQuebra - 1, pValor);
-    if IsFinalMensagem(pValor) then
-      FFinal := True;
+    FBreaks.Insert(lBrokenParts - 1, AValue);
+    if IsFinalMenssage(AValue) then
+      FIsEnd := True;
   end
   else
-    Quebrar(pValor);
-  FIndexAtual := -1;
+    DoBreak(AValue);
+  FCurrentIndex := -1;
 end;
 
-constructor TLRDataFlashQuebraProtocolo.Create;
+constructor TRpDataFlashProtocolBreaker.Create;
 begin
-  FFinal := False;
-  FQuebras := TStringList.Create;
-  Limpar;
+  FIsEnd := False;
+  FBreaks := TStringList.Create;
+  Clear;
 end;
 
-destructor TLRDataFlashQuebraProtocolo.Destroy;
+destructor TRpDataFlashProtocolBreaker.Destroy;
 begin
-  FQuebras.Free;
+  FBreaks.Free;
   inherited;
 end;
 
-procedure TLRDataFlashQuebraProtocolo.GerarStatus(const ASituacao: TRpDataFlashStatusType;
-  const AProcessamentoTotal, AProcessamentoAtual: Integer; const AStatusMens : string);
+procedure TRpDataFlashProtocolBreaker.DoStatus(const AStatus: TRpDataFlashStatusType;
+  const ATotalProc, ACurrentProc: Integer; const AStatusMessage : string);
 begin
   if Assigned(FOnStatus) then
-    FOnStatus(Self, ASituacao, AProcessamentoTotal, AProcessamentoAtual, AStatusMens);
+    FOnStatus(Self, AStatus, ATotalProc, ACurrentProc, AStatusMessage);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetAtual: string;
+function TRpDataFlashProtocolBreaker.GetCurrent: string;
 begin
-  Result := GetQuebra(FIndexAtual);
+  Result := GetBreakMessage(FCurrentIndex);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetContinua: Boolean;
+function TRpDataFlashProtocolBreaker.GetContinue: Boolean;
 begin
-  Result := (FIndexAtual <> -1)
-        and (QuantidadeQuebras >= FIndexAtual);
+  Result := (FCurrentIndex <> -1)
+        and (BreakCount >= FCurrentIndex);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorCompleto(const pMarcador: string; const pIndex: Integer): string;
+function TRpDataFlashProtocolBreaker.GetMarkComplete(const AMark: string; const AIndex: Integer): string;
 begin
-  Result := Format(pMarcador, [IntToStr(pIndex)]);
+  Result := Format(AMark, [IntToStr(AIndex)]);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorFinalCompleto: string;
+function TRpDataFlashProtocolBreaker.GetMarkEndComplete: string;
 begin
-  Result := MARCADOR_FINAL;
+  Result := MARKER_END;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorGuidCompleto: string;
+function TRpDataFlashProtocolBreaker.GetMarkGuidComplete: string;
 begin
-  Result := Format(MARCADOR_GUID, [FGUID]);
+  Result := Format(MARKER_GUID, [FGUID]);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorInicioCompleto: string;
+function TRpDataFlashProtocolBreaker.GetMarkBeginComplete: string;
 begin
-  Result := MARCADOR_INICIO;
+  Result := MARKER_BEGIN;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorQuebraCompleto: string;
+function TRpDataFlashProtocolBreaker.GetMarkBreakComplete: string;
 begin
-  Result := GetMarcadorCompleto(MARCADOR_QUEBRA, QuantidadeQuebras + 1);
+  Result := GetMarkComplete(MARKER_BREAKS, BreakCount + 1);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetMarcadorTotalQuebraCompleto(const pIndex : integer): string;
+function TRpDataFlashProtocolBreaker.GetMarkBreakTotalComplete(const AIndex : integer): string;
 begin
-  Result := GetMarcadorCompleto(MARCADOR_TOTAL_QUEBRA, pIndex);
+  Result := GetMarkComplete(MARKER_TOTAL_BREAKS, AIndex);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetProxima: Boolean;
+function TRpDataFlashProtocolBreaker.GetNext: Boolean;
 begin
-  Result := IndexExiste(FIndexAtual + 1);
+  Result := IndexExists(FCurrentIndex + 1);
   if Result then
-    FIndexAtual := FIndexAtual + 1;
+    FCurrentIndex := FCurrentIndex + 1;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetQuantidadeQuebras: Integer;
+function TRpDataFlashProtocolBreaker.GetBreakCount: Integer;
 begin
-  Result := FQuebras.Count;
+  Result := FBreaks.Count;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetQuantidadeQuebrasPrevistas: Integer;
+function TRpDataFlashProtocolBreaker.GetBreakCountPreview: Integer;
 begin
-  Result := ValorTotalDeQuebra;
+  Result := GetTotalBreakValue;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetQuebra(const pIndex: Integer): string;
+function TRpDataFlashProtocolBreaker.GetBreakMessage(const AIndex: Integer): string;
 begin
-  if IndexExiste(pIndex) then
-  begin
-    Result := FQuebras[pIndex];
-  end else begin
+  if IndexExists(AIndex) then
+    Result := FBreaks[AIndex]
+  else
     Result := EmptyStr;
-  end;
 end;
 
-function TLRDataFlashQuebraProtocolo.GetValida: Boolean;
+function TRpDataFlashProtocolBreaker.GetValid: Boolean;
 begin
-  Result := FInicio and FFinal and (GetQuantidadeQuebrasPrevistas = FQuebras.Count);
+  Result := FIsBegin and FIsEnd and (GetBreakCountPreview = FBreaks.Count);
 end;
 
-function TLRDataFlashQuebraProtocolo.GetValor: string;
+function TRpDataFlashProtocolBreaker.GetValue: string;
 var
   I: Integer;
-  lResultado: string;
+  lResul: string;
 begin
-  lResultado := EmptyStr;
-  for I := 0 to QuantidadeQuebras - 1 do
+  lResul := EmptyStr;
+  for I := 0 to BreakCount - 1 do
   begin
     if I = 0 then
     begin
-      lResultado := RemoverMarcadorTotalQuebra(FQuebras[I]);
-      lResultado := RemoverMarcadorInicioMensagem(lResultado);
-      lResultado := RemoverMarcadorQuebra(lResultado);
+      lResul := RemoveMarkBreakTotal(FBreaks[I]);
+      lResul := RemoveMarkBeginMessage(lResul);
+      lResul := RemoveBreakMark(lResul);
     end else
-      lResultado := lResultado + RemoverMarcadorQuebra(FQuebras[I]);
+      lResul := lResul + RemoveBreakMark(FBreaks[I]);
   end;
-  Result := lResultado;
+  Result := lResul;
 
-  if not Valida then
+  if not Valid then
     raise Exception.Create('Mensagem incompleta');
 
 end;
 
-class function TLRDataFlashQuebraProtocolo.GuidValor(const pValor: string): TGuid;
+class function TRpDataFlashProtocolBreaker.GuidValue(const AValue: string): TGuid;
 var
-  lValorGuid: string;
-  lPosicaoFormatador: Integer;
-  lPosicaoFinalMarcador: Integer;
-  lPosicaoInicialMarcador: Integer;
-  lPosicaoFinalFormatador: Integer;
-  lVlrInicialMarcador: string;
-  lVlrFinalMarcador: string;
-  lQuantidade: Integer;
+  lGuidValue: string;
+  lFormPos: Integer;
+  lPosEndMark: Integer;
+  lPosBeginMark: Integer;
+  lPosEndForm: Integer;
+  lMarkBeginValue: string;
+  lMarkFinalValue: string;
+  lQuantity: Integer;
 begin
-  lValorGuid := EmptyStr;
+  lGuidValue := EmptyStr;
 
-  lPosicaoFormatador      := Pos(FORMATADOR, MARCADOR_GUID);
-  lPosicaoFinalFormatador   := lPosicaoFormatador + Length(FORMATADOR);
+  lFormPos      := Pos(FORMATTER, MARKER_GUID);
+  lPosEndForm   := lFormPos + Length(FORMATTER);
 
-  lVlrInicialMarcador := Copy(MARCADOR_GUID, 1, lPosicaoFormatador - 1);
+  lMarkBeginValue := Copy(MARKER_GUID, 1, lFormPos - 1);
 
-  lPosicaoInicialMarcador := Pos(lVlrInicialMarcador, pValor);
+  lPosBeginMark := Pos(lMarkBeginValue, AValue);
 
-  if lPosicaoInicialMarcador > 0 then
+  if lPosBeginMark > 0 then
   begin
-    lVlrFinalMarcador := Copy(MARCADOR_GUID, lPosicaoFinalFormatador, Length(MARCADOR_GUID));
-    lPosicaoFinalMarcador := Pos(lVlrFinalMarcador, pValor);
+    lMarkFinalValue := Copy(MARKER_GUID, lPosEndForm, Length(MARKER_GUID));
+    lPosEndMark := Pos(lMarkFinalValue, AValue);
 
-    lQuantidade := lPosicaoFinalMarcador - (lPosicaoInicialMarcador + length(lVlrInicialMarcador));
+    lQuantity := lPosEndMark - (lPosBeginMark + length(lMarkBeginValue));
 
-    lValorGuid := Copy(pValor, lPosicaoInicialMarcador + length(lVlrInicialMarcador), lQuantidade);
+    lGuidValue := Copy(AValue, lPosBeginMark + length(lMarkBeginValue), lQuantity);
 
-    Result := StringToGUID(lValorGuid);
+    Result := StringToGUID(lGuidValue);
   end
   else
     Result := GUID_NULL;
 end;
 
-function TLRDataFlashQuebraProtocolo.IndexExiste(const pIndex: Integer): Boolean;
+function TRpDataFlashProtocolBreaker.IndexExists(const AIndex: Integer): Boolean;
 begin
-  Result :=  QuantidadeQuebras > pIndex;
+  Result :=  BreakCount > AIndex;
 end;
 
-function TLRDataFlashQuebraProtocolo.IsFinalMensagem(const pValor: string): Boolean;
+function TRpDataFlashProtocolBreaker.IsFinalMenssage(const AValue: string): Boolean;
 var
-  lPosicaoFinal: Integer;
+  lLastPos: Integer;
 begin
-  lPosicaoFinal := pos(MARCADOR_FINAL, pValor);
-  Result := lPosicaoFinal > 0;
+  lLastPos := pos(MARKER_END, AValue);
+  Result := lLastPos > 0;
 end;
 
-function TLRDataFlashQuebraProtocolo.IsInicioMensagem(const pValor: string): Boolean;
+function TRpDataFlashProtocolBreaker.IsBeginMessage(const AValue: string): Boolean;
 var
-  lPosicaoFinal: Integer;
+  lEndPos: Integer;
 begin
-  lPosicaoFinal := pos(MARCADOR_INICIO, pValor);
-  Result := lPosicaoFinal > 0;
+  lEndPos := pos(MARKER_BEGIN, AValue);
+  Result := lEndPos > 0;
 end;
 
-procedure TLRDataFlashQuebraProtocolo.Limpar;
+procedure TRpDataFlashProtocolBreaker.Clear;
 begin
-  FFinal := False;
-  FQuebras.Clear;
-  FIndexAtual := -1;
-  FUltimaParteQuebra := 0;
+  FIsEnd := False;
+  FBreaks.Clear;
+  FCurrentIndex := -1;
+  FLastBreakPart := 0;
 end;
 
-function TLRDataFlashQuebraProtocolo.ValorParteDeQuebra(const pValor: string): Integer;
+function TRpDataFlashProtocolBreaker.GetBreakValue(const AValue: string): Integer;
 begin
-  Result := ValorMarcador(MARCADOR_QUEBRA, pValor);
+  Result := GetMarkValue(MARKER_BREAKS, AValue);
 end;
 
-function TLRDataFlashQuebraProtocolo.ValorTotalDeQuebra: Integer;
+function TRpDataFlashProtocolBreaker.GetTotalBreakValue: Integer;
 begin
-  if QuantidadeQuebras > 0 then
-    Result := ValorMarcador(MARCADOR_TOTAL_QUEBRA, FQuebras[0])
+  if BreakCount > 0 then
+    Result := GetMarkValue(MARKER_TOTAL_BREAKS, FBreaks[0])
   else
     Result := -1;
 end;
 
-function TLRDataFlashQuebraProtocolo.QuantidadeQuebrasCalculada(
-  const pValor: string): Integer;
+function TRpDataFlashProtocolBreaker.BreaksCalcCount(const AValue: string): Integer;
 begin
-  Result := Trunc(Length(pValor) / TAMANHO_MAXIMO);
+  Result := Trunc(Length(AValue) / MAX_SIZE);
 end;
 
-function TLRDataFlashQuebraProtocolo.Quebrar(const pValor : string) : Integer;
+function TRpDataFlashProtocolBreaker.DoBreak(const AValue : string) : Integer;
 var
-  lValorQuebra: string;
-  lValorQuebrado: string;
+  lBreakValue: string;
+  lAuxValue: string;
   lGuid: TGUID;
-  lQuantidadeTotalCalculada: Integer;
+  lTotalCount: Integer;
   lCount: Integer;
 begin
-  lQuantidadeTotalCalculada := QuantidadeQuebrasCalculada(pValor)  * 2;
+  lTotalCount := BreaksCalcCount(AValue)  * 2;
   lCount := 0;
 
-  FQuebras.Clear;
+  FBreaks.Clear;
   CreateGUID(lGuid);
   FGUID := GUIDToString(lGuid);
 
-  lValorQuebra := pValor;
-  while Length(lValorQuebra) > TAMANHO_MAXIMO do
+  lBreakValue := AValue;
+  while Length(lBreakValue) > MAX_SIZE do
   begin
-    lValorQuebrado := Copy(lValorQuebra, 1, TAMANHO_MAXIMO);
-    lValorQuebrado := AdicionarMarcadorQuebra(lValorQuebrado);
-    FQuebras.Add(lValorQuebrado);
-    Delete(lValorQuebra, 1, TAMANHO_MAXIMO);
+    lAuxValue := Copy(lBreakValue, 1, MAX_SIZE);
+    lAuxValue := AddBreakMark(lAuxValue);
+    FBreaks.Add(lAuxValue);
+    Delete(lBreakValue, 1, MAX_SIZE);
 
-    GerarStatus(stPreparingData, lQuantidadeTotalCalculada, lCount, 'Preparando protocolo de mensagem');
+    DoStatus(stPreparingData, lTotalCount, lCount, R_DATAFLASH_PROT_PREPARING_DATA);
 
     Inc(lCount);
   end;
 
-  if lValorQuebra <> EmptyStr then
-    FQuebras.Add(AdicionarMarcadorQuebra(lValorQuebra))
+  if lBreakValue <> EmptyStr then
+    FBreaks.Add(AddBreakMark(lBreakValue))
   else
-    if FQuebras.Count = 0 then
-      FQuebras.Add(AdicionarMarcadorQuebra( EmptyStr ));
+    if FBreaks.Count = 0 then
+      FBreaks.Add(AddBreakMark( EmptyStr ));
 
-  AdicionarMarcadorInicioMensagem;
-  AdicionarMarcadorTotalQuebra;
-  AdicionarMarcadorFinalMensagem;
+  AddMarkBeginMessage;
+  AddMarkBreakTotal;
+  AddMarkEndMenssage;
 
-  Result := QuantidadeQuebras;
+  Result := BreakCount;
 end;
 
-function TLRDataFlashQuebraProtocolo.RemoverMarcadorFinalMensagem(
-  const pValor: string): string;
+function TRpDataFlashProtocolBreaker.RemoveMarkEndMenssage(
+  const AValue: string): string;
 var
-  lValor: string;
-  lPosicaoFinal: Integer;
+  lValue: string;
+  lEndPos: Integer;
 begin
-  lValor := pValor;
-  lPosicaoFinal := pos(MARCADOR_FINAL, lValor);
-  if lPosicaoFinal > 0 then
-    Delete(lValor, lPosicaoFinal, Length(pValor) - lPosicaoFinal);
-  Result := lValor;
+  lValue := AValue;
+  lEndPos := pos(MARKER_END, lValue);
+  if lEndPos > 0 then
+    Delete(lValue, lEndPos, Length(AValue) - lEndPos);
+  Result := lValue;
 end;
 
-function TLRDataFlashQuebraProtocolo.RemoverMarcadorGuid(const pValor: string): string;
+function TRpDataFlashProtocolBreaker.RemoveGuidMark(const AValue: string): string;
 var
-  lValorSemQuebra: string;
-  lIndexInicioMarcador: Integer;
-  lTamanhoTotal: Integer;
-  lPosicaoFormatador: Integer;
-  lPosicaoFinalMarcador: Integer;
-  lValorQuebraFinal: string;
+  lFullValue: string;
+  lIdxMarkBegin: Integer;
+  lTotalSize: Integer;
+  lFormPos: Integer;
+  lPosMarkEnd: Integer;
+  lEndValue: string;
 begin
-  lValorSemQuebra := pValor;
+  lFullValue := AValue;
 
-  lIndexInicioMarcador := Pos(Copy(MARCADOR_GUID, 1, 5), lValorSemQuebra);
+  lIdxMarkBegin := Pos(Copy(MARKER_GUID, 1, 5), lFullValue);
 
-  lPosicaoFormatador := Pos(FORMATADOR, MARCADOR_GUID);
-  lPosicaoFinalMarcador := lPosicaoFormatador + Length(FORMATADOR);
-  lValorQuebraFinal := Copy(MARCADOR_GUID, lPosicaoFinalMarcador, (Length(MARCADOR_GUID) - (lPosicaoFinalMarcador -  1)));
+  lFormPos := Pos(FORMATTER, MARKER_GUID);
+  lPosMarkEnd := lFormPos + Length(FORMATTER);
+  lEndValue := Copy(MARKER_GUID, lPosMarkEnd, (Length(MARKER_GUID) - (lPosMarkEnd -  1)));
 
-  if lIndexInicioMarcador > 0 then
+  if lIdxMarkBegin > 0 then
   begin
-    lTamanhoTotal := Length(lValorSemQuebra);
-    Delete(lValorSemQuebra, lIndexInicioMarcador, lTamanhoTotal);
+    lTotalSize := Length(lFullValue);
+    Delete(lFullValue, lIdxMarkBegin, lTotalSize);
   end;
-  Result := lValorSemQuebra;
+  Result := lFullValue;
 end;
 
-function TLRDataFlashQuebraProtocolo.RemoverMarcadorInicioMensagem(const pValor: string): string;
+function TRpDataFlashProtocolBreaker.RemoveMarkBeginMessage(const AValue: string): string;
 var
-  lValor: string;
-  lPosicaoInicio: Integer;
+  lValue: string;
+  lEndPos: Integer;
 begin
-  lValor := pValor;
-  lPosicaoInicio := pos(MARCADOR_INICIO, lValor);
-  if lPosicaoInicio > 0 then
-    Delete(lValor, lPosicaoInicio, Length(MARCADOR_INICIO));
-  Result := lValor;
+  lValue := AValue;
+  lEndPos := pos(MARKER_BEGIN, lValue);
+  if lEndPos > 0 then
+    Delete(lValue, lEndPos, Length(MARKER_BEGIN));
+  Result := lValue;
 end;
 
-function TLRDataFlashQuebraProtocolo.RemoverMarcadorQuebra(const pValor: string): string;
+function TRpDataFlashProtocolBreaker.RemoveBreakMark(const AValue: string): string;
 var
-  lValorSemQuebra: string;
-  lIndexInicioMarcador: Integer;
-  lTamanhoTotal: Integer;
+  lFullValue: string;
+  lIdxBeginMark: Integer;
+  lTotalSize: Integer;
 begin
-  lValorSemQuebra := pValor;
-  lValorSemQuebra := RemoverMarcadorFinalMensagem(lValorSemQuebra);
-  lValorSemQuebra := RemoverMarcadorGuid(lValorSemQuebra);
+  lFullValue := AValue;
+  lFullValue := RemoveMarkEndMenssage(lFullValue);
+  lFullValue := RemoveGuidMark(lFullValue);
 
-  lIndexInicioMarcador := Pos(Copy(MARCADOR_QUEBRA, 1, 3), lValorSemQuebra);
-  if lIndexInicioMarcador > 0 then
+  lIdxBeginMark := Pos(Copy(MARKER_BREAKS, 1, 3), lFullValue);
+  if lIdxBeginMark > 0 then
   begin
-    lTamanhoTotal := Length(lValorSemQuebra);
-    Delete(lValorSemQuebra, lIndexInicioMarcador, lTamanhoTotal);
+    lTotalSize := Length(lFullValue);
+    Delete(lFullValue, lIdxBeginMark, lTotalSize);
   end;
-  Result := lValorSemQuebra;
+  Result := lFullValue;
 end;
 
-function TLRDataFlashQuebraProtocolo.RemoverMarcadorTotalQuebra(const pValor: string): string;
+function TRpDataFlashProtocolBreaker.RemoveMarkBreakTotal(const AValue: string): string;
 var
-  lPosicaoFormatador: Integer;
-  lPosicaoFinalMarcador: Integer;
-  lValorQuebraFinal: string;
-  lValorSemTotal: string;
-  lIndexInicioMarcador: Integer;
-  lTamanhoIdent: Integer;
+  lFormPos: Integer;
+  lEndMarkPos: Integer;
+  lEndBreakValue: string;
+  lValueNoTotal: string;
+  lIdxMarkBegin: Integer;
+  lIdSize: Integer;
 begin
-  lValorSemTotal := pValor;
+  lValueNoTotal := AValue;
 
-  lPosicaoFormatador := Pos(FORMATADOR, MARCADOR_TOTAL_QUEBRA);
-  lPosicaoFinalMarcador := lPosicaoFormatador + Length(FORMATADOR);
-  lValorQuebraFinal := Copy(MARCADOR_TOTAL_QUEBRA, lPosicaoFinalMarcador, (Length(MARCADOR_TOTAL_QUEBRA) - (lPosicaoFinalMarcador -  1)));
+  lFormPos := Pos(FORMATTER, MARKER_TOTAL_BREAKS);
+  lEndMarkPos := lFormPos + Length(FORMATTER);
+  lEndBreakValue := Copy(MARKER_TOTAL_BREAKS, lEndMarkPos, (Length(MARKER_TOTAL_BREAKS) - (lEndMarkPos -  1)));
 
-  lIndexInicioMarcador := Pos(lValorQuebraFinal, lValorSemTotal);
-  if lIndexInicioMarcador > 0 then
+  lIdxMarkBegin := Pos(lEndBreakValue, lValueNoTotal);
+  if lIdxMarkBegin > 0 then
   begin
-    lTamanhoIdent := Length(lValorQuebraFinal);
-    Delete(lValorSemTotal, 1, (lIndexInicioMarcador + lTamanhoIdent) - 1);
+    lIdSize := Length(lEndBreakValue);
+    Delete(lValueNoTotal, 1, (lIdxMarkBegin + lIdSize) - 1);
   end;
-  Result := lValorSemTotal;
+  Result := lValueNoTotal;
 end;
 
-function TLRDataFlashQuebraProtocolo.ValorMarcador(const pMarcador, pValor: string): Integer;
+function TRpDataFlashProtocolBreaker.GetMarkValue(const AMark, AValue: string): Integer;
 var
-  lIndexInicioMarcador: Integer;
-  lPosicaoFormatador: Integer;
-  lIndexFinalMarcador: Integer;
-  lPosicaoFormatadorValor : integer;
-  lValorQuebraInicial: string;
+  lIdxBegin: Integer;
+  lFormatPos: Integer;
+  lIdxEnd: Integer;
+  lPosFormValue : integer;
+  lBeginMarkValue: string;
 begin
   Result := -1;
-  lIndexInicioMarcador := 0;
-  lIndexFinalMarcador := 0;
+  lIdxBegin := 0;
+  lIdxEnd := 0;
 
-  lPosicaoFormatador := Pos(FORMATADOR, pMarcador);
-  lValorQuebraInicial := Copy(pMarcador, 1, lPosicaoFormatador - 1);
-  lPosicaoFormatadorValor := Pos(lValorQuebraInicial, pValor);
-  if lPosicaoFormatadorValor > 0 then
+  lFormatPos := Pos(FORMATTER, AMark);
+  lBeginMarkValue := Copy(AMark, 1, lFormatPos - 1);
+  lPosFormValue := Pos(lBeginMarkValue, AValue);
+  if lPosFormValue > 0 then
   begin
-    lIndexInicioMarcador := lPosicaoFormatadorValor + Length(lValorQuebraInicial);
-    lIndexFinalMarcador := Pos(Copy(pMarcador, (lPosicaoFormatador + Length(FORMATADOR)), Length(pMarcador)), pValor);
+    lIdxBegin := lPosFormValue + Length(lBeginMarkValue);
+    lIdxEnd := Pos(Copy(AMark, (lFormatPos + Length(FORMATTER)), Length(AMark)), AValue);
   end;
 
-  if lIndexInicioMarcador > 0 then
+  if lIdxBegin > 0 then
   begin
-    Result := StrToIntDef(Copy(pValor, lIndexInicioMarcador, (lIndexFinalMarcador - lIndexInicioMarcador)), -1);
+    Result := StrToIntDef(Copy(AValue, lIdxBegin, (lIdxEnd - lIdxBegin)), -1);
   end;
 end;
 
 { TRpListaQuebraProtocolo }
 
-function TRpQuebraProtocoloList.AddQuebra: TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.AddQuebra: TRpDataFlashProtocolBreaker;
 begin
-  Result := TLRDataFlashQuebraProtocolo.Create;
+  Result := TRpDataFlashProtocolBreaker.Create;
   Add(Result);
 end;
 
-function TRpQuebraProtocoloList.Carregar(const AValor: string): TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.Carregar(const AValor: string): TRpDataFlashProtocolBreaker;
 var
   lGuid: TGUID;
 begin
-  lGuid := TLRDataFlashQuebraProtocolo.GuidValor(AValor);
+  lGuid := TRpDataFlashProtocolBreaker.GuidValue(AValor);
   Result := Find(GUIDToString(lGuid));
   if Result = nil then
     Result := AddQuebra;
-  Result.AdicionarValor(AValor);
+  Result.AddValue(AValor);
 end;
 
-procedure TRpQuebraProtocoloList.Delete(const AQuebra: TLRDataFlashQuebraProtocolo);
+procedure TRpQuebraProtocoloList.Delete(const AQuebra: TRpDataFlashProtocolBreaker);
 begin
   Remove(AQuebra);
 end;
 
-function TRpQuebraProtocoloList.Find(const AGuid: string): TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.Find(const AGuid: string): TRpDataFlashProtocolBreaker;
 var
   I : Integer;
 begin
@@ -1026,18 +1023,18 @@ begin
   end;
 end;
 
-function TRpQuebraProtocoloList.GetItem(Index: Integer): TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.GetItem(Index: Integer): TRpDataFlashProtocolBreaker;
 begin
-  Result := TLRDataFlashQuebraProtocolo(inherited Items[Index]);
+  Result := TRpDataFlashProtocolBreaker(inherited Items[Index]);
 end;
 
-function TRpQuebraProtocoloList.Quebrar(const AValor: string): TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.DoBreak(const AValor: string): TRpDataFlashProtocolBreaker;
 begin
   Result := AddQuebra;
-  Result.AdicionarValor(AValor);
+  Result.AddValue(AValor);
 end;
 
-procedure TRpQuebraProtocoloList.SetItem(Index: Integer; const Value: TLRDataFlashQuebraProtocolo);
+procedure TRpQuebraProtocoloList.SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);
 begin
   inherited Items[Index] := Value;
 end;

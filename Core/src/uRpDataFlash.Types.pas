@@ -107,6 +107,7 @@ type
   ERpDataFlashUserNotFound = class(ERpDataFlashException);
   ERpDataFlashBeforeExecuteCommandError = class(ERpDataFlashException);
   ERpDataFlashFTPError = class(ERpDataFlashException);
+  ERpDataFlashProtocolGuid = class(ERpDataFlashException);
 //  ERpDataFlashFileTransferError = class(ERpDataFlashException);
 //  ERpDataFlashCommunication = class(ERpDataFlashException);
 //  ERpDataFlashReceive = class(ERpDataFlashException);
@@ -205,7 +206,7 @@ type
 
 implementation
 
-{ TLRDataFlashClientInfo }
+{ TRpDataFlashClientInfo }
 
 procedure TRpDataFlashClientInfo.Initialize;
 begin
@@ -215,7 +216,7 @@ begin
   GUIDComando := EmptyStr;
 end;
 
-{ TLRDataFlashCustomProvider }
+{ TRpDataFlashCustomProvider }
 
 procedure TRpDataFlashCustomProvider.Clear;
 begin
@@ -297,7 +298,7 @@ begin
   FUpdateSQL.Assign( Value );
 end;
 
-{ TDataSetParams }
+{ TRpDataSetParams }
 
 function TRpDataSetParams.GetAsString: string;
 var
@@ -375,7 +376,7 @@ begin
   Self.AutoCreateParam := lOldAutoCreate;
 end;
 
-{ TDataSetParamItem }
+{ TRpDataSetParamItem }
 
 function TRpDataSetParamItem.Serialize: string;
 var
@@ -389,7 +390,7 @@ begin
   Result := Format('<TYPE>%3.3d</TYPE><NAME>%s</NAME><VALUE>%s</VALUE>', [Ord(Self.DataType), Name, lStr] );
 end;
 
-{ TFtpFileInfo }
+{ TRpDataFlashFtpFileInfo }
 
 procedure TRpDataFlashFtpFileInfo.Decode(const AString: string);
 var
