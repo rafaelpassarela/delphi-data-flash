@@ -45,7 +45,7 @@ type
   TLRDataFlashCustomDataSetProvider = class(TComponent)
   private
     FGrupo: string;
-    FServer: TLRDataFlashConexaoServer;
+    FServer: TRpDataFlashServerConnection;
     FInsertSQL: TStrings;
     FUpdateSQL: TStrings;
     FDeleteSQL: TStrings;
@@ -61,7 +61,7 @@ type
     FOnBeforeDataSetExecuteSQL: TLRDataFlashOnExecSQL;
     FDescricao: string;
     procedure SetGrupo(const Value: string);
-    procedure SetServer(const Value: TLRDataFlashConexaoServer);
+    procedure SetServer(const Value: TRpDataFlashServerConnection);
     procedure SetInsertSQL(const Value: TStrings);
     procedure SetUpdateSQL(const Value: TStrings);
     procedure SetDeleteSQL(const Value: TStrings);
@@ -69,7 +69,7 @@ type
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    property Server : TLRDataFlashConexaoServer read FServer write SetServer;
+    property Server : TRpDataFlashServerConnection read FServer write SetServer;
     property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
     property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
@@ -280,7 +280,7 @@ begin
   FSelectSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetServer(const Value: TLRDataFlashConexaoServer);
+procedure TLRDataFlashCustomDataSetProvider.SetServer(const Value: TRpDataFlashServerConnection);
 begin
   if (FServer <> nil) then
     FServer.Providers.Remove(Self);

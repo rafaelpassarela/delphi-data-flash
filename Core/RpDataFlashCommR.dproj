@@ -72,8 +72,6 @@
 			<DCCReference Include="IndyCore.dcp"/>
 			<DCCReference Include="designide.dcp"/>
 			<DCCReference Include="dsnap.dcp"/>
-			<DCCReference Include="RpCommonFunctions.dcp"/>
-			<DCCReference Include="RpEncryption.dcp"/>
 			<DCCReference Include="RpSerialization.dcp"/>
 			<DCCReference Include="src\uRpDataFlash.Components.pas"/>
 			<DCCReference Include="src\uRpDataFlash.Protocol.pas"/>

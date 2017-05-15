@@ -8,7 +8,7 @@ uses
   Classes, uRpDataFlash.Command, SysUtils, Contnrs, uRpDataFlash.Types,
   uRpDataFlash.Components, uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
   uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg,
-  uRpDataFlash.Utils;
+  uRpDataFlash.Utils, uRpResourceString;
 
 const
   C_DEFAULT_PROXY_NAME = 'uClassesProxyGenerator';
@@ -847,7 +847,7 @@ var
   lEnumGrupos: TListEnumerator;
   lEnumComandos: TCollectionEnumerator;
 
-  lController: TLRDataFlashComandController;
+  lController: TRpDataFlashComandController;
   lItemComando: TLRDataFlashComandItem;
 begin
   // registrar os comandos do Collection
@@ -857,7 +857,7 @@ begin
     lEnumGrupos := GetServer.Controllers.GetEnumerator;
     while (lEnumGrupos.MoveNext) do
     begin
-      lController := TLRDataFlashComandController(lEnumGrupos.Current);
+      lController := TRpDataFlashComandController(lEnumGrupos.Current);
       lEnumComandos := lController.Comandos.GetEnumerator;
       try
         while lEnumComandos.MoveNext do
@@ -1474,7 +1474,7 @@ begin
     for i := 0 to Self.Count - 1 do
     begin
       lComent := 'Comando: ' + Self[i].NomeClasse;
-      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> C_COMMAND_NO_DESCRIPTION) then
+      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> R_DATAFLASH_CMD_NO_DESCRIPTION) then
         lComent := lComent + '|' + Self[i].Descricao;
 
       lTexto.Add( FormatParamLine(4, '{ ' + lComent + ' }', ' ') );

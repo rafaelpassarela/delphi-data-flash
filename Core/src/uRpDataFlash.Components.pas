@@ -14,26 +14,27 @@ uses
   uRpDataFlash.Utils;
 
 type
-  TLRDataFlashConexaoItem = class;
-  TLRDataFlashConexaoCustom = class;
-  TLRDataFlashConexaoClienteCustom = class;
-  TLRDataFlashConexaoServer = class;
-  TLRDataFlashComandController = class;
-  TLRDataFlashComandControllerList = class;
-  TLRDataFlashProviderControllerList = class;
+  TRpDataFlashConnectionItem = class;
+  TRpDataFlashCustomConnection = class;
+  TRpDataFlashCustomClientConnection = class;
+  TRpDataFlashServerConnection = class;
+  TRpDataFlashComandController = class;
+  TRpDataFlashComandControllerList = class;
+  TRpDataFlashProviderControllerList = class;
 
-  TLRDataFlashOnNovoLog                   = procedure(Sender : TObject; ATipoLog : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TRpDataFlashClientInfo) of object;
-  TLRDataFlashOnException                 = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
-  TLRDataFlashOnAntesConexaoClienteEvento = procedure(Sender : TObject; var APermitir : Boolean) of object;
-  TLRDataFlashOnConexaoCliente            = procedure(Sender : TObject; const AConexaoItem : TLRDataFlashConexaoItem) of object;
-  TLRDataFlashOnRecebimentoGenerico       = function(Sender : TObject; const AMensagem : string; AItemConexao : TLRDataFlashConexaoItem) : string of object;
-  TLRDataFlashRecebimento                 = function(Sender : TObject; AItemConexao : TLRDataFlashConexaoItem) : string of object;
-  TLRDataFlashOnErroEnvio                 = procedure(Sender : TObject; const AProtocolo : TProtocolo; const AException : Exception) of object;
-  TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AItemConexao : TLRDataFlashConexaoItem) of object;
+  TRpDataFlashOnGenericReceipt         = function(Sender : TObject; const AMenssage : string; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
+  TRpDataFlashOnReceiving              = function(Sender : TObject; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
+  TRpDataFlashOnNewLog                 = procedure(Sender : TObject; ALogType : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TRpDataFlashClientInfo) of object;
+  TRpDataFlashOnException              = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
+  TRpDataFlashOnBeforeClientConnection = procedure(Sender : TObject; var AAllow : Boolean) of object;
+  TRpDataFlashOnClientConnection       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
+
+  TRpDataFlashOnSendingError           = procedure(Sender : TObject; const AProtocol : TProtocolo; const AException : Exception) of object;
+  TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
   TLRDataFlashOnCriarExecutor             = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
-  TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AItemConexao : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
+  TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AConnectionItem : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
   TLRDataFlashOnTimeOutCheck              = procedure(Sender : TObject; const AOrigem : TRpDataFlashValidationOrigin; var AContinue : Boolean) of object;
-  TLRDataFlashOnBeforeExecuteCommand      = procedure(Sender : TObject; const AItemConexao : TLRDataFlashConexaoItem; var AContinue : Boolean; out AMessage : string) of object;
+  TLRDataFlashOnBeforeExecuteCommand      = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem; var AContinue : Boolean; out AMessage : string) of object;
   // DataSet
   TLRDataFlashOnExecSQL = function (const AComando: IRpDataFlashCommandInterfaced; var ASQL: string; var AContinue : Boolean) : Boolean of object;
   TLRDataFlashOnSelect = function (const AComando: IRpDataFlashCommandInterfaced; var ASelectSQL : string; var AContinue : Boolean): Boolean of object;
@@ -53,7 +54,7 @@ type
 
   ILRDataFlashExecutorComandController = interface
   ['{0A57044F-0EAF-4837-ABA1-A4F951FA8B09}']
-    function GetServer : TLRDataFlashConexaoServer;
+    function GetServer : TRpDataFlashServerConnection;
   end;
 
   ILRDataFlashConfigConexaoView = interface
@@ -72,7 +73,7 @@ type
 
   TLRDataFlashComandHelper = class helper for TRpDataFlashCommand
   public
-    function GetServer : TLRDataFlashConexaoServer;
+    function GetServer : TRpDataFlashServerConnection;
   end;
 
   TLRDataFlashExecutorCallBack = class(TInterfacedObject, ILRDataFlashExecutorCallBack)
@@ -87,8 +88,8 @@ type
 
   TLRDataFlashSyncLogEvent = class(TIdNotify)
   private
-    FLRDataFlashIP : TLRDataFlashConexaoCustom;
-    FEvento : TLRDataFlashOnNovoLog;
+    FLRDataFlashIP : TRpDataFlashCustomConnection;
+    FEvento : TRpDataFlashOnNewLog;
     FTipoLog : TRpDataFlashServiceLog;
     FLog : string;
     FClientInfo : TRpDataFlashClientInfo;
@@ -98,30 +99,30 @@ type
 
   TLRDataFlashSyncConexaoEvent = class(TIdNotify)
   private
-    FLRDataFlashIP : TLRDataFlashConexaoCustom;
-    FEvento : TLRDataFlashOnConexaoCliente;
-    FConexaoItem : TLRDataFlashConexaoItem;
+    FLRDataFlashIP : TRpDataFlashCustomConnection;
+    FEvento : TRpDataFlashOnClientConnection;
+    FConexaoItem : TRpDataFlashConnectionItem;
   protected
     procedure DoNotify; override;
   end;
 
   TLRDataFlashSyncConexaoEventNew = class(TIdNotify)
   private
-    FLRDataFlashIP : TLRDataFlashConexaoCustom;
+    FLRDataFlashIP : TRpDataFlashCustomConnection;
     FEvento : TLRDataFlashOnCriarExecutor;
     FExecutor : IRpPackageCommandExecutor;
   protected
     procedure DoNotify; override;
   end;
 
-  TLRDataFlashConexaoItem = class(TInterfacedPersistent, ISessionInstanceController, IAutenticationProvider)
+  TRpDataFlashConnectionItem = class(TInterfacedPersistent, ISessionInstanceController, IAutenticationProvider)
   private
     FInterfaceList : TInterfaceList;
     FHandler: TIdIOHandler;
     FNomeCliente: string;
     FExecutor: IRpPackageCommandExecutor;
-    FOwner: TLRDataFlashConexaoCustom;
-    FTcpClientPonte: TLRDataFlashConexaoClienteCustom;
+    FOwner: TRpDataFlashCustomConnection;
+    FTcpClientPonte: TRpDataFlashCustomClientConnection;
     FQuebras : TRpQuebraProtocoloList;
     FOnCallBack: TRpDataFlashCallBackEvent;
     FIdentificadorCliente: string;
@@ -135,7 +136,7 @@ type
     procedure SetPassword(const Value : string);
     procedure SetAutenticado(const Value : Boolean);
   public
-    constructor Create(AOwner : TLRDataFlashConexaoCustom; pHandler : TIdIOHandler);
+    constructor Create(AOwner : TRpDataFlashCustomConnection; pHandler : TIdIOHandler);
     destructor Destroy; override;
     function LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
     procedure AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
@@ -145,7 +146,7 @@ type
     property IdentificadorCliente : string read FIdentificadorCliente write FIdentificadorCliente;
     property Handler : TIdIOHandler read FHandler write FHandler;
     property Executor : IRpPackageCommandExecutor read FExecutor write FExecutor;
-    property TcpClientPonte : TLRDataFlashConexaoClienteCustom read FTcpClientPonte;
+    property TcpClientPonte : TRpDataFlashCustomClientConnection read FTcpClientPonte;
     property Quebras : TRpQuebraProtocoloList read FQuebras;
     property Username : string read GetUserName write SetUsername;
     property Password : string read GetPassword write SetPassword;
@@ -194,12 +195,12 @@ type
     property Enabled : Boolean read FEnabled write FEnabled default True;
   end;
 
-  TLRDataFlashConexaoCustom = class(TComponent, IRpDataFlashFileTransferSupport)
+  TRpDataFlashCustomConnection = class(TComponent, IRpDataFlashFileTransferSupport)
   private
     FServidor : string;
-    FInternalOnProcessar: TLRDataFlashRecebimento;
-    FOnNovoLog: TLRDataFlashOnNovoLog;
-    FOnException: TLRDataFlashOnException;
+    FInternalOnProcessar: TRpDataFlashOnReceiving;
+    FOnNovoLog: TRpDataFlashOnNewLog;
+    FOnException: TRpDataFlashOnException;
     FTipoCriptografia: TRpDataFlashEncryptionType;
     FIpsReconhecidos: TStringList;
     FQuebrasProtocolosRecebidos: TRpQuebraProtocoloList;
@@ -228,17 +229,17 @@ type
     procedure NovaExcecao(const AException : Exception); overload;
 
     function CriarException(const AException : Exception; const AResultType : TSerializationFormat = sfJSON) : string;
-    procedure TentaGerarException(const AProtocolo : TProtocolo); overload;
-    function TentaGerarException(const AMensagem : string; out AException : string) : Boolean; overload;
+    procedure TentaGerarException(const AProtocol : TProtocolo); overload;
+    function TentaGerarException(const AMenssage : string; out AException : string) : Boolean; overload;
 
     procedure Inicializar; virtual;
     procedure Finalizar; virtual;
     procedure DoSalvarConfiguracoes(const ANode : IXMLNode); virtual;
     procedure DoCarregarConfiguracoes(const ANode : IXMLNode); virtual;
 
-    procedure NovoLog(const ATipoLog : TRpDataFlashServiceLog; const ALog : string;
+    procedure NovoLog(const ALogType : TRpDataFlashServiceLog; const ALog : string;
       const AContext : TIdContext); overload;
-    procedure NovoLog(const ATipoLog : TRpDataFlashServiceLog; const ALog : string;
+    procedure NovoLog(const ALogType : TRpDataFlashServiceLog; const ALog : string;
       const AIP : string); overload;
     procedure Limpar; virtual;
 
@@ -279,7 +280,7 @@ type
     function GetFile(const AFileID : string; AArquivo : IFileProxy) : Boolean; virtual;
     function PutFile(const AArquivo : IFileProxy) : Boolean; virtual;
 
-    property OnInternalProcessar : TLRDataFlashRecebimento read FInternalOnProcessar write FInternalOnProcessar;
+    property OnInternalProcessar : TRpDataFlashOnReceiving read FInternalOnProcessar write FInternalOnProcessar;
     property Servidor : string read FServidor write SetServidor stored True;
     property Conectado : Boolean read GetConectado;
     property TipoCriptografia : TRpDataFlashEncryptionType read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
@@ -288,27 +289,27 @@ type
     property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem stored True default mtCommand;
     property FileTransfer : TLRDataFlashFileTransfer read FFileTransfer write FFileTransfer;
 
-    property OnNovoLog : TLRDataFlashOnNovoLog read FOnNovoLog write FOnNovoLog;
-    property OnException : TLRDataFlashOnException read FOnException write FOnException;
+    property OnNovoLog : TRpDataFlashOnNewLog read FOnNovoLog write FOnNovoLog;
+    property OnException : TRpDataFlashOnException read FOnException write FOnException;
     property OnStatus : TRpDataFlashOnStatus read FOnStatus write FOnStatus;
     property OnTimeOutCheck : TLRDataFlashOnTimeOutCheck read FOnTimeOutCheck write FOnTimeOutCheck;
   end;
 
-  TLRDataFlashConexaoServer = class(TLRDataFlashConexaoCustom, IServerInstanceController)
+  TRpDataFlashServerConnection = class(TRpDataFlashCustomConnection, IServerInstanceController)
   private
     FConectorTCP : TIdTCPServer;
     FConectorREST : TIdHTTPServer;
     FConectorFTP : TIdFTPServer;
 
-    FOnAntesConexaoCliente: TLRDataFlashOnAntesConexaoClienteEvento;
-    FOnConexaoCliente: TLRDataFlashOnConexaoCliente;
-    FOnDesconexaoCliente: TLRDataFlashOnConexaoCliente;
+    FOnAntesConexaoCliente: TRpDataFlashOnBeforeClientConnection;
+    FOnConexaoCliente: TRpDataFlashOnClientConnection;
+    FOnDesconexaoCliente: TRpDataFlashOnClientConnection;
     FDesconectandoServer : Boolean;
-    FPonte: TLRDataFlashConexaoClienteCustom;
-    FControllers: TLRDataFlashComandControllerList;
+    FPonte: TRpDataFlashCustomClientConnection;
+    FControllers: TRpDataFlashComandControllerList;
     FUtilizarControllers: Boolean;
-    FProviders: TLRDataFlashProviderControllerList;
-    FOnRecebimentoGenerico: TLRDataFlashOnRecebimentoGenerico;
+    FProviders: TRpDataFlashProviderControllerList;
+    FOnRecebimentoGenerico: TRpDataFlashOnGenericReceipt;
     FInterfaceList : TInterfaceList;
     FOnProcessamentoManual: TLRDataFlashOnProcessamentoManual;
     FOnAutenticarCliente: TLRDataFlashOnAutenticarCliente;
@@ -320,9 +321,9 @@ type
     FPrefixoBaseComandos: string;
     FNumeroConectados: Integer;
     FOnObjectRequest: TRpDataFlashOnObjectRequest;
-    function EnviarCallBack(const AContext: TIdContext; const AMensagem : string) : Boolean;
-    procedure NotificarConexaoCliente(const AConexaoItem : TLRDataFlashConexaoItem;
-      const AEvento : TLRDataFlashOnConexaoCliente);
+    function EnviarCallBack(const AContext: TIdContext; const AMenssage : string) : Boolean;
+    procedure NotificarConexaoCliente(const AConnectionItem : TRpDataFlashConnectionItem;
+      const AEvento : TRpDataFlashOnClientConnection);
 
     function Conector : TIdTCPServer;
 
@@ -333,20 +334,20 @@ type
     procedure AoDesconectarCliente(AContext: TIdContext);
 //    procedure DoFreeExecutor(AExecutor : IExecutorComandoPacote);
 
-    function ItemConexao(AContext: TIdContext) : TLRDataFlashConexaoItem;
+    function ItemConexao(AContext: TIdContext) : TRpDataFlashConnectionItem;
 
-    function ExecutarComando(const AItem : TLRDataFlashConexaoItem; AContext: TIdContext;
-      const AProtocolo : TProtocolo; out ASaida : string; out AArquivo : string;
+    function ExecutarComando(const AItem : TRpDataFlashConnectionItem; AContext: TIdContext;
+      const AProtocol : TProtocolo; out ASaida : string; out AArquivo : string;
       const ARequestInfo: TIdHTTPRequestInfo = nil; AResponseInfo: TIdHTTPResponseInfo = nil) : Boolean;
 
     procedure Receber(AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo = nil;
       AResponseInfo: TIdHTTPResponseInfo = nil);
 
     function GetServidor: string;
-    procedure SetPonte(const Value: TLRDataFlashConexaoClienteCustom);
-    function CarregarConexaoCliente(const AConexaoItem : TLRDataFlashConexaoItem; out AConexao: TLRDataFlashConexaoClienteCustom) : Boolean;
-    function CarregarStatusProcessamento(const AConexaoItem : TLRDataFlashConexaoItem;
-      out AConexao: TLRDataFlashConexaoClienteCustom) : TRpDataFlashProcessingStatus;
+    procedure SetPonte(const Value: TRpDataFlashCustomClientConnection);
+    function CarregarConexaoCliente(const AConnectionItem : TRpDataFlashConnectionItem; out AConexao: TRpDataFlashCustomClientConnection) : Boolean;
+    function CarregarStatusProcessamento(const AConnectionItem : TRpDataFlashConnectionItem;
+      out AConexao: TRpDataFlashCustomClientConnection) : TRpDataFlashProcessingStatus;
     function GetNumeroClientesConectados: Integer;
     // controllers e providers
     function CarregarComandoViaControllers(const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
@@ -357,8 +358,8 @@ type
     function GetProvidersCount: Integer;
     function GetUtilizarControllers : Boolean;
     procedure SetUtilizarControllers(const Value : Boolean);
-    function GetControllers: TLRDataFlashComandControllerList;
-    function GetProviders: TLRDataFlashProviderControllerList;
+    function GetControllers: TRpDataFlashComandControllerList;
+    function GetProviders: TRpDataFlashProviderControllerList;
     // ftp
     procedure OnFTPServerAfterUserLogin(ASender: TIdFTPServerContext);
     procedure OnFTPServerUserLogin(ASender: TIdFTPServerContext;
@@ -385,8 +386,8 @@ type
     procedure AfterConstruction; override;
     procedure AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
     function LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
-    property Controllers : TLRDataFlashComandControllerList read GetControllers;
-    property Providers : TLRDataFlashProviderControllerList read GetProviders;
+    property Controllers : TRpDataFlashComandControllerList read GetControllers;
+    property Providers : TRpDataFlashProviderControllerList read GetProviders;
   published
     property ConexaoTCPIP;
     property ConexaoREST;
@@ -404,16 +405,16 @@ type
     property OnTimeOutCheck;
     property OnInternalProcessar;
 
-    property OnAntesConexaoCliente : TLRDataFlashOnAntesConexaoClienteEvento read FOnAntesConexaoCliente write FOnAntesConexaoCliente;
-    property OnConexaoCliente : TLRDataFlashOnConexaoCliente read FOnConexaoCliente write FOnConexaoCliente;
-    property OnDesconexaoCliente : TLRDataFlashOnConexaoCliente read FOnDesconexaoCliente write FOnDesconexaoCliente;
-    property OnRecebimentoGenerico : TLRDataFlashOnRecebimentoGenerico read FOnRecebimentoGenerico write FOnRecebimentoGenerico;
+    property OnAntesConexaoCliente : TRpDataFlashOnBeforeClientConnection read FOnAntesConexaoCliente write FOnAntesConexaoCliente;
+    property OnConexaoCliente : TRpDataFlashOnClientConnection read FOnConexaoCliente write FOnConexaoCliente;
+    property OnDesconexaoCliente : TRpDataFlashOnClientConnection read FOnDesconexaoCliente write FOnDesconexaoCliente;
+    property OnRecebimentoGenerico : TRpDataFlashOnGenericReceipt read FOnRecebimentoGenerico write FOnRecebimentoGenerico;
     property OnProcessamentoManual : TLRDataFlashOnProcessamentoManual read FOnProcessamentoManual write FOnProcessamentoManual;
     property OnAutenticarCliente : TLRDataFlashOnAutenticarCliente read FOnAutenticarCliente write FOnAutenticarCliente;
     property OnBeforeExecuteCommand : TLRDataFlashOnBeforeExecuteCommand read FOnBeforeExecuteCommand write FOnBeforeExecuteCommand;
     property OnObjectRequest : TRpDataFlashOnObjectRequest read FOnObjectRequest write FOnObjectRequest;
 
-    property Ponte : TLRDataFlashConexaoClienteCustom read FPonte write SetPonte;
+    property Ponte : TRpDataFlashCustomClientConnection read FPonte write SetPonte;
     property Servidor : string read GetServidor;
     property ControllersCount : Integer read GetControllersCount;
     property ProvidersCount : Integer read GetProvidersCount;
@@ -426,7 +427,7 @@ type
     property OnBeforeDataSetRollbackTransaction : TLRDataFlashOnTransactionEvent read FOnBeforeDataSetRollbackTransaction write FOnBeforeDataSetRollbackTransaction;
   end;
 
-  TLRDataFlashConexaoClienteCustom = class(TLRDataFlashConexaoCustom)
+  TRpDataFlashCustomClientConnection = class(TRpDataFlashCustomConnection)
   private
     FThreadConexao: TThreadConexao;
     FConnectionHelper: TLRDataFlashConnectionHelperCustom;
@@ -434,7 +435,7 @@ type
     FOnConnect: TRpDataFlashOnConnectOnServer;
     FAoSemServico: TRpDataFlashOnNoService;
     FConfigurarConexao: Boolean;
-    FAoErroEnvio: TLRDataFlashOnErroEnvio;
+    FAoErroEnvio: TRpDataFlashOnSendingError;
     FTimeOutLeitura: Integer;
     FTimeOutConexao: Integer;
     FEsperaReconexao: Integer;
@@ -449,10 +450,10 @@ type
     FOnAfterConnect: TRpDataFlashOnConnectOnServer;
     FOnBeforeConnect: TRpDataFlashOnConnectOnServer;
     FConvertLocalHostToIP: Boolean;
-    function Enviar(const AIdentificador, AMensagem, ANomeComando : string) : string; virtual;
+    function Enviar(const AIdentificador, AMenssage, ANomeComando : string) : string; virtual;
     function PodeConectar : Boolean;
     procedure DoNovaExcecao(const E:Exception);
-    procedure TentaExecutarCallBack(const AProtocolo : TProtocolo);
+    procedure TentaExecutarCallBack(const AProtocol : TProtocolo);
     function GetPorta: Integer; virtual;
     procedure SetPorta(const Value: Integer); virtual;
     procedure SetServidor(const Value: string); override;
@@ -475,12 +476,12 @@ type
     procedure DoDesconectar; override;
     procedure DoSalvarConfiguracoes(const ANode : IXMLNode); override;
     procedure DoCarregarConfiguracoes(const ANode : IXMLNode); override;
-    procedure NovoErroEnvio(const AException : Exception; const AProtocolo : TProtocolo);
+    procedure NovoErroEnvio(const AException : Exception; const AProtocol : TProtocolo);
     procedure Limpar; override;
   public
     constructor Create(AOwner : TComponent); override;
 
-    function Comunicar(const AIdentificador : string; const AMensagem : string = ''; const ANomeComando : string = '') : string; overload;
+    function Comunicar(const AIdentificador : string; const AMenssage : string = ''; const ANomeComando : string = '') : string; overload;
     function Comunicar(const AComando : TRpDataFlashCommand) : string; overload;
     function Comunicar(const AComando : IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters) : string; overload;
     // chamadas com callback
@@ -497,7 +498,7 @@ type
     function ConfirmFileReceipt(const AFileID : string; const ADeleteTemp : Boolean;
       const ADeleteOriginal : Boolean; AFtpClient : TIdFTP) : Boolean;
 
-    procedure ClonarDe(const AOther: TLRDataFlashConexaoClienteCustom; const AClonarEnventos : Boolean = False);
+    procedure ClonarDe(const AOther: TRpDataFlashCustomClientConnection; const AClonarEnventos : Boolean = False);
     { .:: --> Ao adicionar uma nova propriedade, verificar funcao "ClonarDe" <-- ::. }
     property Porta : Integer read GetPorta write SetPorta default 8890;
     property Servidor;
@@ -518,10 +519,10 @@ type
 
     property AoDesconectar : TRpDataFlashOnConnectOnServer read FAoDesconectar write FAoDesconectar;
     property AoSemServico : TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
-    property AoErroEnvio : TLRDataFlashOnErroEnvio read FAoErroEnvio write FAoErroEnvio;
+    property AoErroEnvio : TRpDataFlashOnSendingError read FAoErroEnvio write FAoErroEnvio;
   end;
 
-  TLRDataFlashConexaoCliente = class(TLRDataFlashConexaoClienteCustom)
+  TLRDataFlashConexaoCliente = class(TRpDataFlashCustomClientConnection)
   protected
     function DoComunicarComThred(const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : ILRDataFlashExecutorCallBack) : string; override;
@@ -555,14 +556,14 @@ type
     property AoErroEnvio;
   end;
 
-  TLRDataFlashConexaoREST = class(TLRDataFlashConexaoClienteCustom)
+  TLRDataFlashConexaoREST = class(TRpDataFlashCustomClientConnection)
   protected
     function DoComunicarComThred(const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : ILRDataFlashExecutorCallBack) : string; override;
     procedure InternalEnviar(const AHandler : TIdHTTP; const AValor, ANomeComando : string;
       out AResponse : TStringStream); reintroduce;
   private
-    function Enviar(const AIdentificador, AMensagem, ANomeComando : string) : string; override;
+    function Enviar(const AIdentificador, AMenssage, ANomeComando : string) : string; override;
     function GetPorta: Integer; override;
     procedure SetPorta(const Value: Integer); override;
     procedure SetServidor(const Value: string); override;
@@ -588,17 +589,17 @@ type
     property AoErroEnvio;
   end;
 
-  TLRDataFlashThreadInternalAdapter = class(TLRDataFlashConexaoClienteCustom)
+  TLRDataFlashThreadInternalAdapter = class(TRpDataFlashCustomClientConnection)
   public
     function DoInternalConectar : Boolean;
   end;
 
-  TLRDataFlashComandController = class(TComponent)
+  TRpDataFlashComandController = class(TComponent)
   private
-    FServer: TLRDataFlashConexaoServer;
+    FServer: TRpDataFlashServerConnection;
     FComandos: TLRDataFlashComandList;
     FGrupo: string;
-    procedure SetServer(const Value: TLRDataFlashConexaoServer);
+    procedure SetServer(const Value: TRpDataFlashServerConnection);
     procedure SetGrupo(const Value: string);
     function GetGrupo: string;
 
@@ -614,24 +615,24 @@ type
 
     procedure EditarComandos;
   published
-    property Server   : TLRDataFlashConexaoServer read FServer write SetServer;
+    property Server   : TRpDataFlashServerConnection read FServer write SetServer;
     property Comandos : TLRDataFlashComandList read GetComandos write SetComandos;
     property Grupo : string read GetGrupo write SetGrupo;
   end;
 
-  TLRDataFlashComandControllerList = class(TComponentList)
+  TRpDataFlashComandControllerList = class(TComponentList)
   public
     function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
 
-  TLRDataFlashProviderControllerList = class(TComponentList)
+  TRpDataFlashProviderControllerList = class(TComponentList)
   public
     function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
 
   TThreadCallback = class(TThread)
   private
-    FConexaoClient: TLRDataFlashConexaoClienteCustom;
+    FConexaoClient: TRpDataFlashCustomClientConnection;
     FResult : string;
     FComando: TRpDataFlashCommand;
     FCallbackClassName: string;
@@ -642,7 +643,7 @@ type
     procedure Execute; override;
     procedure DoTerminate; override;
   public
-    constructor Create(const AClient : TLRDataFlashConexaoClienteCustom; const AComando: TRpDataFlashCommand;
+    constructor Create(const AClient : TRpDataFlashCustomClientConnection; const AComando: TRpDataFlashCommand;
       const ACallBackClassName: string; const AExecutorCallBack: ILRDataFlashExecutorCallBack);
 
     property Comando : TRpDataFlashCommand read FComando write FComando;
@@ -657,7 +658,7 @@ type
   private
     FSerializationFormat: TSerializationFormat;
   protected
-    FClient: TLRDataFlashConexaoClienteCustom;
+    FClient: TRpDataFlashCustomClientConnection;
     FLastError: string;
     FStatusProcessamento: TRpDataFlashProcessingStatus;
     FEventoStatus : TRpDataFlashOnStatus;
@@ -668,7 +669,7 @@ type
     procedure DoComunicar(const AComando : TLRDataFlashComandoEnvio);
     function DoEnviar(const ANomeComando: string; const AParams: TRpDataFlashCommandParameters) : Boolean;
   public
-    constructor Create(ATcpClient: TLRDataFlashConexaoClienteCustom;
+    constructor Create(ATcpClient: TRpDataFlashCustomClientConnection;
       ABusyCallback : TRpDataFlashBusyCallback; const ASharedClient : Boolean = False);
     procedure SetEvents(const AEventoStatus : TRpDataFlashOnStatus);
     function GetLastError : string;
@@ -691,7 +692,7 @@ uses
 
 { TLRDataFlashConexaoCustom }
 
-procedure TLRDataFlashConexaoCustom.CarregarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.CarregarConfiguracoes(const ANode: IXMLNode);
 begin
   FServidor := ANode['Servidor'];
   FConexaoTCPIP.Port := ANode['Porta'];
@@ -700,7 +701,7 @@ begin
   DoCarregarConfiguracoes(ANode);
 end;
 
-procedure TLRDataFlashConexaoCustom.CarregarConfiguracoes(const AArquivo: string);
+procedure TRpDataFlashCustomConnection.CarregarConfiguracoes(const AArquivo: string);
 var
   lArquivo: TXMLDocument;
   lNodeConfig: IXMLNode;
@@ -713,7 +714,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.CompressStream(var AEntrada: TMemoryStream);
+procedure TRpDataFlashCustomConnection.CompressStream(var AEntrada: TMemoryStream);
 var
   SourceStream : TCompressionStream;
   DestStream : TMemoryStream;
@@ -740,12 +741,12 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.Conectar;
+procedure TRpDataFlashCustomConnection.Conectar;
 begin
   DoConectar;
 end;
 
-constructor TLRDataFlashConexaoCustom.Create(AOwner: TComponent);
+constructor TRpDataFlashCustomConnection.Create(AOwner: TComponent);
 begin
   inherited;
   FFileTransferList := TStringList.Create;
@@ -761,7 +762,7 @@ begin
   Inicializar;
 end;
 
-function TLRDataFlashConexaoCustom.CriarException(const AException: Exception;
+function TRpDataFlashCustomConnection.CriarException(const AException: Exception;
   const AResultType : TSerializationFormat): string;
 var
   lXmlException: IXMLDocument;
@@ -799,7 +800,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.DecompressStream(var AEntrada: TMemoryStream);
+procedure TRpDataFlashCustomConnection.DecompressStream(var AEntrada: TMemoryStream);
 const
   BufferSize = 4096;
 var
@@ -831,13 +832,13 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.Desconectar;
+procedure TRpDataFlashCustomConnection.Desconectar;
 begin
   DoDesconectar;
   RemoverArquivosTemporarios;
 end;
 
-destructor TLRDataFlashConexaoCustom.Destroy;
+destructor TRpDataFlashCustomConnection.Destroy;
 begin
 //  Desconectar;
   Finalizar;
@@ -850,12 +851,12 @@ begin
   inherited;
 end;
 
-procedure TLRDataFlashConexaoCustom.DoCarregarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.DoCarregarConfiguracoes(const ANode: IXMLNode);
 begin
 
 end;
 
-procedure TLRDataFlashConexaoCustom.DoInternalEnviar(const AHandler: TIdIOHandler;
+procedure TRpDataFlashCustomConnection.DoInternalEnviar(const AHandler: TIdIOHandler;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo; const AValor: string;
   const AContext : TIdContext; const AArquivo : string);
 var
@@ -935,24 +936,24 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.DoSalvarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.DoSalvarConfiguracoes(const ANode: IXMLNode);
 begin
 
 end;
 
-function TLRDataFlashConexaoCustom.FileTransfer_RegisterFile(const AFileID, AFileName: string): Boolean;
+function TRpDataFlashCustomConnection.FileTransfer_RegisterFile(const AFileID, AFileName: string): Boolean;
 begin
   FFileTransferList.Add(AFileID + '=' + AFileName);
   RemoverArquivosTemporarios;
   Result := True;
 end;
 
-procedure TLRDataFlashConexaoCustom.Finalizar;
+procedure TRpDataFlashCustomConnection.Finalizar;
 begin
   RemoverArquivosTemporarios;
 end;
 
-function TLRDataFlashConexaoCustom.TentaGerarException(const AMensagem: string; out AException : string) : Boolean;
+function TRpDataFlashCustomConnection.TentaGerarException(const AMenssage: string; out AException : string) : Boolean;
 var
   lException: IXMLDocument;
   lRoot: IXMLNode;
@@ -965,14 +966,14 @@ var
 begin
   AException := EmptyStr;
 
-  Result := Pos('Exception', AMensagem) > 0;
+  Result := Pos('Exception', AMenssage) > 0;
 
   if Result then
   begin
     // xml
-    if AMensagem[1] = '<' then
+    if AMenssage[1] = '<' then
     begin
-      lMessage := AMensagem;
+      lMessage := AMenssage;
       if Pos('<?xml version="', lMessage) <= 0 then
         lMessage := '<?xml version="1.0" encoding="iso-8859-1"?>' + sLineBreak
                   + lMessage;
@@ -1007,7 +1008,7 @@ begin
     begin
       lJson := TJSONObject.Create;
       try
-        lJson.Parse(BytesOf(AMensagem), 0);
+        lJson.Parse(BytesOf(AMenssage), 0);
         lPair := lJson.Get('Exception');
         Result := Assigned(lPair);
         if Result then
@@ -1024,51 +1025,51 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.GerarStatus(const ASituacao: TRpDataFlashStatusType;
+procedure TRpDataFlashCustomConnection.GerarStatus(const ASituacao: TRpDataFlashStatusType;
   const AProcessamentoTotal, AProcessamentoAtual: Integer; const AStatusMens : string);
 begin
   if Assigned(FOnStatus) then
     FOnStatus(Self, ASituacao, AProcessamentoTotal, AProcessamentoAtual, AStatusMens);
 end;
 
-function TLRDataFlashConexaoCustom.GetConectado: Boolean;
+function TRpDataFlashCustomConnection.GetConectado: Boolean;
 begin
   Result := False;
 end;
 
-function TLRDataFlashConexaoCustom.GetFile(const AFileID: string;
+function TRpDataFlashCustomConnection.GetFile(const AFileID: string;
   AArquivo: IFileProxy): Boolean;
 begin
   Result := False;
 end;
 
-function TLRDataFlashConexaoCustom.GetFileTransfer_Port: Integer;
+function TRpDataFlashCustomConnection.GetFileTransfer_Port: Integer;
 begin
   Result := FFileTransfer.Port;
 end;
 
-function TLRDataFlashConexaoCustom.GetFileTransfer_TempDir: string;
+function TRpDataFlashCustomConnection.GetFileTransfer_TempDir: string;
 begin
   Result := FFileTransfer.TempDir;
 end;
 
-function TLRDataFlashConexaoCustom.GetIdentificador: string;
+function TRpDataFlashCustomConnection.GetIdentificador: string;
 begin
   Result := EmptyStr;
 end;
 
-function TLRDataFlashConexaoCustom.GetNomeComputadorLocal: string;
+function TRpDataFlashCustomConnection.GetNomeComputadorLocal: string;
 begin
   Result := TRpDataFlashUtils.GetLocalComputerName;
 end;
 
-procedure TLRDataFlashConexaoCustom.Inicializar;
+procedure TRpDataFlashCustomConnection.Inicializar;
 begin
   FTipoComunicacao := ctText;
   FTipoCriptografia := tcBase64Compressed;
 end;
 
-procedure TLRDataFlashConexaoCustom.InternalEnviar(const AHandler: TIdIOHandler;
+procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandler;
   const AValor: string);
 
   procedure EnviarComoTexto;
@@ -1178,7 +1179,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoCustom.InternalReceber(
+function TRpDataFlashCustomConnection.InternalReceber(
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo): string;
 var
   lQuebra: TLRDataFlashQuebraProtocolo;
@@ -1270,7 +1271,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoCustom.InternalReceber(const AHandler: TIdIOHandler): string;
+function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandler): string;
 
   procedure ReceberComoTexto;
   var
@@ -1370,7 +1371,7 @@ begin
   NovoLog(slOnReceive, Result, EmptyStr);
 end;
 
-function TLRDataFlashConexaoCustom.isComandoDesejado(const pComando,
+function TRpDataFlashCustomConnection.isComandoDesejado(const pComando,
   pMensagem: string): Boolean;
 
   function DoExpectedCmd : Boolean;
@@ -1393,18 +1394,18 @@ begin
     Result := False;
 end;
 
-procedure TLRDataFlashConexaoCustom.Limpar;
+procedure TRpDataFlashCustomConnection.Limpar;
 begin
 end;
 
-procedure TLRDataFlashConexaoCustom.NovaExcecao(const AException: Exception; out AExpandir : Boolean);
+procedure TRpDataFlashCustomConnection.NovaExcecao(const AException: Exception; out AExpandir : Boolean);
 begin
   AExpandir := True;
   if Assigned(FOnException) then
     FOnException(Self, AException, AExpandir);
 end;
 
-procedure TLRDataFlashConexaoCustom.NovaExcecao(const AException: Exception);
+procedure TRpDataFlashCustomConnection.NovaExcecao(const AException: Exception);
 var
   lExpandir: Boolean;
 begin
@@ -1413,7 +1414,7 @@ begin
     FOnException(Self, AException, lExpandir);
 end;
 
-procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TRpDataFlashServiceLog;
+procedure TRpDataFlashCustomConnection.NovoLog(const ALogType: TRpDataFlashServiceLog;
   const ALog: string; const AContext: TIdContext);
 var
   lIP: string;
@@ -1421,10 +1422,10 @@ begin
   lIP := EmptyStr;
   if AContext <> nil then
     lIP := AContext.Binding.PeerIP;
-  NovoLog(ATipoLog, ALog, lIP);
+  NovoLog(ALogType, ALog, lIP);
 end;
 
-procedure TLRDataFlashConexaoCustom.NovoLog(const ATipoLog: TRpDataFlashServiceLog;
+procedure TRpDataFlashCustomConnection.NovoLog(const ALogType: TRpDataFlashServiceLog;
   const ALog: string; const AIP : string);
 var
   lLog: TLRDataFlashSyncLogEvent;
@@ -1460,7 +1461,7 @@ begin
     try
       lLog.FLRDataFlashIP  := Self;
       lLog.FEvento    := FOnNovoLog;
-      lLog.FTipoLog   := ATipoLog;
+      lLog.FTipoLog   := ALogType;
       lLog.FLog       := ALog;
       lLog.FClientInfo.Initialize;
       lLog.FClientInfo.GUIDComando := EmptyStr; //IfThen(pGUID = '', 'GUID DESCONHECIDO', pGUID);
@@ -1478,17 +1479,17 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.OnFileTransferLog(const ALogMessage: string);
+procedure TRpDataFlashCustomConnection.OnFileTransferLog(const ALogMessage: string);
 begin
   NovoLog(slOnStatus, ALogMessage, nil);
 end;
 
-function TLRDataFlashConexaoCustom.PutFile(const AArquivo: IFileProxy): Boolean;
+function TRpDataFlashCustomConnection.PutFile(const AArquivo: IFileProxy): Boolean;
 begin
   Result := False;
 end;
 
-procedure TLRDataFlashConexaoCustom.RemoverArquivosTemporarios;
+procedure TRpDataFlashCustomConnection.RemoverArquivosTemporarios;
 var
   lRec: TSearchRec;
   lFileAge: TDateTime;
@@ -1509,7 +1510,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.SalvarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.SalvarConfiguracoes(const ANode: IXMLNode);
 begin
   ANode['Servidor'] := FServidor;
   ANode['Porta'] := FConexaoTCPIP.Port;
@@ -1517,7 +1518,7 @@ begin
   DoSalvarConfiguracoes(ANode);
 end;
 
-procedure TLRDataFlashConexaoCustom.SalvarConfiguracoes(const AArquivo: string);
+procedure TRpDataFlashCustomConnection.SalvarConfiguracoes(const AArquivo: string);
 var
   lArquivo: TXMLDocument;
   lNodeRoot: IXMLNode;
@@ -1529,7 +1530,7 @@ begin
   lArquivo.SaveToFile(AArquivo);
 end;
 
-procedure TLRDataFlashConexaoCustom.SeparaComando(const pComandoCompleto: string;
+procedure TRpDataFlashCustomConnection.SeparaComando(const pComandoCompleto: string;
   out AComando, AGuid: string);
 var
   lLen : Integer;
@@ -1561,29 +1562,29 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoCustom.SetServidor(const Value: string);
+procedure TRpDataFlashCustomConnection.SetServidor(const Value: string);
 begin
   FServidor := Value;
 //  if Pos(':', FServidor) > 0 then
 //    Delete(FServidor, Pos(':', FServidor) - 1, Length(FServidor));
 end;
 
-procedure TLRDataFlashConexaoCustom.SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
+procedure TRpDataFlashCustomConnection.SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
 begin
   FTipoCriptografia := Value;
 end;
 
-procedure TLRDataFlashConexaoCustom.TentaGerarException(const AProtocolo : TProtocolo);
+procedure TRpDataFlashCustomConnection.TentaGerarException(const AProtocol : TProtocolo);
 var
   lException: string;
 begin
-  if (AProtocolo.IsErro) and (TentaGerarException(AProtocolo.Mensagem, lException)) then
+  if (AProtocol.IsErro) and (TentaGerarException(AProtocol.Mensagem, lException)) then
     raise ERpDataFlashException.Create(lException);
 end;
 
 { TLRDataFlashConexaoServer }
 
-function TLRDataFlashConexaoServer.CarregarComandoViaControllers(
+function TRpDataFlashServerConnection.CarregarComandoViaControllers(
   const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
   out AParametros : TRpDataFlashCommandParameters) : Boolean;
 begin
@@ -1601,7 +1602,7 @@ begin
   Result := AObjComando <> nil;
 end;
 
-function TLRDataFlashConexaoServer.CarregarComandoViaProviders(
+function TRpDataFlashServerConnection.CarregarComandoViaProviders(
   const AComando: string; out AObjComando: IRpDataFlashCommandInterfaced;
   out AParametros: TRpDataFlashCommandParameters): Boolean;
 begin
@@ -1619,16 +1620,16 @@ begin
   Result := AObjComando <> nil;
 end;
 
-function TLRDataFlashConexaoServer.CarregarConexaoCliente(
-  const AConexaoItem : TLRDataFlashConexaoItem;
-  out AConexao: TLRDataFlashConexaoClienteCustom) : Boolean;
+function TRpDataFlashServerConnection.CarregarConexaoCliente(
+  const AConnectionItem : TRpDataFlashConnectionItem;
+  out AConexao: TRpDataFlashCustomClientConnection) : Boolean;
 begin
   AConexao := nil;
   Result := False;
 
   if IsPonte then
   begin
-    AConexao := AConexaoItem.TcpClientPonte;
+    AConexao := AConnectionItem.TcpClientPonte;
     try
       if AConexao <> nil then
       begin
@@ -1644,22 +1645,22 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoServer.CarregarStatusProcessamento(
-  const AConexaoItem: TLRDataFlashConexaoItem;
-  out AConexao: TLRDataFlashConexaoClienteCustom): TRpDataFlashProcessingStatus;
+function TRpDataFlashServerConnection.CarregarStatusProcessamento(
+  const AConnectionItem: TRpDataFlashConnectionItem;
+  out AConexao: TRpDataFlashCustomClientConnection): TRpDataFlashProcessingStatus;
 begin
   AConexao := nil;
   Result := psServer;
   if IsPonte then
   begin
-   if CarregarConexaoCliente(AConexaoItem, AConexao) then
+   if CarregarConexaoCliente(AConnectionItem, AConexao) then
      Result := psBridgeOnline
    else
      Result := psBridgeOffLine;
   end;
 end;
 
-function TLRDataFlashConexaoServer.ComandoRequerAutenticacao(const AClasseComando: string;
+function TRpDataFlashServerConnection.ComandoRequerAutenticacao(const AClasseComando: string;
   const AParametros : TRpDataFlashCommandParameters): Boolean;
 var
   lIgnorados: Boolean;
@@ -1692,12 +1693,12 @@ begin
   Result := not lIgnorados;
 end;
 
-function TLRDataFlashConexaoServer.Conector: TIdTCPServer;
+function TRpDataFlashServerConnection.Conector: TIdTCPServer;
 begin
   Result := FConectorTCP;
 end;
 
-procedure TLRDataFlashConexaoServer.DoConectar;
+procedure TRpDataFlashServerConnection.DoConectar;
 begin
   inherited;
   try
@@ -1780,7 +1781,7 @@ begin
   RemoverArquivosTemporarios;
 end;
 
-procedure TLRDataFlashConexaoServer.DoDesconectar;
+procedure TRpDataFlashServerConnection.DoDesconectar;
 begin
   FDesconectandoServer := True;
 
@@ -1824,7 +1825,7 @@ end;
 //  AExecutor := nil;
 //end;
 
-function TLRDataFlashConexaoServer.EnviarCallBack(const AContext: TIdContext; const AMensagem: string) : Boolean;
+function TRpDataFlashServerConnection.EnviarCallBack(const AContext: TIdContext; const AMenssage: string) : Boolean;
 var
   lProtocolo: TProtocolo;
   lResposta: string;
@@ -1832,7 +1833,7 @@ begin
   lProtocolo := TProtocolo.Create(TipoCriptografia);
   try
     lProtocolo.Identificador := TAG_CALLBACK;
-    lProtocolo.Mensagem := AMensagem;
+    lProtocolo.Mensagem := AMenssage;
     lResposta := lProtocolo.Montar;
 
     InternalEnviar(AContext.Connection.IOHandler, lResposta);
@@ -1843,14 +1844,14 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoServer.ExecutarComando(const AItem : TLRDataFlashConexaoItem;
-  AContext: TIdContext; const AProtocolo : TProtocolo; out ASaida : string;
+function TRpDataFlashServerConnection.ExecutarComando(const AItem : TRpDataFlashConnectionItem;
+  AContext: TIdContext; const AProtocol : TProtocolo; out ASaida : string;
   out AArquivo : string; const ARequestInfo: TIdHTTPRequestInfo = nil;
   AResponseInfo: TIdHTTPResponseInfo = nil) : Boolean;
 var
   lComando: IRpDataFlashCommandInterfaced;
   lParametros: TRpDataFlashCommandParameters;
-  lTcpClient: TLRDataFlashConexaoClienteCustom;
+  lTcpClient: TRpDataFlashCustomClientConnection;
   lContinuar: Boolean;
   lStatusProcessamento: TRpDataFlashProcessingStatus;
   lNomeComando: string;
@@ -1978,22 +1979,22 @@ begin
   lParametros := nil;
   lTcpClient := nil;
   try
-    if AProtocolo.Identificador <> TAG_COMMAND then
+    if AProtocol.Identificador <> TAG_COMMAND then
       raise ERpDataFlashException.Create('Identificador não é um comando: ' + sLineBreak +
-        'Identificador: ' + AProtocolo.Identificador);
+        'Identificador: ' + AProtocol.Identificador);
 
     lCarregado := False;
     if FUtilizarControllers then
     begin
       // localiza um provider ligado ao servidor
-      lCarregado := CarregarComandoViaProviders(AProtocolo.Mensagem, lComando, lParametros);
+      lCarregado := CarregarComandoViaProviders(AProtocol.Mensagem, lComando, lParametros);
       if not lCarregado then
       begin
         lComando := nil;
         if lParametros <> nil then
           FreeAndNil(lParametros);
         // vai para os comandos registrados no controller
-        lCarregado := CarregarComandoViaControllers(AProtocolo.Mensagem, lComando, lParametros);
+        lCarregado := CarregarComandoViaControllers(AProtocol.Mensagem, lComando, lParametros);
         if not lCarregado then
         begin
           lComando := nil;
@@ -2004,7 +2005,7 @@ begin
     end;
 
     if not lCarregado then
-      lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocolo.Mensagem, lComando, lParametros, Self, AItem));
+      lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocol.Mensagem, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
       raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Comando]);
@@ -2042,7 +2043,7 @@ begin
   Result := True;
 end;
 
-procedure TLRDataFlashConexaoServer.Finalizar;
+procedure TRpDataFlashServerConnection.Finalizar;
 begin
   inherited;
   Desconectar;
@@ -2051,7 +2052,7 @@ begin
   FreeAndNil(FInterfaceList);
 end;
 
-function TLRDataFlashConexaoServer.GetConectado: Boolean;
+function TRpDataFlashServerConnection.GetConectado: Boolean;
 var
   lRestOk: Boolean;
   lTcpOk: Boolean;
@@ -2085,69 +2086,69 @@ begin
       end;
 end;
 
-function TLRDataFlashConexaoServer.GetControllers: TLRDataFlashComandControllerList;
+function TRpDataFlashServerConnection.GetControllers: TRpDataFlashComandControllerList;
 begin
   Result := FControllers;
 end;
 
-function TLRDataFlashConexaoServer.GetControllersCount: Integer;
+function TRpDataFlashServerConnection.GetControllersCount: Integer;
 begin
   Result := Controllers.Count;
 end;
 
-function TLRDataFlashConexaoServer.GetNumeroClientesConectados: Integer;
+function TRpDataFlashServerConnection.GetNumeroClientesConectados: Integer;
 begin
   Result := FNumeroConectados;
 end;
 
-function TLRDataFlashConexaoServer.GetProviders: TLRDataFlashProviderControllerList;
+function TRpDataFlashServerConnection.GetProviders: TRpDataFlashProviderControllerList;
 begin
   Result := FProviders;
 end;
 
-function TLRDataFlashConexaoServer.GetProvidersCount: Integer;
+function TRpDataFlashServerConnection.GetProvidersCount: Integer;
 begin
   Result := Providers.Count;
 end;
 
-function TLRDataFlashConexaoServer.GetServidor: string;
+function TRpDataFlashServerConnection.GetServidor: string;
 begin
   Result := FServidor;
 end;
 
-function TLRDataFlashConexaoServer.GetUtilizarControllers: Boolean;
+function TRpDataFlashServerConnection.GetUtilizarControllers: Boolean;
 begin
   Result := FUtilizarControllers;
 end;
 
-procedure TLRDataFlashConexaoServer.Inicializar;
+procedure TRpDataFlashServerConnection.Inicializar;
 begin
   inherited;
   FInterfaceList := TInterfaceList.Create;
   FServidor := GetNomeComputadorLocal;
-  FControllers := TLRDataFlashComandControllerList.Create(False);
-  FProviders := TLRDataFlashProviderControllerList.Create(False);
+  FControllers := TRpDataFlashComandControllerList.Create(False);
+  FProviders := TRpDataFlashProviderControllerList.Create(False);
   FUtilizarControllers := True;
   FPrefixoBaseComandos := 'TComando';
 end;
 
-function TLRDataFlashConexaoServer.IsPonte: Boolean;
+function TRpDataFlashServerConnection.IsPonte: Boolean;
 begin
   Result := (FPonte <> nil);
 end;
 
-function TLRDataFlashConexaoServer.ItemConexao(AContext: TIdContext): TLRDataFlashConexaoItem;
+function TRpDataFlashServerConnection.ItemConexao(AContext: TIdContext): TRpDataFlashConnectionItem;
 begin
-  Result := TLRDataFlashConexaoItem(AContext.Data);
+  Result := TRpDataFlashConnectionItem(AContext.Data);
 end;
 
-procedure TLRDataFlashConexaoServer.Limpar;
+procedure TRpDataFlashServerConnection.Limpar;
 begin
   inherited;
   FServidor := GetNomeComputadorLocal;
 end;
 
-function TLRDataFlashConexaoServer.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
+function TRpDataFlashServerConnection.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
 var
   I: Integer;
 begin
@@ -2162,8 +2163,8 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.NotificarConexaoCliente(const AConexaoItem: TLRDataFlashConexaoItem;
-  const AEvento : TLRDataFlashOnConexaoCliente);
+procedure TRpDataFlashServerConnection.NotificarConexaoCliente(const AConnectionItem: TRpDataFlashConnectionItem;
+  const AEvento : TRpDataFlashOnClientConnection);
 var
   lLog: TLRDataFlashSyncConexaoEvent;
 begin
@@ -2171,35 +2172,35 @@ begin
   try
     lLog.FLRDataFlashIP := Self;
     lLog.FEvento := AEvento;
-    lLog.FConexaoItem := AConexaoItem;
+    lLog.FConexaoItem := AConnectionItem;
     lLog.DoNotify;
   finally
     FreeAndNil(lLog);
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.Notification(AComponent: TComponent;
+procedure TRpDataFlashServerConnection.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
   if (Operation = opRemove) and (AComponent = FPonte) then
     FPonte := nil;
 
-  if (Operation = opRemove) and (AComponent.InheritsFrom(TLRDataFlashComandController)) then
+  if (Operation = opRemove) and (AComponent.InheritsFrom(TRpDataFlashComandController)) then
     FControllers.Remove(AComponent);
 
   if (Operation = opRemove) and (AComponent.InheritsFrom(TLRDataFlashCustomDataSetProvider)) then
     FProviders.Remove(AComponent);
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerAfterUserLogin(
+procedure TRpDataFlashServerConnection.OnFTPServerAfterUserLogin(
   ASender: TIdFTPServerContext);
 begin
   ASender.HomeDir    := FFileTransfer.TempDir;
   ASender.CurrentDir := FFileTransfer.TempDir;
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerDeleteFile(
+procedure TRpDataFlashServerConnection.OnFTPServerDeleteFile(
   ASender: TIdFTPServerContext; const APathName: string);
 var
   lFileID : string;
@@ -2236,13 +2237,13 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerException(AContext: TIdContext;
+procedure TRpDataFlashServerConnection.OnFTPServerException(AContext: TIdContext;
   AException: Exception);
 begin
   NovoLog(slOnError, 'Erro no servidor FTP. ' + AException.Message, AContext);
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerRetrieveFile(
+procedure TRpDataFlashServerConnection.OnFTPServerRetrieveFile(
   ASender: TIdFTPServerContext; const AFileName: string; var VStream: TStream);
 var
   lID : string;
@@ -2286,7 +2287,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerStatus(ASender: TObject;
+procedure TRpDataFlashServerConnection.OnFTPServerStatus(ASender: TObject;
   const AStatus: TIdStatus; const AStatusText: string);
 var
   lMens : string;
@@ -2306,7 +2307,7 @@ begin
   NovoLog(slOnStatus, 'Status FTP ' + lMens + ' ' + AStatusText, '');
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerStoreFile(
+procedure TRpDataFlashServerConnection.OnFTPServerStoreFile(
   ASender: TIdFTPServerContext; const AFileName: string; AAppend: Boolean;
   var VStream: TStream);
 var
@@ -2324,7 +2325,7 @@ begin
   FileTransfer_RegisterFile(lFileID, lFileName);
 end;
 
-procedure TLRDataFlashConexaoServer.OnFTPServerUserLogin(
+procedure TRpDataFlashServerConnection.OnFTPServerUserLogin(
   ASender: TIdFTPServerContext; const AUsername, APassword: string;
   var AAuthenticated: Boolean);
 begin
@@ -2332,12 +2333,12 @@ begin
                 and (APassword = C_FTP_DEFAULT_PWD);
 end;
 
-procedure TLRDataFlashConexaoServer.Receber(AContext: TIdContext;
+procedure TRpDataFlashServerConnection.Receber(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
   lPedido: string;
   lResultado: string;
-  lItem: TLRDataFlashConexaoItem;
+  lItem: TRpDataFlashConnectionItem;
   lResposta: string;
   lProtocolo: TProtocolo;
   lContinue: Boolean;
@@ -2416,7 +2417,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.SetPonte(const Value: TLRDataFlashConexaoClienteCustom);
+procedure TRpDataFlashServerConnection.SetPonte(const Value: TRpDataFlashCustomClientConnection);
 begin
   if Assigned(FPonte) then
     FPonte.RemoveFreeNotification(Self);
@@ -2427,12 +2428,12 @@ begin
     FPonte.FreeNotification(Self);
 end;
 
-procedure TLRDataFlashConexaoServer.SetUtilizarControllers(const Value: Boolean);
+procedure TRpDataFlashServerConnection.SetUtilizarControllers(const Value: Boolean);
 begin
   FUtilizarControllers := Value;
 end;
 
-procedure TLRDataFlashConexaoServer.AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
+procedure TRpDataFlashServerConnection.AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
 var
   I : Integer;
   lExiste: Boolean;
@@ -2450,14 +2451,14 @@ begin
     FInterfaceList.Add(AInstancia);
 end;
 
-procedure TLRDataFlashConexaoServer.AfterConstruction;
+procedure TRpDataFlashServerConnection.AfterConstruction;
 begin
   inherited;
 end;
 
-procedure TLRDataFlashConexaoServer.AoConectarCliente(AContext: TIdContext);
+procedure TRpDataFlashServerConnection.AoConectarCliente(AContext: TIdContext);
 var
-  lConexao: TLRDataFlashConexaoItem;
+  lConexao: TRpDataFlashConnectionItem;
   lPermitir: Boolean;
 begin
   lPermitir := True;
@@ -2466,7 +2467,7 @@ begin
 
   if lPermitir then
   begin
-    lConexao := TLRDataFlashConexaoItem.Create(Self, AContext.Connection.IOHandler);
+    lConexao := TRpDataFlashConnectionItem.Create(Self, AContext.Connection.IOHandler);
     lConexao.IdentificadorCliente := IntToStr(AContext.Binding.Handle);
     lConexao.NomeCliente := AContext.Binding.PeerIP;
     lConexao.OnCallBack := EnviarCallBack;
@@ -2484,13 +2485,13 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.AoDesconectarCliente(AContext: TIdContext);
+procedure TRpDataFlashServerConnection.AoDesconectarCliente(AContext: TIdContext);
 var
-  lItemConexao: TLRDataFlashConexaoItem;
+  lItemConexao: TRpDataFlashConnectionItem;
 begin
   if (AContext.Data <> nil) then
   begin
-    lItemConexao := TLRDataFlashConexaoItem(AContext.Data);
+    lItemConexao := TRpDataFlashConnectionItem(AContext.Data);
     NovoLog(slOnDisconnection, 'Desconectando Cliente ' + AContext.Binding.PeerIP, AContext);
     Dec(FNumeroConectados);
     if (not FDesconectandoServer) and (Assigned(FOnDesconexaoCliente)) then
@@ -2501,7 +2502,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.AoExecutarNoServidor(AContext: TIdContext);
+procedure TRpDataFlashServerConnection.AoExecutarNoServidor(AContext: TIdContext);
 var
   lException : string;
 begin
@@ -2526,7 +2527,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoServer.AoExecutarNoServidorRest(
+procedure TRpDataFlashServerConnection.AoExecutarNoServidorRest(
   AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo;
   AResponseInfo: TIdHTTPResponseInfo);
 var
@@ -2585,7 +2586,7 @@ end;
 
 { TLRDataFlashConexaoItem }
 
-procedure TLRDataFlashConexaoItem.AdicionarInstancia(
+procedure TRpDataFlashConnectionItem.AdicionarInstancia(
   const AInstancia: IRpDataFlashCommandInterfaced);
 var
   I : Integer;
@@ -2604,9 +2605,9 @@ begin
     FInterfaceList.Add(AInstancia);
 end;
 
-constructor TLRDataFlashConexaoItem.Create(AOwner : TLRDataFlashConexaoCustom; pHandler: TIdIOHandler);
+constructor TRpDataFlashConnectionItem.Create(AOwner : TRpDataFlashCustomConnection; pHandler: TIdIOHandler);
 var
-  lPonte: TLRDataFlashConexaoClienteCustom;
+  lPonte: TRpDataFlashCustomClientConnection;
 begin
   FAutenticado := False;
   FUsername := EmptyStr;
@@ -2617,11 +2618,11 @@ begin
   FInterfaceList := TInterfaceList.Create;
   FExecutor := nil;
 
-  if (AOwner is TLRDataFlashConexaoServer) and (TLRDataFlashConexaoServer(AOwner).Ponte <> nil) then
+  if (AOwner is TRpDataFlashServerConnection) and (TRpDataFlashServerConnection(AOwner).Ponte <> nil) then
   begin
     FTcpClientPonte := TLRDataFlashConexaoCliente.Create(nil);
     FTcpClientPonte.Name := 'TcpClientPonte_' + IntToStr(Abs(GetTickCount));
-    lPonte := TLRDataFlashConexaoServer(AOwner).Ponte;
+    lPonte := TRpDataFlashServerConnection(AOwner).Ponte;
     FTcpClientPonte.ClonarDe(lPonte);
     FTcpClientPonte.LazyConnection := True;
   end;
@@ -2629,7 +2630,7 @@ begin
   FQuebras := TRpQuebraProtocoloList.Create;
 end;
 
-destructor TLRDataFlashConexaoItem.Destroy;
+destructor TRpDataFlashConnectionItem.Destroy;
 begin
   if (Assigned(FTcpClientPonte) ) then
   begin
@@ -2648,27 +2649,27 @@ begin
   inherited;
 end;
 
-function TLRDataFlashConexaoItem.GetAutenticado: Boolean;
+function TRpDataFlashConnectionItem.GetAutenticado: Boolean;
 begin
   Result := FAutenticado;
 end;
 
-function TLRDataFlashConexaoItem.GetPassword: string;
+function TRpDataFlashConnectionItem.GetPassword: string;
 begin
   Result := FPassword;
 end;
 
-function TLRDataFlashConexaoItem.GetUserName: string;
+function TRpDataFlashConnectionItem.GetUserName: string;
 begin
   Result := FUsername;
 end;
 
-function TLRDataFlashConexaoItem.Ip: string;
+function TRpDataFlashConnectionItem.Ip: string;
 begin
   Result := FNomeCliente;
 end;
 
-function TLRDataFlashConexaoItem.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
+function TRpDataFlashConnectionItem.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
 var
   I: Integer;
 begin
@@ -2683,30 +2684,30 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoItem.SetAutenticado(const Value: Boolean);
+procedure TRpDataFlashConnectionItem.SetAutenticado(const Value: Boolean);
 begin
   FAutenticado := Value;
 end;
 
-procedure TLRDataFlashConexaoItem.SetPassword(const Value: string);
+procedure TRpDataFlashConnectionItem.SetPassword(const Value: string);
 begin
   FPassword := Value;
 end;
 
-procedure TLRDataFlashConexaoItem.SetUsername(const Value: string);
+procedure TRpDataFlashConnectionItem.SetUsername(const Value: string);
 begin
   FUsername := Value;
 end;
 
 { TLRDataFlashConexaoClienteCustom }
 
-function TLRDataFlashConexaoClienteCustom.Comunicar(const AIdentificador,
-  AMensagem, ANomeComando: string): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const AIdentificador,
+  AMenssage, ANomeComando: string): string;
 begin
   Result := EmptyStr;
 
   try
-    Result := Enviar(AIdentificador, AMensagem, ANomeComando);
+    Result := Enviar(AIdentificador, AMenssage, ANomeComando);
   except
     on E:Exception Do
     begin
@@ -2716,7 +2717,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.ConectarFtp(
+function TRpDataFlashCustomClientConnection.ConectarFtp(
   out ACliente: TIdFTP): Boolean;
 begin
   Result := False;
@@ -2749,7 +2750,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.ConfirmFileReceipt(
+function TRpDataFlashCustomClientConnection.ConfirmFileReceipt(
   const AFileID: string; const ADeleteTemp, ADeleteOriginal: Boolean;
   AFtpClient: TIdFTP): Boolean;
 var
@@ -2777,23 +2778,23 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.Comunicar(const AComando: TRpDataFlashCommand): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand): string;
 begin
   Result := Comunicar(AComando, AComando.Parametros);
 end;
 
-function TLRDataFlashConexaoClienteCustom.Autenticar(out AErrorMessage: string): Boolean;
+function TRpDataFlashCustomClientConnection.Autenticar(out AErrorMessage: string): Boolean;
 begin
   Result := Autenticar(FUserName, FPassword, AErrorMessage);
 end;
 
-function TLRDataFlashConexaoClienteCustom.Autenticar(const AUsername,
+function TRpDataFlashCustomClientConnection.Autenticar(const AUsername,
   APassword: string; out AErrorMessage: string): Boolean;
 begin
   Result := TLRDataFlashComandoAutenticar.Autenticar(Self, AUsername, APassword, AErrorMessage);
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.ClonarDe(const AOther: TLRDataFlashConexaoClienteCustom;
+procedure TRpDataFlashCustomClientConnection.ClonarDe(const AOther: TRpDataFlashCustomClientConnection;
   const AClonarEnventos : Boolean);
 begin
   FServidor          := AOther.Servidor;
@@ -2831,7 +2832,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.Comunicar(const AComando: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const AComando: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters): string;
 begin
   AParametros.Comando := AComando.Comando;
   AComando.DoSerializar(AParametros);
@@ -2840,12 +2841,12 @@ begin
   AComando.DoCarregar(loReceive, AParametros);
 end;
 
-function TLRDataFlashConexaoClienteCustom.Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string;
 begin
   Result := DoComunicarComThred(AComando, ACallBackClassName, nil);
 end;
 
-constructor TLRDataFlashConexaoClienteCustom.Create(AOwner: TComponent);
+constructor TRpDataFlashCustomClientConnection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FConfigurarConexao := False;
@@ -2857,7 +2858,7 @@ begin
   FExecutorCallBackInterfaced := nil;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.DoCarregarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomClientConnection.DoCarregarConfiguracoes(const ANode: IXMLNode);
 begin
   inherited;
   ANode['TimeOutLeitura'] := FTimeOutLeitura;
@@ -2865,12 +2866,12 @@ begin
   ANode['EsperaReconexao'] := FEsperaReconexao;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.DoConectar;
+procedure TRpDataFlashCustomClientConnection.DoConectar;
 begin
   inherited;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.DoDesconectar;
+procedure TRpDataFlashCustomClientConnection.DoDesconectar;
 begin
   FConnectionHelper.LiberarConector;
 
@@ -2878,12 +2879,12 @@ begin
     FAoDesconectar(Self, FServidor, ConexaoTCPIP.Port);
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.DoNovaExcecao(const E: Exception);
+procedure TRpDataFlashCustomClientConnection.DoNovaExcecao(const E: Exception);
 begin
   NovaExcecao(E);
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.DoSalvarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomClientConnection.DoSalvarConfiguracoes(const ANode: IXMLNode);
 begin
   inherited;
   FTimeOutLeitura := ANode['TimeOutLeitura'];
@@ -2891,7 +2892,7 @@ begin
   FEsperaReconexao := ANode['EsperaReconexao'];
 end;
 
-function TLRDataFlashConexaoClienteCustom.Enviar(const AIdentificador, AMensagem,
+function TRpDataFlashCustomClientConnection.Enviar(const AIdentificador, AMenssage,
   ANomeComando : string): string;
 var
   lResultado : string;
@@ -2907,7 +2908,7 @@ begin
       lProtocolo := TProtocolo.Create(Self.TipoCriptografia);
       try
         lProtocolo.Identificador := AIdentificador;
-        lProtocolo.Mensagem := AMensagem;
+        lProtocolo.Mensagem := AMenssage;
 
         lIdentificadorEnviado := lProtocolo.Identificador;
         InternalEnviar(FConnectionHelper.Conector.IOHandler, lProtocolo.Montar);
@@ -2944,7 +2945,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.Finalizar;
+procedure TRpDataFlashCustomClientConnection.Finalizar;
 begin
   inherited;
 //  if FThreadConexao <> nil then
@@ -2966,7 +2967,7 @@ begin
   FreeAndNil( FConnectionHelper );
 end;
 
-function TLRDataFlashConexaoClienteCustom.GetConectado: Boolean;
+function TRpDataFlashCustomClientConnection.GetConectado: Boolean;
 begin
   try
     if Assigned(FThreadConexao) then
@@ -2981,7 +2982,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.GetFile(const AFileID: string;
+function TRpDataFlashCustomClientConnection.GetFile(const AFileID: string;
   AArquivo: IFileProxy): Boolean;
 var
   lClienteFtp: TIdFTP;
@@ -3040,22 +3041,22 @@ begin
 //  end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.GetIdentificador: string;
+function TRpDataFlashCustomClientConnection.GetIdentificador: string;
 begin
   Result:= EmptyStr;
 end;
 
-function TLRDataFlashConexaoClienteCustom.GetListaItensServidor: string;
+function TRpDataFlashCustomClientConnection.GetListaItensServidor: string;
 begin
   Result := Enviar(DEFAULT_ITEM_ID, EmptyStr, EmptyStr);
 end;
 
-function TLRDataFlashConexaoClienteCustom.GetPorta: Integer;
+function TRpDataFlashCustomClientConnection.GetPorta: Integer;
 begin
   Result := FConexaoTCPIP.Port;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.Inicializar;
+procedure TRpDataFlashCustomClientConnection.Inicializar;
 begin
   inherited;
   FUltimaConexao := 0;
@@ -3069,7 +3070,7 @@ begin
   FConnectionHelper.NovaExcecao := DoNovaExcecao;
 end;
 
-function TLRDataFlashConexaoClienteCustom.InternalConectar : Boolean;
+function TRpDataFlashCustomClientConnection.InternalConectar : Boolean;
 begin
   // libera o antigo e configura um conector novo
   FConnectionHelper.ReinicializarConector(
@@ -3086,27 +3087,27 @@ begin
   Result := FConnectionHelper.Conectar;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.Limpar;
+procedure TRpDataFlashCustomClientConnection.Limpar;
 begin
   inherited;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.NovoErroEnvio(const AException: Exception;
-  const AProtocolo : TProtocolo);
+procedure TRpDataFlashCustomClientConnection.NovoErroEnvio(const AException: Exception;
+  const AProtocol : TProtocolo);
 begin
   if Assigned(FAoErroEnvio) then
-    FAoErroEnvio(Self, AProtocolo, AException);
+    FAoErroEnvio(Self, AProtocol, AException);
 
   NovoLog(slOnError, AException.Message, nil);
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.OnFTPClientStatus(ASender: TObject;
+procedure TRpDataFlashCustomClientConnection.OnFTPClientStatus(ASender: TObject;
   const AStatus: TIdStatus; const AStatusText: string);
 begin
   NovoLog(slOnStatus, IntToStr(Integer(AStatus)) + ' - ' + AStatusText, '');
 end;
 
-function TLRDataFlashConexaoClienteCustom.PodeConectar: Boolean;
+function TRpDataFlashCustomClientConnection.PodeConectar: Boolean;
 begin
   Result := ((FEsperaReconexao = 0) or (FUltimaConexao = 0) or (Now >= IncMilliSecond(FUltimaConexao, FEsperaReconexao)))
     and (not Conectado) and ((FThreadConexao <> nil) and (FThreadConexao.Conectando = False));
@@ -3115,7 +3116,7 @@ begin
     FUltimaConexao := Now;
 end;
 
-function TLRDataFlashConexaoClienteCustom.PutFile(const AArquivo: IFileProxy): Boolean;
+function TRpDataFlashCustomClientConnection.PutFile(const AArquivo: IFileProxy): Boolean;
 var
   lClienteFtp: TIdFTP;
 begin
@@ -3147,7 +3148,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.ServerOnline: Boolean;
+function TRpDataFlashCustomClientConnection.ServerOnline: Boolean;
 var
   lClient: TIdTCPClient;
 begin
@@ -3166,24 +3167,24 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.SetPorta(const Value: Integer);
+procedure TRpDataFlashCustomClientConnection.SetPorta(const Value: Integer);
 begin
   FConexaoTCPIP.Port := Value;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.SetServidor(const Value: string);
+procedure TRpDataFlashCustomClientConnection.SetServidor(const Value: string);
 begin
   FServidor := Value;
   inherited;
 end;
 
-procedure TLRDataFlashConexaoClienteCustom.TentaExecutarCallBack(const AProtocolo: TProtocolo);
+procedure TRpDataFlashCustomClientConnection.TentaExecutarCallBack(const AProtocol: TProtocolo);
 var
   lCallBack: ILRDataFlashExecutorCallBack;
   lComandoClass: TRpDataFlashAbstractClass;
   lParametros: TRpDataFlashCommandParameters;
 begin
-  if AProtocolo.Identificador = TAG_CALLBACK then
+  if AProtocol.Identificador = TAG_CALLBACK then
   begin
     lParametros := nil;
 
@@ -3192,7 +3193,7 @@ begin
       if (FExecutorCallBackClass <> EmptyStr) or Assigned(FExecutorCallBackInterfaced) then
       begin
         lParametros := TRpDataFlashCommandParameters.Create(Self);
-        lParametros.Carregar( AProtocolo.Mensagem );
+        lParametros.Carregar( AProtocol.Mensagem );
       end;
 
       if FExecutorCallBackClass <> EmptyStr then
@@ -3212,7 +3213,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteCustom.Comunicar(const AComando: TRpDataFlashCommand;
+function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand;
   const AExecutorCallBack: ILRDataFlashExecutorCallBack): string;
 begin
   Result := DoComunicarComThred(AComando, EmptyStr, AExecutorCallBack);
@@ -3245,20 +3246,20 @@ end;
 
 { TLRDataFlashComandController }
 
-constructor TLRDataFlashComandController.Create(AOwner: TComponent);
+constructor TRpDataFlashComandController.Create(AOwner: TComponent);
 begin
   inherited;
   FComandos := GetComandoClass.Create(Self, GetComandoItemClass);
   FGrupo := C_WITHOUT_GROUP;
 end;
 
-destructor TLRDataFlashComandController.Destroy;
+destructor TRpDataFlashComandController.Destroy;
 begin
   FreeAndNil(FComandos);
   inherited;
 end;
 
-procedure TLRDataFlashComandController.EditarComandos;
+procedure TRpDataFlashComandController.EditarComandos;
 var
   lView: TfrmComandosControllerView;
 begin
@@ -3267,27 +3268,27 @@ begin
   lView.Show;
 end;
 
-function TLRDataFlashComandController.GetComandoClass: TLRDataFlashComandListClass;
+function TRpDataFlashComandController.GetComandoClass: TLRDataFlashComandListClass;
 begin
   Result := TLRDataFlashComandList;
 end;
 
-function TLRDataFlashComandController.GetComandoItemClass: TLRDataFlashComandItemClass;
+function TRpDataFlashComandController.GetComandoItemClass: TLRDataFlashComandItemClass;
 begin
   Result := TLRDataFlashComandItem;
 end;
 
-function TLRDataFlashComandController.GetComandos: TLRDataFlashComandList;
+function TRpDataFlashComandController.GetComandos: TLRDataFlashComandList;
 begin
   Result := FComandos;
 end;
 
-function TLRDataFlashComandController.GetGrupo: string;
+function TRpDataFlashComandController.GetGrupo: string;
 begin
   Result := FGrupo;
 end;
 
-procedure TLRDataFlashComandController.Notification(AComponent: TComponent;
+procedure TRpDataFlashComandController.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
@@ -3295,19 +3296,19 @@ begin
     FServer := nil;
 end;
 
-procedure TLRDataFlashComandController.SetComandos(const Value: TLRDataFlashComandList);
+procedure TRpDataFlashComandController.SetComandos(const Value: TLRDataFlashComandList);
 begin
   FComandos.Assign(Value);
 end;
 
-procedure TLRDataFlashComandController.SetGrupo(const Value: string);
+procedure TRpDataFlashComandController.SetGrupo(const Value: string);
 begin
   FGrupo := TRpDataFlashValidations.NameValidation(Value);
   if FGrupo = EmptyStr then
     FGrupo := C_WITHOUT_GROUP;
 end;
 
-procedure TLRDataFlashComandController.SetServer(const Value: TLRDataFlashConexaoServer);
+procedure TRpDataFlashComandController.SetServer(const Value: TRpDataFlashServerConnection);
 begin
   if (FServer <> nil) then
     FServer.Controllers.Remove(Self);
@@ -3320,7 +3321,7 @@ end;
 
 { TThreadCallback }
 
-constructor TThreadCallback.Create(const AClient : TLRDataFlashConexaoClienteCustom; const AComando: TRpDataFlashCommand;
+constructor TThreadCallback.Create(const AClient : TRpDataFlashCustomClientConnection; const AComando: TRpDataFlashCommand;
   const ACallBackClassName: string; const AExecutorCallBack: ILRDataFlashExecutorCallBack);
 begin
   inherited Create(False);
@@ -3421,11 +3422,11 @@ end;
 
 { TLRDataFlashComandControllerList }
 
-function TLRDataFlashComandControllerList.Localizar(const ANome: string;
+function TRpDataFlashComandControllerList.Localizar(const ANome: string;
   out AObjComando: IRpDataFlashCommandInterfaced): Boolean;
 var
   lEnum: TListEnumerator;
-  lController: TLRDataFlashComandController;
+  lController: TRpDataFlashComandController;
 begin
   lEnum := GetEnumerator;
   try
@@ -3433,7 +3434,7 @@ begin
     Result := False;
     while (lEnum.MoveNext) and (not Result) do
     begin
-      lController := TLRDataFlashComandController(lEnum.Current);
+      lController := TRpDataFlashComandController(lEnum.Current);
       Result := lController.Comandos.Localizar(ANome, AObjComando);
     end;
   finally
@@ -3443,14 +3444,14 @@ end;
 
 { TLRDataFlashComandHelper }
 
-function TLRDataFlashComandHelper.GetServer: TLRDataFlashConexaoServer;
+function TLRDataFlashComandHelper.GetServer: TRpDataFlashServerConnection;
 begin
-  Result := TLRDataFlashConexaoServer(Server);
+  Result := TRpDataFlashServerConnection(Server);
 end;
 
 { TLRDataFlashProviderControllerList }
 
-function TLRDataFlashProviderControllerList.Localizar(const ANome: string;
+function TRpDataFlashProviderControllerList.Localizar(const ANome: string;
   out AObjComando: IRpDataFlashCommandInterfaced): Boolean;
 var
   lEnum: TListEnumerator;
@@ -3486,7 +3487,7 @@ end;
 
 { TCustomProxyClient }
 
-constructor TCustomProxyClient.Create(ATcpClient: TLRDataFlashConexaoClienteCustom;
+constructor TCustomProxyClient.Create(ATcpClient: TRpDataFlashCustomClientConnection;
   ABusyCallback : TRpDataFlashBusyCallback; const ASharedClient : Boolean);
 begin
   FSharedClient := ASharedClient;
@@ -3769,7 +3770,7 @@ begin
 {$ENDREGION}
 end;
 
-function TLRDataFlashConexaoREST.Enviar(const AIdentificador, AMensagem, ANomeComando: string): string;
+function TLRDataFlashConexaoREST.Enviar(const AIdentificador, AMenssage, ANomeComando: string): string;
 var
   lResultado : TStringStream;
   lIdentificadorEnviado: string;
@@ -3784,7 +3785,7 @@ begin
     lProtocolo := TProtocolo.Create(Self.TipoCriptografia);
     try
       lProtocolo.Identificador := AIdentificador;
-      lProtocolo.Mensagem := AMensagem;
+      lProtocolo.Mensagem := AMenssage;
 
       lIdentificadorEnviado := lProtocolo.Identificador;
 

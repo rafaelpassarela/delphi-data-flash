@@ -994,8 +994,7 @@ begin
   Add(Result);
 end;
 
-function TRpQuebraProtocoloList.Carregar(
-  const AValor: string): TLRDataFlashQuebraProtocolo;
+function TRpQuebraProtocoloList.Carregar(const AValor: string): TLRDataFlashQuebraProtocolo;
 var
   lGuid: TGUID;
 begin

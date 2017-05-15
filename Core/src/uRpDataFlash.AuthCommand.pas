@@ -15,7 +15,7 @@ type
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
   public
-    class function Autenticar(ATcpClient : TLRDataFlashConexaoClienteCustom;
+    class function Autenticar(ATcpClient : TRpDataFlashCustomClientConnection;
       const AUsername, APassword : string; out AResultMSG : string) : Boolean;
   end;
 
@@ -23,7 +23,7 @@ implementation
 
 { TLRDataFlashComandoAutenticar }
 
-class function TLRDataFlashComandoAutenticar.Autenticar(ATcpClient: TLRDataFlashConexaoClienteCustom;
+class function TLRDataFlashComandoAutenticar.Autenticar(ATcpClient: TRpDataFlashCustomClientConnection;
   const AUsername, APassword : string; out AResultMSG: string): Boolean;
 const
   C_ERRO_AUTENTICACAO = 'Erro enviando pedido de autenticação. ';

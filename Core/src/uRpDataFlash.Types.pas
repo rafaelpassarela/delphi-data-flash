@@ -1,6 +1,6 @@
 unit uRpDataFlash.Types;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -48,7 +48,6 @@ const
   C_FTP_SIZE_MARK = 'SIZE';
   C_FTP_DELETE_RECIVE_MARK = 'DEL';
   C_FTP_FILENAME_MARK = 'FILENAME';
-  C_COMMAND_NO_DESCRIPTION = 'Function "function DoGetDescricao: string; override;" is not implemented';
 
 type
   TRpDataFlashDataSetOperations = (
@@ -163,7 +162,7 @@ type
     procedure Decode(const AString : string);
   end;
 
-  TLRDataFlashCustomProvider = class(TPersistent)
+  TRpDataFlashCustomProvider = class(TPersistent)
   private
     FInsertSQL: TStrings;
     FUpdateSQL: TStrings;
@@ -191,7 +190,7 @@ type
 
   TRpDataSetParamItem = class(TParam)
   public
-    function Serializar : string;
+    function Serialize : string;
   end;
 
   TRpDataSetParams = class(TParams)
@@ -218,7 +217,7 @@ end;
 
 { TLRDataFlashCustomProvider }
 
-procedure TLRDataFlashCustomProvider.Clear;
+procedure TRpDataFlashCustomProvider.Clear;
 begin
   FInsertSQL.Clear;
   FUpdateSQL.Clear;
@@ -227,7 +226,7 @@ begin
   FCustomCommand := EmptyStr;
 end;
 
-constructor TLRDataFlashCustomProvider.Create;
+constructor TRpDataFlashCustomProvider.Create;
 begin
   FInsertSQL := TStringList.Create;
   FUpdateSQL := TStringList.Create;
@@ -235,7 +234,7 @@ begin
   FSelectSQL := TStringList.Create;
 end;
 
-destructor TLRDataFlashCustomProvider.Destroy;
+destructor TRpDataFlashCustomProvider.Destroy;
 begin
   FreeAndNil(FInsertSQL);
   FreeAndNil(FUpdateSQL);
@@ -244,7 +243,7 @@ begin
   inherited;
 end;
 
-function TLRDataFlashCustomProvider.GetAsString: string;
+function TRpDataFlashCustomProvider.GetAsString: string;
 var
   lStr : TStringList;
 begin
@@ -261,12 +260,12 @@ begin
   end;
 end;
 
-procedure TLRDataFlashCustomProvider.SetDeleteSQL(const Value: TStrings);
+procedure TRpDataFlashCustomProvider.SetDeleteSQL(const Value: TStrings);
 begin
   FDeleteSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomProvider.SetFromString(const Value: string);
+procedure TRpDataFlashCustomProvider.SetFromString(const Value: string);
 var
   lStr : TStringList;
 begin
@@ -283,17 +282,17 @@ begin
   end;
 end;
 
-procedure TLRDataFlashCustomProvider.SetInsertSQL(const Value: TStrings);
+procedure TRpDataFlashCustomProvider.SetInsertSQL(const Value: TStrings);
 begin
   FInsertSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomProvider.SetSelectSQL(const Value: TStrings);
+procedure TRpDataFlashCustomProvider.SetSelectSQL(const Value: TStrings);
 begin
   FSelectSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomProvider.SetUpdateSQL(const Value: TStrings);
+procedure TRpDataFlashCustomProvider.SetUpdateSQL(const Value: TStrings);
 begin
   FUpdateSQL.Assign( Value );
 end;
@@ -302,14 +301,14 @@ end;
 
 function TRpDataSetParams.GetAsString: string;
 var
-  lLista : TStrings;
+  lList : TStrings;
   i: Integer;
 begin
-  lLista := TStringList.Create;
+  lList := TStringList.Create;
   for i := 0 to Self.Count - 1 do
-    lLista.Add( TRpDataSetParamItem(Self[i]).Serializar );
-  Result := Trim( lLista.Text );
-  FreeAndNil(lLista);
+    lList.Add( TRpDataSetParamItem(Self[i]).Serialize );
+  Result := Trim( lList.Text );
+  FreeAndNil(lList);
 end;
 
 function TRpDataSetParams.ParamByName(const Value: string): TParam;
@@ -330,47 +329,47 @@ end;
 
 procedure TRpDataSetParams.SetFromString(const Value: string);
 var
-  lLista : TStrings;
+  lList : TStrings;
   i: Integer;
-  lNome: string;
-  lValor: string;
-  lTipo: string;
+  lName: string;
+  lValue: string;
+  lType: string;
   lOldAutoCreate: Boolean;
 
   function GetTagValue(const pTag : string) : string;
   var
     lIni: Integer;
   begin
-    lIni := Pos('<' + pTag + '>', lLista[i]) + Length(pTag) + 2;
-    Result := Copy(lLista[i], lIni, Pos('</' + pTag + '>', lLista[i]) - lIni );
+    lIni := Pos('<' + pTag + '>', lList[i]) + Length(pTag) + 2;
+    Result := Copy(lList[i], lIni, Pos('</' + pTag + '>', lList[i]) - lIni );
   end;
 
 begin
-  lLista := TStringList.Create;
-  lLista.Text := Value;
+  lList := TStringList.Create;
+  lList.Text := Value;
 
   lOldAutoCreate := Self.AutoCreateParam;
   Self.AutoCreateParam := True;
 
   Self.Clear;
   try
-    for i := 0 to lLista.Count - 1 do
+    for i := 0 to lList.Count - 1 do
     begin
-      lNome := GetTagValue('NAME');
-      lValor := Algorithms.Base64DecompressedString( GetTagValue('VALUE') );
-      lTipo := GetTagValue('TYPE');
+      lName := GetTagValue('NAME');
+      lValue := Algorithms.Base64DecompressedString( GetTagValue('VALUE') );
+      lType := GetTagValue('TYPE');
 
-      with ParamByName(lNome) do
+      with ParamByName(lName) do
       begin
-        if Trim(lValor) = C_NULL_TCPVALUE then
+        if Trim(lValue) = C_NULL_TCPVALUE then
           Value := Null
         else
-          Value := lValor;
-        DataType := TFieldType( StrToInt(lTipo) );
+          Value := lValue;
+        DataType := TFieldType( StrToInt(lType) );
       end;
     end;
   finally
-    FreeAndNil(lLista);
+    FreeAndNil(lList);
   end;
 
   Self.AutoCreateParam := lOldAutoCreate;
@@ -378,7 +377,7 @@ end;
 
 { TDataSetParamItem }
 
-function TRpDataSetParamItem.Serializar: string;
+function TRpDataSetParamItem.Serialize: string;
 var
   lStr : string;
 begin

@@ -32,8 +32,6 @@ requires
   IndyCore,
   designide,
   dsnap,
-  RpCommonFunctions,
-  RpEncryption,
   RpSerialization;
 
 contains

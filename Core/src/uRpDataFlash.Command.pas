@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uRpDataFlash.Types, IdContext,
   Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uRpDataFlash.ConvertUtils,
-  uRpSerialization, Windows, IdCustomHttpServer;
+  uRpSerialization, Windows, IdCustomHttpServer, uRpResourceString;
 
 type
   TRpDataFlashCommandParameters = class;
@@ -1372,7 +1372,7 @@ end;
 
 function TRpDataFlashCommand.DoGetDescricao: string;
 begin
-  Result := C_COMMAND_NO_DESCRIPTION;
+  Result := R_DATAFLASH_CMD_NO_DESCRIPTION;
 end;
 
 function TRpDataFlashCommand.DoGetParametrosSerializados: string;
@@ -2085,9 +2085,9 @@ end;
 
 function TLRDataFlashComandoDataSetProvider.DoPrepareClient: Boolean;
 var
-  lSQL : TLRDataFlashCustomProvider;
+  lSQL : TRpDataFlashCustomProvider;
 begin
-  lSQL := TLRDataFlashCustomProvider.Create;
+  lSQL := TRpDataFlashCustomProvider.Create;
 
   lSQL.SelectSQL.Text := GetSelectSQL;
   lSQL.InsertSQL.Text := GetInsertSQL;

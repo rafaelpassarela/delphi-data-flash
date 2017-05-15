@@ -93,9 +93,9 @@ begin
     InternalConectar;
 
     // se possui informacoes para autenticacao, valida no servidor
-    if (TLRDataFlashConexaoClienteCustom(FOwner).UserName <> '') or (TLRDataFlashConexaoClienteCustom(FOwner).Password <> '') then
+    if (TRpDataFlashCustomClientConnection(FOwner).UserName <> '') or (TRpDataFlashCustomClientConnection(FOwner).Password <> '') then
     begin
-      Result := TLRDataFlashConexaoClienteCustom(FOwner).Autenticar(lAutMessage);
+      Result := TRpDataFlashCustomClientConnection(FOwner).Autenticar(lAutMessage);
 
       if not Result then
       begin
@@ -149,8 +149,8 @@ begin
       FServidor := lConfigurador.Server;
       FPorta := lConfigurador.Porta;
       // configura a conexão original
-      TLRDataFlashConexaoClienteCustom(FOwner).Servidor := FServidor;
-      TLRDataFlashConexaoClienteCustom(FOwner).Porta := FPorta;
+      TRpDataFlashCustomClientConnection(FOwner).Servidor := FServidor;
+      TRpDataFlashCustomClientConnection(FOwner).Porta := FPorta;
     end;
   finally
     FreeAndNil(lConfigurador);

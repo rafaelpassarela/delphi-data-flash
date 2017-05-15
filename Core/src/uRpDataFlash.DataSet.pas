@@ -57,8 +57,8 @@ type
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
     FComandoEnviar: TLRDataFlashComandoEnvio;
     FConexaoCliente: TLRDataFlashConexaoCliente;
-    FProviderCustom: TLRDataFlashCustomProvider;
-    FInternalProvider: TLRDataFlashCustomProvider;
+    FProviderCustom: TRpDataFlashCustomProvider;
+    FInternalProvider: TRpDataFlashCustomProvider;
     FProviderClass: string;
     FPrepared: Boolean;
     FAutoCreateParams: Boolean;
@@ -188,7 +188,7 @@ type
     property Ranged;
     // custom propertyes
     property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
-    property ProviderCustom : TLRDataFlashCustomProvider read FProviderCustom write FProviderCustom;
+    property ProviderCustom : TRpDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
     property Params : TRpDataSetParams read GetParams write SetParams;
@@ -227,8 +227,8 @@ begin
   AutoCreateParams := True;
   FParams := TRpDataSetParams.Create(Self);
   FOpenWhere := EmptyStr;
-  FProviderCustom := TLRDataFlashCustomProvider.Create;
-  FInternalProvider := TLRDataFlashCustomProvider.Create;
+  FProviderCustom := TRpDataFlashCustomProvider.Create;
+  FInternalProvider := TRpDataFlashCustomProvider.Create;
 //  FDummyProvider := TDummyProvider.Create(Self);
 
   PrepararComandoEnvio;
