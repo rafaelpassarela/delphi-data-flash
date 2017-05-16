@@ -90,47 +90,48 @@ type
     class function GuidValue(const AValue : string) : TGuid;
   end;
 
-  TProtocolo = class
+  TRpDataFlashProtocol = class
   private const
     FORMATTER = '%s';
-    LIMITADOR = '|';
-    IDENTIFICADOR_INI_FORMAT = '@>%s|';
-    IDENTIFICADOR_FIM_FORMAT = '|%s<@';
-    IDENTIFICADOR_CRIPTO = '@*CRYPTO';
-    NME_PROTOCOLO_ERRO = 'PROT_ERRO';
+    LIMITER = '|';
+    IDENTIFIER_BEGIN_FORMAT = '@>%s|';
+    IDENTIFIER_END_FORMAT = '|%s<@';
+    IDENTIFIER_CRIPTO = '@*CRYPTO';
+    NAME_PROTOCOL_ERROR = 'PROT_ERRO';
   private
-    FIdentificador : string;
-    FMensagem : string;
-    FNomeNodoMsgRetorno: string;
-    FCriptografia : TRpEncryption;
-    FTipoMensagem: TRpDataFlashMessageType;
-    function GetIdentificadorInicialCompleto: string;
-    function GetIdentificadorFinalCompleta: string;
-    procedure SetMensagem(const Value: string);
-    function MensagemComIdentificadorExistente(const AValue : string): Integer;
-    function MensagemCriptografada(const AValue : string): Integer;
-    function RemoverEspacosInicio(const AValue : string) : string;
-    function RemoverEspacosFinal(const AValue : string) : string;
+    FIdentifier : string;
+    FMessage : string;
+    FReturnMsgNodeName: string;
+    FEncryption : TRpEncryption;
+    FMessageType: TRpDataFlashMessageType;
+    function GetCompleteIdentifierStart: string;
+    function GetCompleteIdentifierEnding: string;
+    procedure SetMessage(const Value: string);
+    function MessageWithIdentifierPresent(const AValue : string): Integer;
+    function MessageEncrypted(const AValue : string): Integer;
+    function TrimBegin(const AValue : string) : string;
+    function TrimEnd(const AValue : string) : string;
 
-    function DescobrirIDentificador(const pMensagemCompleta : string) : string;
+    function DiscoverIdentifier(const AMessage : string) : string;
 
-    function SubstituirInvalidos(const AValue : string) : string;
-    function RetornarInvalidos(const AValue : string) : string;
-    procedure SetIdentificador(const Value: string);
-    procedure SetNomeNodoMsgRetorno(const Value: string);
+    function ReplaceInvalids(const AValue : string) : string;
+    function ReturnInvalids(const AValue : string) : string;
+    procedure SetIdentifier(const Value: string);
+    procedure SetReturnMsgNodeName(const Value: string);
 
-    function RemoverFlagCriptografia(const Value : string) : string;
+    function RemoveEncryptionFlag(const Value : string) : string;
   public
+  test
     constructor Create(const ATipoCriptografia : TRpDataFlashEncryptionType); reintroduce;
     destructor Destroy; override;
-    property Mensagem : string read FMensagem write SetMensagem;
+    property Mensagem : string read FMessage write SetMessage;
 
-    property Identificador : string read FIdentificador  write SetIdentificador;
-    property IdentificadorInicialCompleto : string read GetIdentificadorInicialCompleto;
-    property IdentificadorFinalCompleto : string read GetIdentificadorFinalCompleta;
-    property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem;
+    property Identificador : string read FIdentifier  write SetIdentifier;
+    property IdentificadorInicialCompleto : string read GetCompleteIdentifierStart;
+    property IdentificadorFinalCompleto : string read GetCompleteIdentifierEnding;
+    property TipoMensagem : TRpDataFlashMessageType read FMessageType write FMessageType;
 
-    property NomeNodoMsgRetorno : string read FNomeNodoMsgRetorno write SetNomeNodoMsgRetorno;
+    property NomeNodoMsgRetorno : string read FReturnMsgNodeName write SetReturnMsgNodeName;
     procedure SetTipoCriptografia(const pTipoCriptografia : TRpEncryptionClass);
 
     function GetMarcaCriptoPadrao : string;
@@ -141,7 +142,7 @@ type
 
 
     function Montar : string;
-    function Desmontar(const pMensagemCompleta : string) : string;
+    function Desmontar(const AMessage : string) : string;
 
     procedure Clear;
 
@@ -191,56 +192,56 @@ begin
   {$ENDIF}
 end;
 
-function TProtocolo.Criptografar(const pValue: string): string;
+function TRpDataFlashProtocol.Criptografar(const pValue: string): string;
 begin
   Result := pValue;
-  if Assigned(FCriptografia) then
+  if Assigned(FEncryption) then
   begin
-    Result := IDENTIFICADOR_CRIPTO + FCriptografia.Encrypt(pValue);
+    Result := IDENTIFIER_CRIPTO + FEncryption.Encrypt(pValue);
   end;
 end;
 
-function TProtocolo.Desmontar(const pMensagemCompleta : string) : string;
+function TRpDataFlashProtocol.Desmontar(const AMessage : string) : string;
 var
   lPosicaoInicial: Integer;
   lPosicaoInicioMensagem: Integer;
   lPosicaoFinalMensagem: Integer;
   lMensagem: string;
 begin
-  if FTipoMensagem = mtText then
-    Result := pMensagemCompleta
+  if FMessageType = mtText then
+    Result := AMessage
   else
   begin
-    lMensagem := pMensagemCompleta;
+    lMensagem := AMessage;
     // remove o identificador
-    lPosicaoInicial := MensagemComIdentificadorExistente(lMensagem);
+    lPosicaoInicial := MessageWithIdentifierPresent(lMensagem);
     if lPosicaoInicial <> -1 then
     begin
       lPosicaoInicioMensagem := lPosicaoInicial + Length(IdentificadorInicialCompleto);
-      lPosicaoFinalMensagem := (Length(lMensagem) - Length(GetIdentificadorFinalCompleta)) + 1;
+      lPosicaoFinalMensagem := (Length(lMensagem) - Length(GetCompleteIdentifierEnding)) + 1;
       lMensagem := Copy(lMensagem, lPosicaoInicioMensagem, (lPosicaoFinalMensagem - lPosicaoInicioMensagem));
     end;
 
     lMensagem := Descriptografar(lMensagem);
-    Result := RetornarInvalidos(lMensagem);
+    Result := ReturnInvalids(lMensagem);
   end;
 end;
 
-destructor TProtocolo.Destroy;
+destructor TRpDataFlashProtocol.Destroy;
 begin
-  if Assigned(FCriptografia) then
+  if Assigned(FEncryption) then
   begin
-    FCriptografia.Free;
+    FEncryption.Free;
   end;
   inherited;
 end;
 
-constructor TProtocolo.Create(const ATipoCriptografia : TRpDataFlashEncryptionType);
+constructor TRpDataFlashProtocol.Create(const ATipoCriptografia : TRpDataFlashEncryptionType);
 begin
-  FIdentificador := EmptyStr;
-  FMensagem := EmptyStr;
-  FNomeNodoMsgRetorno := EmptyStr;
-  FTipoMensagem := mtCommand;
+  FIdentifier := EmptyStr;
+  FMessage := EmptyStr;
+  FReturnMsgNodeName := EmptyStr;
+  FMessageType := mtCommand;
 
   case ATipoCriptografia of
     ecNone : SetTipoCriptografia(nil);
@@ -250,7 +251,7 @@ begin
   end;
 end;
 
-function TProtocolo.DescobrirIDentificador(const pMensagemCompleta: string): string;
+function TRpDataFlashProtocol.DiscoverIdentifier(const AMessage: string): string;
 var
   lPrimeiroCaractereAntesIdentificador: string;
   lPrimeiroCaractereDepoisIdentificador: string;
@@ -259,102 +260,102 @@ var
   lValido: Boolean;
 begin
   Result := EmptyStr;
-  lValido := (pMensagemCompleta > IDENTIFICADOR_INI_FORMAT);
+  lValido := (AMessage > IDENTIFIER_BEGIN_FORMAT);
 
   if lValido then
   begin
-    lPrimeiroCaractereAntesIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(FORMATTER, IDENTIFICADOR_INI_FORMAT) - 1];
-    lPrimeiroCaractereDepoisIdentificador := IDENTIFICADOR_INI_FORMAT[Pos(lPrimeiroCaractereAntesIdentificador, IDENTIFICADOR_INI_FORMAT) + Length(FORMATTER) + 1];
+    lPrimeiroCaractereAntesIdentificador := IDENTIFIER_BEGIN_FORMAT[Pos(FORMATTER, IDENTIFIER_BEGIN_FORMAT) - 1];
+    lPrimeiroCaractereDepoisIdentificador := IDENTIFIER_BEGIN_FORMAT[Pos(lPrimeiroCaractereAntesIdentificador, IDENTIFIER_BEGIN_FORMAT) + Length(FORMATTER) + 1];
 
-    lPosicaoInicialIdentificador := Pos(lPrimeiroCaractereAntesIdentificador, pMensagemCompleta) + 1;
+    lPosicaoInicialIdentificador := Pos(lPrimeiroCaractereAntesIdentificador, AMessage) + 1;
     lValido := lPosicaoInicialIdentificador > 0;
 
     if lValido then
     begin
-      lTamanhoIdentificador := (Pos(lPrimeiroCaractereDepoisIdentificador, pMensagemCompleta) - lPosicaoInicialIdentificador);
-      Result := Copy(pMensagemCompleta, lPosicaoInicialIdentificador, lTamanhoIdentificador);
+      lTamanhoIdentificador := (Pos(lPrimeiroCaractereDepoisIdentificador, AMessage) - lPosicaoInicialIdentificador);
+      Result := Copy(AMessage, lPosicaoInicialIdentificador, lTamanhoIdentificador);
     end;
   end;
 end;
 
-function TProtocolo.Descriptografar(const pValue: string): string;
+function TRpDataFlashProtocol.Descriptografar(const pValue: string): string;
 begin
   Result := pValue;
-  if (MensagemCriptografada(pValue) <> -1) and (Assigned(FCriptografia)) then
+  if (MessageEncrypted(pValue) <> -1) and (Assigned(FEncryption)) then
   begin
-    Result := FCriptografia.Decrypt(RemoverFlagCriptografia(pValue));
+    Result := FEncryption.Decrypt(RemoveEncryptionFlag(pValue));
   end;
 end;
 
-class function TProtocolo.GetErrorTag: string;
+class function TRpDataFlashProtocol.GetErrorTag: string;
 begin
-  Result := Format(IDENTIFICADOR_INI_FORMAT, [NME_PROTOCOLO_ERRO]);
+  Result := Format(IDENTIFIER_BEGIN_FORMAT, [NAME_PROTOCOL_ERROR]);
 end;
 
-function TProtocolo.GetIdentificadorFinalCompleta: string;
+function TRpDataFlashProtocol.GetCompleteIdentifierEnding: string;
 begin
-  Result := Format(IDENTIFICADOR_FIM_FORMAT, [FIdentificador]);
+  Result := Format(IDENTIFIER_END_FORMAT, [FIdentifier]);
 end;
 
-function TProtocolo.GetIdentificadorInicialCompleto: string;
+function TRpDataFlashProtocol.GetCompleteIdentifierStart: string;
 begin
-  Result := Format(IDENTIFICADOR_INI_FORMAT, [FIdentificador]);
+  Result := Format(IDENTIFIER_BEGIN_FORMAT, [FIdentifier]);
 end;
 
-function TProtocolo.GetMarcaCripto(const pValue: string): string;
+function TRpDataFlashProtocol.GetMarcaCripto(const pValue: string): string;
 var
   lIndice: Integer;
 begin
-  lIndice := MensagemCriptografada(pValue);
+  lIndice := MessageEncrypted(pValue);
   if lIndice <> -1 then
     Result := GetMarcaCriptoPadrao
   else
     Result := EmptyStr;
 end;
 
-function TProtocolo.GetMarcaCriptoPadrao: string;
+function TRpDataFlashProtocol.GetMarcaCriptoPadrao: string;
 begin
-  if Assigned(FCriptografia) then
-    Result := FCriptografia.GetDefaultEncryptionIdentifier
+  if Assigned(FEncryption) then
+    Result := FEncryption.GetDefaultEncryptionIdentifier
   else
-    Result := IDENTIFICADOR_CRIPTO;
+    Result := IDENTIFIER_CRIPTO;
 end;
 
-function TProtocolo.IsErro: Boolean;
+function TRpDataFlashProtocol.IsErro: Boolean;
 begin
-  Result := (FIdentificador = NME_PROTOCOLO_ERRO);
+  Result := (FIdentifier = NAME_PROTOCOL_ERROR);
 end;
 
-procedure TProtocolo.Clear;
+procedure TRpDataFlashProtocol.Clear;
 begin
-  FNomeNodoMsgRetorno := EmptyStr;
-  FMensagem := EmptyStr;
-  FIdentificador := EmptyStr;
+  FReturnMsgNodeName := EmptyStr;
+  FMessage := EmptyStr;
+  FIdentifier := EmptyStr;
 end;
 
-function TProtocolo.Montar: string;
+function TRpDataFlashProtocol.Montar: string;
 var
   lMensagem: string;
 begin
-  if FTipoMensagem = mtText then
-    Result := FMensagem
+  if FMessageType = mtText then
+    Result := FMessage
   else
   begin
-    lMensagem := SubstituirInvalidos(FMensagem);
+    lMensagem := ReplaceInvalids(FMessage);
     lMensagem := Criptografar(lMensagem);
 
     // adiciona o identificador da mensagem
-    if (MensagemComIdentificadorExistente(lMensagem)) = -1 then
+    if (MessageWithIdentifierPresent(lMensagem)) = -1 then
       Result := IdentificadorInicialCompleto + lMensagem + IdentificadorFinalCompleto
     else
       Result := lMensagem;
   end;
 end;
 
-class function TProtocolo.NovoErro(const ATipoCriptografia: TRpDataFlashEncryptionType;
+class function TRpDataFlashProtocol.NovoErro(const ATipoCriptografia: TRpDataFlashEncryptionType;
   const pMensagem: string): string;
 var
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
 begin
   lProtocolo := Self.Create(ATipoCriptografia);
   try
@@ -364,7 +365,7 @@ begin
   end;
 end;
 
-function TProtocolo.RemoverEspacosFinal(const AValue: string): string;
+function TRpDataFlashProtocol.TrimEnd(const AValue: string): string;
 var
   lMensagem: string;
 begin
@@ -376,7 +377,7 @@ begin
   Result := lMensagem;
 end;
 
-function TProtocolo.RemoverEspacosInicio(const AValue: string): string;
+function TRpDataFlashProtocol.TrimBegin(const AValue: string): string;
 var
   lMensagem: string;
 begin
@@ -388,19 +389,19 @@ begin
   Result := lMensagem;
 end;
 
-function TProtocolo.RemoverFlagCriptografia(const Value: string): string;
+function TRpDataFlashProtocol.RemoveEncryptionFlag(const Value: string): string;
 var
   lIndice: Integer;
   lMensagem: string;
 begin
-  lIndice := MensagemCriptografada(Value);
+  lIndice := MessageEncrypted(Value);
   lMensagem := Value;
   if lIndice <> -1 then
-    Delete(lMensagem, lIndice, Length(IDENTIFICADOR_CRIPTO));
+    Delete(lMensagem, lIndice, Length(IDENTIFIER_CRIPTO));
   Result := lMensagem;
 end;
 
-function TProtocolo.RetornarInvalidos(const AValue: string): string;
+function TRpDataFlashProtocol.ReturnInvalids(const AValue: string): string;
 var
   lResultado: string;
 begin
@@ -411,7 +412,7 @@ begin
   Result := lResultado;
 end;
 
-function TProtocolo.SubstituirInvalidos(const AValue: string): string;
+function TRpDataFlashProtocol.ReplaceInvalids(const AValue: string): string;
 var
   lResultado: string;
 begin
@@ -422,7 +423,7 @@ begin
   Result := lResultado;
 end;
 
-function TProtocolo.ToData: Olevariant;
+function TRpDataFlashProtocol.ToData: Olevariant;
 var
   lGrupo: TGrupo;
   lIndex: Integer;
@@ -433,7 +434,7 @@ begin
   if Assigned(lGrupo) then
   begin
     try
-      lGrupoNodo := lGrupo.Primeiro(FNomeNodoMsgRetorno, lIndex);
+      lGrupoNodo := lGrupo.Primeiro(FReturnMsgNodeName, lIndex);
       Result := lGrupoNodo.ToDataPacket.ToData;
     finally
       lGrupo.Free;
@@ -441,14 +442,14 @@ begin
   end;
 end;
 
-function TProtocolo.ToErro(const pMensagem: string): string;
+function TRpDataFlashProtocol.ToErro(const pMensagem: string): string;
 begin
-  Identificador := NME_PROTOCOLO_ERRO;
+  Identificador := NAME_PROTOCOL_ERROR;
   Mensagem := pMensagem;
   Result := Montar;
 end;
 
-procedure TProtocolo.ToFile(const pFileName: string);
+procedure TRpDataFlashProtocol.ToFile(const pFileName: string);
 var
   lTexto: TStringList;
 begin
@@ -461,91 +462,91 @@ begin
   end;
 end;
 
-function TProtocolo.ToTexto: string;
+function TRpDataFlashProtocol.ToTexto: string;
 begin
   Result := Desmontar(Mensagem);
 end;
 
-procedure TProtocolo.SetIdentificador(const Value: string);
+procedure TRpDataFlashProtocol.SetIdentifier(const Value: string);
 begin
-  FIdentificador := Value;
-  FMensagem := EmptyStr;
+  FIdentifier := Value;
+  FMessage := EmptyStr;
 end;
 
-procedure TProtocolo.SetMensagem(const Value: string);
+procedure TRpDataFlashProtocol.SetMessage(const Value: string);
 var
   lMensagem: string;
 begin
-  if FTipoMensagem = mtText then
+  if FMessageType = mtText then
   begin
-    FIdentificador := '';
-    FMensagem := Value;
+    FIdentifier := '';
+    FMessage := Value;
   end
   else
   begin
-    lMensagem := RemoverEspacosInicio(Value);
-    lMensagem := RemoverEspacosFinal(lMensagem);
+    lMensagem := TrimBegin(Value);
+    lMensagem := TrimEnd(lMensagem);
 
-    if Trim(FIdentificador) = EmptyStr then
-      FIdentificador := DescobrirIDentificador(lMensagem);
+    if Trim(FIdentifier) = EmptyStr then
+      FIdentifier := DiscoverIdentifier(lMensagem);
 
-    if MensagemComIdentificadorExistente(lMensagem) = -1 then
-      FMensagem := RemoverFlagCriptografia(lMensagem)
+    if MessageWithIdentifierPresent(lMensagem) = -1 then
+      FMessage := RemoveEncryptionFlag(lMensagem)
     else
     begin
-      FMensagem := Desmontar(lMensagem);
-      if DescobrirIDentificador(FMensagem) = NME_PROTOCOLO_ERRO then
+      FMessage := Desmontar(lMensagem);
+      if DiscoverIdentifier(FMessage) = NAME_PROTOCOL_ERROR then
       begin
-        FIdentificador := NME_PROTOCOLO_ERRO;
-        FMensagem := Desmontar(FMensagem);
+        FIdentifier := NAME_PROTOCOL_ERROR;
+        FMessage := Desmontar(FMessage);
       end;
     end;
   end;
 end;
 
-procedure TProtocolo.SetNomeNodoMsgRetorno(const Value: string);
+procedure TRpDataFlashProtocol.SetReturnMsgNodeName(const Value: string);
 begin
   if Trim(Value) = EmptyStr then
-    FNomeNodoMsgRetorno := 'Retorno'
+    FReturnMsgNodeName := 'Retorno'
   else
-    FNomeNodoMsgRetorno := Value;
+    FReturnMsgNodeName := Value;
 end;
 
-procedure TProtocolo.SetTipoCriptografia(const pTipoCriptografia: TRpEncryptionClass);
+procedure TRpDataFlashProtocol.SetTipoCriptografia(const pTipoCriptografia: TRpEncryptionClass);
 var
   lRecriar: Boolean;
 begin
-  lRecriar := (FCriptografia = nil);
+  lRecriar := (FEncryption = nil);
 
-  if (not lRecriar) and (not pTipoCriptografia.ClassNameIs(FCriptografia.ClassName)) then
+  if (not lRecriar) and (not pTipoCriptografia.ClassNameIs(FEncryption.ClassName)) then
     lRecriar := True;
 
   if (not lRecriar) then
     lRecriar := pTipoCriptografia <> nil;
 
-  if (pTipoCriptografia = nil) and (FCriptografia <> nil) then
-    FreeAndNil(FCriptografia);
+  if (pTipoCriptografia = nil) and (FEncryption <> nil) then
+    FreeAndNil(FEncryption);
 
   if lRecriar and (pTipoCriptografia <> nil) then
-    FCriptografia := pTipoCriptografia.Create;
+    FEncryption := pTipoCriptografia.Create;
 end;
 
-function TProtocolo.MensagemComIdentificadorExistente(const AValue : string): Integer;
+function TRpDataFlashProtocol.MessageWithIdentifierPresent(const AValue : string): Integer;
 var
   lPosicaoInicial: Integer;
 begin
-  lPosicaoInicial := Pos(GetIdentificadorInicialCompleto, AValue);
+  lPosicaoInicial := Pos(GetCompleteIdentifierStart, AValue);
   if lPosicaoInicial <> 0 then
     Result := lPosicaoInicial
   else
     Result := -1;
 end;
 
-function TProtocolo.MensagemCriptografada(const AValue: string): Integer;
+function TRpDataFlashProtocol.MessageEncrypted(const AValue: string): Integer;
 var
   lPosicaoInicial: Integer;
 begin
-  lPosicaoInicial := Pos(IDENTIFICADOR_CRIPTO, AValue);
+  lPosicaoInicial := Pos(IDENTIFIER_CRIPTO, AValue);
   if lPosicaoInicial <> 0 then
     Result := lPosicaoInicial
   else

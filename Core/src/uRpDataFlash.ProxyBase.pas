@@ -17,7 +17,7 @@ type
     procedure DoAfterExecute(const AResult : string); virtual;
     function DoExecutar : Boolean; override;
   private
-    procedure OnErroEnvio(Sender: TObject; const AProtocolo: TProtocolo; const AException: Exception);
+    procedure OnErroEnvio(Sender: TObject; const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
   public
     function GetLastError : string;
     function Executar(const pTcpClient : TLRDataFlashConexaoCliente) : Boolean; reintroduce;
@@ -84,7 +84,7 @@ begin
 end;
 
 procedure TLRDataFlashComandoProxy.OnErroEnvio(Sender: TObject;
-  const AProtocolo: TProtocolo; const AException: Exception);
+  const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
 begin
   FLastError := AException.Message + AProtocolo.Mensagem;
 end;

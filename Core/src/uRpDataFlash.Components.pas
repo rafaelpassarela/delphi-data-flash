@@ -29,7 +29,7 @@ type
   TRpDataFlashOnBeforeClientConnection = procedure(Sender : TObject; var AAllow : Boolean) of object;
   TRpDataFlashOnClientConnection       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
 
-  TRpDataFlashOnSendingError           = procedure(Sender : TObject; const AProtocol : TProtocolo; const AException : Exception) of object;
+  TRpDataFlashOnSendingError           = procedure(Sender : TObject; const AProtocol : TRpDataFlashProtocol; const AException : Exception) of object;
   TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
   TLRDataFlashOnCriarExecutor             = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
   TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AConnectionItem : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
@@ -229,7 +229,7 @@ type
     procedure NovaExcecao(const AException : Exception); overload;
 
     function CriarException(const AException : Exception; const AResultType : TSerializationFormat = sfJSON) : string;
-    procedure TentaGerarException(const AProtocol : TProtocolo); overload;
+    procedure TentaGerarException(const AProtocol : TRpDataFlashProtocol); overload;
     function TentaGerarException(const AMenssage : string; out AException : string) : Boolean; overload;
 
     procedure Inicializar; virtual;
@@ -337,7 +337,7 @@ type
     function ItemConexao(AContext: TIdContext) : TRpDataFlashConnectionItem;
 
     function ExecutarComando(const AItem : TRpDataFlashConnectionItem; AContext: TIdContext;
-      const AProtocol : TProtocolo; out ASaida : string; out AArquivo : string;
+      const AProtocol : TRpDataFlashProtocol; out ASaida : string; out AArquivo : string;
       const ARequestInfo: TIdHTTPRequestInfo = nil; AResponseInfo: TIdHTTPResponseInfo = nil) : Boolean;
 
     procedure Receber(AContext: TIdContext; ARequestInfo: TIdHTTPRequestInfo = nil;
@@ -453,7 +453,7 @@ type
     function Enviar(const AIdentificador, AMenssage, ANomeComando : string) : string; virtual;
     function PodeConectar : Boolean;
     procedure DoNovaExcecao(const E:Exception);
-    procedure TentaExecutarCallBack(const AProtocol : TProtocolo);
+    procedure TentaExecutarCallBack(const AProtocol : TRpDataFlashProtocol);
     function GetPorta: Integer; virtual;
     procedure SetPorta(const Value: Integer); virtual;
     procedure SetServidor(const Value: string); override;
@@ -476,7 +476,7 @@ type
     procedure DoDesconectar; override;
     procedure DoSalvarConfiguracoes(const ANode : IXMLNode); override;
     procedure DoCarregarConfiguracoes(const ANode : IXMLNode); override;
-    procedure NovoErroEnvio(const AException : Exception; const AProtocol : TProtocolo);
+    procedure NovoErroEnvio(const AException : Exception; const AProtocol : TRpDataFlashProtocol);
     procedure Limpar; override;
   public
     constructor Create(AOwner : TComponent); override;
@@ -860,7 +860,7 @@ procedure TRpDataFlashCustomConnection.DoInternalEnviar(const AHandler: TIdIOHan
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo; const AValor: string;
   const AContext : TIdContext; const AArquivo : string);
 var
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
   lResposta: string;
   lIsXML: Boolean;
   lErro: Boolean;
@@ -894,7 +894,7 @@ begin
       else
       begin
         // neste caso, deve mandar sem a criptografia
-        lProtocolo := TProtocolo.Create(TipoCriptografia);
+        lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
         try
           lProtocolo.Mensagem := AValor;
           lResposta := lProtocolo.Desmontar(AValor);
@@ -1097,7 +1097,7 @@ procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandl
         lLinha := lQuebra.Current;
 
         lErro := lErro
-              or (Pos(TProtocolo.GetErrorTag, lLinha) > 0);
+              or (Pos(TRpDataFlashProtocol.GetErrorTag, lLinha) > 0);
 
         if Assigned(FOnTimeOutCheck) and (not lErro) then
         begin
@@ -1295,7 +1295,7 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
         lQuebra.AddValue(lLinha);
 
         lErro := lErro
-              or (Pos(TProtocolo.GetErrorTag, lLinha) > 0);
+              or (Pos(TRpDataFlashProtocol.GetErrorTag, lLinha) > 0);
 
         if Assigned(FOnTimeOutCheck) and (not lErro) then
         begin
@@ -1574,7 +1574,7 @@ begin
   FTipoCriptografia := Value;
 end;
 
-procedure TRpDataFlashCustomConnection.TentaGerarException(const AProtocol : TProtocolo);
+procedure TRpDataFlashCustomConnection.TentaGerarException(const AProtocol : TRpDataFlashProtocol);
 var
   lException: string;
 begin
@@ -1827,10 +1827,10 @@ end;
 
 function TRpDataFlashServerConnection.EnviarCallBack(const AContext: TIdContext; const AMenssage: string) : Boolean;
 var
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
   lResposta: string;
 begin
-  lProtocolo := TProtocolo.Create(TipoCriptografia);
+  lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
   try
     lProtocolo.Identificador := TAG_CALLBACK;
     lProtocolo.Mensagem := AMenssage;
@@ -1845,7 +1845,7 @@ begin
 end;
 
 function TRpDataFlashServerConnection.ExecutarComando(const AItem : TRpDataFlashConnectionItem;
-  AContext: TIdContext; const AProtocol : TProtocolo; out ASaida : string;
+  AContext: TIdContext; const AProtocol : TRpDataFlashProtocol; out ASaida : string;
   out AArquivo : string; const ARequestInfo: TIdHTTPRequestInfo = nil;
   AResponseInfo: TIdHTTPResponseInfo = nil) : Boolean;
 var
@@ -2340,7 +2340,7 @@ var
   lResultado: string;
   lItem: TRpDataFlashConnectionItem;
   lResposta: string;
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
   lContinue: Boolean;
   lMessage: string;
   lNomeArquivo: string;
@@ -2358,7 +2358,7 @@ begin
       begin
         if FTipoMensagem = mtCommand then
         begin
-          lProtocolo := TProtocolo.Create(TipoCriptografia);
+          lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
           try
             lProtocolo.TipoMensagem := FTipoMensagem;
 
@@ -2518,7 +2518,7 @@ begin
       end;
       on E:Exception do
       begin
-        lException := TProtocolo.NovoErro(Self.TipoCriptografia, CriarException(E));
+        lException := TRpDataFlashProtocol.NovoErro(Self.TipoCriptografia, CriarException(E));
         InternalEnviar(AContext.Connection.IOHandler, lException);
       end;
     end;
@@ -2533,7 +2533,7 @@ procedure TRpDataFlashServerConnection.AoExecutarNoServidorRest(
 var
   lException : string;
   lType: TSerializationFormat;
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
   lValue: string;
 begin
   CoInitialize(nil);
@@ -2543,7 +2543,7 @@ begin
   begin
     // reverter a criptografia
     try
-      lProtocolo := TProtocolo.Create(TipoCriptografia);
+      lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
       lProtocolo.Mensagem := ARequestInfo.UnparsedParams;
       lValue := lProtocolo.Mensagem ;
       if lValue[1] = '<' then
@@ -2568,7 +2568,7 @@ begin
     except
       on E:Exception do
       begin
-        lException := TProtocolo.NovoErro(Self.TipoCriptografia, CriarException(E, lType));
+        lException := TRpDataFlashProtocol.NovoErro(Self.TipoCriptografia, CriarException(E, lType));
 
         DoInternalEnviar(
           AContext.Connection.IOHandler,
@@ -2897,7 +2897,7 @@ function TRpDataFlashCustomClientConnection.Enviar(const AIdentificador, AMenssa
 var
   lResultado : string;
   lIdentificadorEnviado: string;
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
 begin
   Result := EmptyStr;
   try
@@ -2905,7 +2905,7 @@ begin
 
     if Conectado then
     begin
-      lProtocolo := TProtocolo.Create(Self.TipoCriptografia);
+      lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
       try
         lProtocolo.Identificador := AIdentificador;
         lProtocolo.Mensagem := AMenssage;
@@ -3093,7 +3093,7 @@ begin
 end;
 
 procedure TRpDataFlashCustomClientConnection.NovoErroEnvio(const AException: Exception;
-  const AProtocol : TProtocolo);
+  const AProtocol : TRpDataFlashProtocol);
 begin
   if Assigned(FAoErroEnvio) then
     FAoErroEnvio(Self, AProtocol, AException);
@@ -3178,7 +3178,7 @@ begin
   inherited;
 end;
 
-procedure TRpDataFlashCustomClientConnection.TentaExecutarCallBack(const AProtocol: TProtocolo);
+procedure TRpDataFlashCustomClientConnection.TentaExecutarCallBack(const AProtocol: TRpDataFlashProtocol);
 var
   lCallBack: ILRDataFlashExecutorCallBack;
   lComandoClass: TRpDataFlashAbstractClass;
@@ -3774,7 +3774,7 @@ function TLRDataFlashConexaoREST.Enviar(const AIdentificador, AMenssage, ANomeCo
 var
   lResultado : TStringStream;
   lIdentificadorEnviado: string;
-  lProtocolo: TProtocolo;
+  lProtocolo: TRpDataFlashProtocol;
 begin
   Result := EmptyStr;
   lResultado := nil;
@@ -3782,7 +3782,7 @@ begin
     if not Assigned(FConnectionHelper.Conector) then
       InternalConectar;
 
-    lProtocolo := TProtocolo.Create(Self.TipoCriptografia);
+    lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
     try
       lProtocolo.Identificador := AIdentificador;
       lProtocolo.Mensagem := AMenssage;
