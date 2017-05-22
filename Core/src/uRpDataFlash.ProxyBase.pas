@@ -86,7 +86,7 @@ end;
 procedure TLRDataFlashComandoProxy.OnErroEnvio(Sender: TObject;
   const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
 begin
-  FLastError := AException.Message + AProtocolo.Mensagem;
+  FLastError := AException.Message + AProtocolo.Message;
 end;
 
 { TLRDataFlashComandoServer }

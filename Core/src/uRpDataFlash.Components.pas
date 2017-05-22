@@ -896,8 +896,8 @@ begin
         // neste caso, deve mandar sem a criptografia
         lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
         try
-          lProtocolo.Mensagem := AValor;
-          lResposta := lProtocolo.Desmontar(AValor);
+          lProtocolo.Message := AValor;
+          lResposta := lProtocolo.Dismount(AValor);
 
           if lResposta = EmptyStr then
             lResposta := ' ';
@@ -1578,7 +1578,7 @@ procedure TRpDataFlashCustomConnection.TentaGerarException(const AProtocol : TRp
 var
   lException: string;
 begin
-  if (AProtocol.IsErro) and (TentaGerarException(AProtocol.Mensagem, lException)) then
+  if (AProtocol.IsError) and (TentaGerarException(AProtocol.Message, lException)) then
     raise ERpDataFlashException.Create(lException);
 end;
 
@@ -1832,9 +1832,9 @@ var
 begin
   lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
   try
-    lProtocolo.Identificador := TAG_CALLBACK;
-    lProtocolo.Mensagem := AMenssage;
-    lResposta := lProtocolo.Montar;
+    lProtocolo.Identifier := TAG_CALLBACK;
+    lProtocolo.Message := AMenssage;
+    lResposta := lProtocolo.Mount;
 
     InternalEnviar(AContext.Connection.IOHandler, lResposta);
     Result := True;
@@ -1979,22 +1979,22 @@ begin
   lParametros := nil;
   lTcpClient := nil;
   try
-    if AProtocol.Identificador <> TAG_COMMAND then
+    if AProtocol.Identifier <> TAG_COMMAND then
       raise ERpDataFlashException.Create('Identificador não é um comando: ' + sLineBreak +
-        'Identificador: ' + AProtocol.Identificador);
+        'Identificador: ' + AProtocol.Identifier);
 
     lCarregado := False;
     if FUtilizarControllers then
     begin
       // localiza um provider ligado ao servidor
-      lCarregado := CarregarComandoViaProviders(AProtocol.Mensagem, lComando, lParametros);
+      lCarregado := CarregarComandoViaProviders(AProtocol.Message, lComando, lParametros);
       if not lCarregado then
       begin
         lComando := nil;
         if lParametros <> nil then
           FreeAndNil(lParametros);
         // vai para os comandos registrados no controller
-        lCarregado := CarregarComandoViaControllers(AProtocol.Mensagem, lComando, lParametros);
+        lCarregado := CarregarComandoViaControllers(AProtocol.Message, lComando, lParametros);
         if not lCarregado then
         begin
           lComando := nil;
@@ -2005,7 +2005,7 @@ begin
     end;
 
     if not lCarregado then
-      lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocol.Mensagem, lComando, lParametros, Self, AItem));
+      lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocol.Message, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
       raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Comando]);
@@ -2360,19 +2360,19 @@ begin
         begin
           lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
           try
-            lProtocolo.TipoMensagem := FTipoMensagem;
+            lProtocolo.MessageType := FTipoMensagem;
 
             if ARequestInfo = nil then
             begin
               lPedido := InternalReceber(AContext.Connection.IOHandler);
-              lProtocolo.Mensagem := lPedido;
+              lProtocolo.Message := lPedido;
             end
             else
             begin
               lPedido := InternalReceber(ARequestInfo, AResponseInfo);
-              if lProtocolo.Identificador = EmptyStr then
-                lProtocolo.Identificador := TAG_COMMAND;
-              lProtocolo.Mensagem := lPedido;
+              if lProtocolo.Identifier = EmptyStr then
+                lProtocolo.Identifier := TAG_COMMAND;
+              lProtocolo.Message := lPedido;
             end;
 
             lContinue := True;
@@ -2385,8 +2385,8 @@ begin
 
             ExecutarComando(lItem, AContext, lProtocolo, lResultado, lNomeArquivo, ARequestInfo, AResponseInfo);
 
-            lProtocolo.Mensagem := lResultado;
-            lResposta := lProtocolo.Montar;
+            lProtocolo.Message := lResultado;
+            lResposta := lProtocolo.Mount;
 
             DoInternalEnviar(
               AContext.Connection.IOHandler,
@@ -2518,7 +2518,7 @@ begin
       end;
       on E:Exception do
       begin
-        lException := TRpDataFlashProtocol.NovoErro(Self.TipoCriptografia, CriarException(E));
+        lException := TRpDataFlashProtocol.NewError(Self.TipoCriptografia, CriarException(E));
         InternalEnviar(AContext.Connection.IOHandler, lException);
       end;
     end;
@@ -2544,8 +2544,8 @@ begin
     // reverter a criptografia
     try
       lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
-      lProtocolo.Mensagem := ARequestInfo.UnparsedParams;
-      lValue := lProtocolo.Mensagem ;
+      lProtocolo.Message := ARequestInfo.UnparsedParams;
+      lValue := lProtocolo.Message;
       if lValue[1] = '<' then
         lType := sfXML
       else
@@ -2568,7 +2568,7 @@ begin
     except
       on E:Exception do
       begin
-        lException := TRpDataFlashProtocol.NovoErro(Self.TipoCriptografia, CriarException(E, lType));
+        lException := TRpDataFlashProtocol.NewError(Self.TipoCriptografia, CriarException(E, lType));
 
         DoInternalEnviar(
           AContext.Connection.IOHandler,
@@ -2907,28 +2907,28 @@ begin
     begin
       lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
       try
-        lProtocolo.Identificador := AIdentificador;
-        lProtocolo.Mensagem := AMenssage;
+        lProtocolo.Identifier := AIdentificador;
+        lProtocolo.Message := AMenssage;
 
-        lIdentificadorEnviado := lProtocolo.Identificador;
-        InternalEnviar(FConnectionHelper.Conector.IOHandler, lProtocolo.Montar);
+        lIdentificadorEnviado := lProtocolo.Identifier;
+        InternalEnviar(FConnectionHelper.Conector.IOHandler, lProtocolo.Mount);
 
         repeat
           lResultado := InternalReceber(FConnectionHelper.Conector.IOHandler);
 
           lProtocolo.Clear;
-          lProtocolo.Mensagem := lResultado;
+          lProtocolo.Message := lResultado;
 
           TentaGerarException(lProtocolo);
 
           TentaExecutarCallBack(lProtocolo);
 
-        until (lProtocolo.Identificador <> TAG_CALLBACK);
+        until (lProtocolo.Identifier <> TAG_CALLBACK);
 
-        if AIdentificador <> lProtocolo.Identificador then
-          raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
+        if AIdentificador <> lProtocolo.Identifier then
+          raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Message);
 
-        Result := lProtocolo.Mensagem;
+        Result := lProtocolo.Message;
       finally
         FreeAndNil(lProtocolo);
       end;
@@ -3184,7 +3184,7 @@ var
   lComandoClass: TRpDataFlashAbstractClass;
   lParametros: TRpDataFlashCommandParameters;
 begin
-  if AProtocol.Identificador = TAG_CALLBACK then
+  if AProtocol.Identifier = TAG_CALLBACK then
   begin
     lParametros := nil;
 
@@ -3193,7 +3193,7 @@ begin
       if (FExecutorCallBackClass <> EmptyStr) or Assigned(FExecutorCallBackInterfaced) then
       begin
         lParametros := TRpDataFlashCommandParameters.Create(Self);
-        lParametros.Carregar( AProtocol.Mensagem );
+        lParametros.Carregar( AProtocol.Message );
       end;
 
       if FExecutorCallBackClass <> EmptyStr then
@@ -3784,34 +3784,30 @@ begin
 
     lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
     try
-      lProtocolo.Identificador := AIdentificador;
-      lProtocolo.Mensagem := AMenssage;
+      lProtocolo.Identifier := AIdentificador;
+      lProtocolo.Message := AMenssage;
 
-      lIdentificadorEnviado := lProtocolo.Identificador;
+      lIdentificadorEnviado := lProtocolo.Identifier;
 
       InternalEnviar(
         TLRDataFlashConnectionHelperREST(FConnectionHelper).Conector,
-        lProtocolo.Montar,
+        lProtocolo.Mount,
         ANomeComando,
         lResultado);
-//    repeat
-//      lResultado := InternalReceber(FConnectionHelper.Conector.IOHandler);
 
       lResultado.Position := 0;
 
       lProtocolo.Clear;
-      lProtocolo.Mensagem := lResultado.DataString;
+      lProtocolo.Message := lResultado.DataString;
 
       TentaGerarException(lProtocolo);
 
       TentaExecutarCallBack(lProtocolo);
 
-//    until (lProtocolo.Identificador <> TAG_CALLBACK);
+      if AIdentificador <> lProtocolo.Identifier then
+        raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Message);
 
-      if AIdentificador <> lProtocolo.Identificador then
-        raise ERpDataFlashSending.Create('A mensagem recebida não é a esperada' + sLineBreak + lProtocolo.Mensagem);
-
-      Result := lProtocolo.Mensagem;
+      Result := lProtocolo.Message;
     finally
       FreeAndNil(lResultado);
       FreeAndNil(lProtocolo);
