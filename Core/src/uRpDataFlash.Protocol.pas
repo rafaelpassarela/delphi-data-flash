@@ -156,14 +156,14 @@ type
     class function GetErrorTag : string;
   end;
 
-  TRpQuebraProtocoloList = class(TObjectList)
+  TRpDataFlashProtocolBreakerList = class(TObjectList)
   private
     function GetItem(Index: Integer): TRpDataFlashProtocolBreaker;
     procedure SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);
-    function AddQuebra : TRpDataFlashProtocolBreaker;
+    function AddBreak : TRpDataFlashProtocolBreaker;
   public
     function Find(const AGuid : string) : TRpDataFlashProtocolBreaker;
-
+           aqui \/
     procedure Delete(const AQuebra : TRpDataFlashProtocolBreaker); overload;
 
     property Item[Index : Integer]: TRpDataFlashProtocolBreaker read GetItem write SetItem; default;
@@ -172,7 +172,6 @@ type
     function Carregar(const AValor : string) : TRpDataFlashProtocolBreaker;
   end;
 
-
 function CharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
 
 implementation
@@ -180,7 +179,7 @@ implementation
 uses
   ComObj;
 
-{ TProtocolo }
+{ TRpDataFlashProtocol }
 
 function CharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
 begin
@@ -343,7 +342,6 @@ begin
     lMessage := ReplaceInvalids(FMessage);
     lMessage := Encrypt(lMessage);
 
-    // adiciona o identificador da mensagem
     if (MessageWithIdentifierPresent(lMessage)) = -1 then
       Result := CompleteIdentifierStart + lMessage + CompleteIdentifierEnding
     else
@@ -552,7 +550,7 @@ begin
     Result := -1;
 end;
 
-{ TListaRetornos }
+{ TRpDataFlashProtocolBreaker }
 
 procedure TRpDataFlashProtocolBreaker.AddMarkEndMenssage;
 begin
@@ -983,36 +981,36 @@ begin
   end;
 end;
 
-{ TRpListaQuebraProtocolo }
+{ TRpDataFlashProtocolBreakerList }
 
-function TRpQuebraProtocoloList.AddQuebra: TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.AddBreak: TRpDataFlashProtocolBreaker;
 begin
   Result := TRpDataFlashProtocolBreaker.Create;
   Add(Result);
 end;
 
-function TRpQuebraProtocoloList.Carregar(const AValor: string): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.Carregar(const AValor: string): TRpDataFlashProtocolBreaker;
 var
   lGuid: TGUID;
 begin
   lGuid := TRpDataFlashProtocolBreaker.GuidValue(AValor);
   Result := Find(GUIDToString(lGuid));
   if Result = nil then
-    Result := AddQuebra;
+    Result := AddBreak;
   Result.AddValue(AValor);
 end;
 
-procedure TRpQuebraProtocoloList.Delete(const AQuebra: TRpDataFlashProtocolBreaker);
+procedure TRpDataFlashProtocolBreakerList.Delete(const AQuebra: TRpDataFlashProtocolBreaker);
 begin
   Remove(AQuebra);
 end;
 
-function TRpQuebraProtocoloList.Find(const AGuid: string): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.Find(const AGuid: string): TRpDataFlashProtocolBreaker;
 var
   I : Integer;
 begin
   Result := nil;
-  // localiza nas quebras já registradas o protocolo recebido
+  // Finds in the already registered breaks of the received protocol
   for I := 0 to Count - 1 do
   begin
     if Item[I].GUID = AGuid then
@@ -1023,18 +1021,18 @@ begin
   end;
 end;
 
-function TRpQuebraProtocoloList.GetItem(Index: Integer): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.GetItem(Index: Integer): TRpDataFlashProtocolBreaker;
 begin
   Result := TRpDataFlashProtocolBreaker(inherited Items[Index]);
 end;
 
-function TRpQuebraProtocoloList.DoBreak(const AValor: string): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.DoBreak(const AValor: string): TRpDataFlashProtocolBreaker;
 begin
-  Result := AddQuebra;
+  Result := AddBreak;
   Result.AddValue(AValor);
 end;
 
-procedure TRpQuebraProtocoloList.SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);
+procedure TRpDataFlashProtocolBreakerList.SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);
 begin
   inherited Items[Index] := Value;
 end;

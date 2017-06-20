@@ -123,7 +123,7 @@ type
     FExecutor: IRpPackageCommandExecutor;
     FOwner: TRpDataFlashCustomConnection;
     FTcpClientPonte: TRpDataFlashCustomClientConnection;
-    FQuebras : TRpQuebraProtocoloList;
+    FQuebras : TRpDataFlashProtocolBreakerList;
     FOnCallBack: TRpDataFlashCallBackEvent;
     FIdentificadorCliente: string;
     FUsername: string;
@@ -147,7 +147,7 @@ type
     property Handler : TIdIOHandler read FHandler write FHandler;
     property Executor : IRpPackageCommandExecutor read FExecutor write FExecutor;
     property TcpClientPonte : TRpDataFlashCustomClientConnection read FTcpClientPonte;
-    property Quebras : TRpQuebraProtocoloList read FQuebras;
+    property Quebras : TRpDataFlashProtocolBreakerList read FQuebras;
     property Username : string read GetUserName write SetUsername;
     property Password : string read GetPassword write SetPassword;
     property Autenticado : Boolean read GetAutenticado write SetAutenticado;
@@ -203,7 +203,7 @@ type
     FOnException: TRpDataFlashOnException;
     FTipoCriptografia: TRpDataFlashEncryptionType;
     FIpsReconhecidos: TStringList;
-    FQuebrasProtocolosRecebidos: TRpQuebraProtocoloList;
+    FQuebrasProtocolosRecebidos: TRpDataFlashProtocolBreakerList;
     FTipoComunicacao: TRpDataFlashCommunicationType;
     FTipoMensagem: TRpDataFlashMessageType;
     FOnTimeOutCheck: TLRDataFlashOnTimeOutCheck;
@@ -754,7 +754,7 @@ begin
   FConexaoTCPIP := TLRDataFlashConfigConexaoTCPIP.Create;
   FConexaoREST  := TLRDataFlashConfigConexaoREST.Create;
 
-  FQuebrasProtocolosRecebidos := TRpQuebraProtocoloList.Create;
+  FQuebrasProtocolosRecebidos := TRpDataFlashProtocolBreakerList.Create;
   FIpsReconhecidos := TStringList.Create;
 
   FFileTransfer := TLRDataFlashFileTransfer.Create;
@@ -2627,7 +2627,7 @@ begin
     FTcpClientPonte.LazyConnection := True;
   end;
 
-  FQuebras := TRpQuebraProtocoloList.Create;
+  FQuebras := TRpDataFlashProtocolBreakerList.Create;
 end;
 
 destructor TRpDataFlashConnectionItem.Destroy;
