@@ -539,7 +539,7 @@ begin
     AGerados := EmptyStr;
     for i := 0 to lCmd.Parametros.Count - 1 do
     begin
-      if (lCmd.Parametros[i].TipoValor = tvpBase) and (lCmd.Parametros[i].BaseClass <> EmptyStr) then
+      if (lCmd.Parametros[i].ValueType = tvpBase) and (lCmd.Parametros[i].BaseClass <> EmptyStr) then
       begin
         lClass := SerializationClassRegistrer.GetClass(lCmd.Parametros[i].BaseClass);
         DecodeClass(lClass, AGerados, lCmd.Parametros[i].BaseClass);

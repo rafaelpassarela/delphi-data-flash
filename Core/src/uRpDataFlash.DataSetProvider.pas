@@ -12,14 +12,14 @@ type
   TLRDataFlashCustomDataSetProvider = class;
 //  TLRDataFlashMasterDataSetProvider = class;
 
-  TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameters) : Boolean of object;
+  TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
 
   TLRDataFlashDataSetCommandProvider = class(TLRDataFlashComandoDataSetProvider)
   protected
     FProvider: TLRDataFlashCustomDataSetProvider;
     // from TLRDataFlashComando
     function GetCommand: string; override;
-    function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameters) : Boolean; override;
+    function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; override;
     function GetProcessType : TRpDataFlashProcessType; override;
     function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
@@ -144,7 +144,7 @@ begin
 end;
 
 function TLRDataFlashDataSetCommandProvider.DoCallBack(
-  var AParamsCallback: TRpDataFlashCommandParameters): Boolean;
+  var AParamsCallback: TRpDataFlashCommandParameterList): Boolean;
 begin
   Result := Assigned(FProvider.OnSendCallback)
         and FProvider.OnSendCallback(Self, AParamsCallback);

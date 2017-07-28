@@ -52,7 +52,7 @@ type
     function GetListaParametros : string;
   public
     property Parametros[const AIndex : Integer] : TProxyParametroComandoItem read GetParametros; default;
-    procedure AddParametro(const PParams : TLRDataFlashParametroComando); overload;
+    procedure AddParametro(const PParams : TRpDataFlashCommandParameter); overload;
     procedure AddParametro(const PParams : TLRDataFlashParametroItem); overload;
     function GetAsString(const pCommandName : string; const pIdentCount : Smallint;
       const pNomeGrupo : string) : string;
@@ -1434,7 +1434,7 @@ begin
   begin
     // cria a lista de parametros de entrada
     for i := 0 to lCmd.GetParams.Count - 1 do
-      if lCmd.GetParams[i].Tipo <> tpInternal then
+      if lCmd.GetParams[i].ParamType <> tpInternal then
         ListaParametros.AddParametro(lCmd.GetParams[i]);
   end;
 end;
@@ -1668,15 +1668,15 @@ end;
 
 { TProxyParametroComandoList }
 
-procedure TProxyParametroComandoList.AddParametro(const PParams: TLRDataFlashParametroComando);
+procedure TProxyParametroComandoList.AddParametro(const PParams: TRpDataFlashCommandParameter);
 var
   lParametro : TProxyParametroComandoItem;
 begin
   lParametro := TProxyParametroComandoItem.Create;
 
-  lParametro.Nome := PParams.Nome;
-  lParametro.TipoParametro := PParams.Tipo;
-  lParametro.TipoValor := PParams.TipoValor;
+  lParametro.Nome := PParams.Name;
+  lParametro.TipoParametro := PParams.ParamType;
+  lParametro.TipoValor := PParams.ValueType;
   lParametro.BaseClass := PParams.BaseClass;
 
   Self.Add( lParametro );

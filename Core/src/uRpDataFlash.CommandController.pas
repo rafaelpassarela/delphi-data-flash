@@ -17,7 +17,7 @@ type
   protected
     function GetCommand: string; override;
     function DoExecutar : Boolean; override;
-    function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; override;
+    function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; override;
     function GetProcessType : TRpDataFlashProcessType; override;
     function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
@@ -44,7 +44,7 @@ type
   TLRDataFlashOnExecutarAntesComunicarPonteEvent = TLRDataFlashValidateExecuteEvent;
   TLRDataFlashOnErroExecucaoEvent = procedure(const AComando : IRpDataFlashCommandInterfaced; const AErrorMsg : string) of object;
   TLRDataFlashOnExecutarComandItemEvent = function(const AComando : IRpDataFlashCommandInterfaced) : Boolean of object;
-  TLRDataFlashOnSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRPDataFlashCommandParameters) : Boolean of object;
+  TLRDataFlashOnSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
 
   TLRDataFlashBaseParametroItem = class(TCollectionItem)
   private
@@ -337,7 +337,7 @@ begin
   inherited Create;
 end;
 
-function TLRDataFlashComandoItem.DoCallBack(var AParamsCallback: TRPDataFlashCommandParameters): Boolean;
+function TLRDataFlashComandoItem.DoCallBack(var AParamsCallback: TRpDataFlashCommandParameterList): Boolean;
 begin
   Result := Assigned(FItem.OnSendCallback) and FItem.OnSendCallback(Self, AParamsCallback);
 end;

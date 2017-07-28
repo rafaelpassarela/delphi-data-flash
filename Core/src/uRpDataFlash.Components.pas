@@ -36,14 +36,14 @@ type
   TLRDataFlashOnTimeOutCheck           = procedure(Sender : TObject; const AOrigem : TRpDataFlashValidationOrigin; var AContinue : Boolean) of object;
   TLRDataFlashOnBeforeExecuteCommand   = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem; var AContinue : Boolean; out AMessage : string) of object;
   // DataSet
-  TLRDataFlashOnExecSQL = function (const AComando: IRpDataFlashCommandInterfaced; var ASQL: string; var AContinue : Boolean) : Boolean of object;
-  TLRDataFlashOnSelect = function (const AComando: IRpDataFlashCommandInterfaced; var ASelectSQL : string; var AContinue : Boolean): Boolean of object;
-  TLRDataFlashOnTransactionEvent = function (const AComando: IRpDataFlashCommandInterfaced; const ARetaining : Boolean; var AContinue : Boolean) : Boolean of object;
-  TLRDataFlashOnStartTransactionEvent = function(const AComando: IRpDataFlashCommandInterfaced; var AContinue : Boolean) : Boolean of object;
+  TLRDataFlashOnExecSQL = function (const ACommand: IRpDataFlashCommandInterfaced; var ASQL: string; var AContinue : Boolean) : Boolean of object;
+  TLRDataFlashOnSelect = function (const ACommand: IRpDataFlashCommandInterfaced; var ASelectSQL : string; var AContinue : Boolean): Boolean of object;
+  TLRDataFlashOnTransactionEvent = function (const ACommand: IRpDataFlashCommandInterfaced; const ARetaining : Boolean; var AContinue : Boolean) : Boolean of object;
+  TLRDataFlashOnStartTransactionEvent = function(const ACommand: IRpDataFlashCommandInterfaced; var AContinue : Boolean) : Boolean of object;
 
   ILRDataFlashExecutorCallBack = interface
   ['{E1E31424-BC86-4207-AC11-BD7C2FB1549E}']
-    function ExecutarCallBack(const AParametrosCallback : TRPDataFlashCommandParameters) : Boolean;
+    function ExecutarCallBack(const AParametrosCallback : TRpDataFlashCommandParameterList) : Boolean;
   end;
 
   ISPITCPMonitorEventos = interface
@@ -80,10 +80,10 @@ type
   protected
     procedure InternalCallback;
     procedure DoAfterCallback; virtual; abstract;
-    function DoBeforeCallback(const AParametrosCallback: TRpDataFlashCommandParameters) : Boolean; virtual; abstract;
+    function DoBeforeCallback(const AParametrosCallback: TRpDataFlashCommandParameterList) : Boolean; virtual; abstract;
     function AsyncMode : Boolean; virtual;
   public
-    function ExecutarCallBack(const AParametrosCallback: TRpDataFlashCommandParameters): Boolean;
+    function ExecutarCallBack(const AParametrosCallback: TRpDataFlashCommandParameterList): Boolean;
   end;
 
   TLRDataFlashSyncLogEvent = class(TIdNotify)
@@ -138,8 +138,8 @@ type
   public
     constructor Create(AOwner : TRpDataFlashCustomConnection; pHandler : TIdIOHandler);
     destructor Destroy; override;
-    function LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
-    procedure AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
+    function FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
+    procedure AddInstance(const AInstance: IRpDataFlashCommandInterfaced);
     function Ip: string;
 
     property NomeCliente : string read FNomeCliente write FNomeCliente;
@@ -244,7 +244,7 @@ type
     procedure Limpar; virtual;
 
     function isComandoDesejado(const pComando, pMensagem : string) : Boolean;
-    procedure SeparaComando(const pComandoCompleto : string; out AComando, AGuid : string);
+    procedure SeparaComando(const pComandoCompleto : string; out ACommand, AGuid : string);
 
     procedure DoInternalEnviar(const AHandler : TIdIOHandler; ARequestInfo: TIdHTTPRequestInfo;
       AResponseInfo: TIdHTTPResponseInfo; const AValor : string; const AContext : TIdContext;
@@ -350,10 +350,10 @@ type
       out AConexao: TRpDataFlashCustomClientConnection) : TRpDataFlashProcessingStatus;
     function GetNumeroClientesConectados: Integer;
     // controllers e providers
-    function CarregarComandoViaControllers(const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
-      out AParametros : TRpDataFlashCommandParameters) : Boolean;
-    function CarregarComandoViaProviders(const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
-      out AParametros : TRpDataFlashCommandParameters) : Boolean;
+    function CarregarComandoViaControllers(const ACommand : string; out AObjComando : IRpDataFlashCommandInterfaced;
+      out AParametros : TRpDataFlashCommandParameterList) : Boolean;
+    function CarregarComandoViaProviders(const ACommand : string; out AObjComando : IRpDataFlashCommandInterfaced;
+      out AParametros : TRpDataFlashCommandParameterList) : Boolean;
     function GetControllersCount: Integer;
     function GetProvidersCount: Integer;
     function GetUtilizarControllers : Boolean;
@@ -380,12 +380,12 @@ type
     procedure Limpar; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     function ComandoRequerAutenticacao(const AClasseComando : string;
-      const AParametros : TRpDataFlashCommandParameters) : Boolean;
+      const AParametros : TRpDataFlashCommandParameterList) : Boolean;
     function IsPonte : Boolean;
   public
     procedure AfterConstruction; override;
-    procedure AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
-    function LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
+    procedure AddInstance(const AInstance: IRpDataFlashCommandInterfaced);
+    function FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
     property Controllers : TRpDataFlashComandControllerList read GetControllers;
     property Providers : TRpDataFlashProviderControllerList read GetProviders;
   published
@@ -465,7 +465,7 @@ type
     function GetConectado: Boolean; override;
     function GetListaItensServidor : string;
     function InternalConectar : Boolean;
-    function DoComunicarComThred(const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
+    function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : ILRDataFlashExecutorCallBack) : string; virtual; abstract;
     function GetConnectionHelperClass : TLRDataFlashConnectionHelperCustomClass; virtual; abstract;
 
@@ -482,11 +482,11 @@ type
     constructor Create(AOwner : TComponent); override;
 
     function Comunicar(const AIdentificador : string; const AMenssage : string = ''; const ANomeComando : string = '') : string; overload;
-    function Comunicar(const AComando : TRpDataFlashCommand) : string; overload;
-    function Comunicar(const AComando : IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters) : string; overload;
+    function Comunicar(const ACommand : TRpDataFlashCommand) : string; overload;
+    function Comunicar(const ACommand : IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameterList) : string; overload;
     // chamadas com callback
-    function Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string; overload;
-    function Comunicar(const AComando: TRpDataFlashCommand; const AExecutorCallBack: ILRDataFlashExecutorCallBack): string; overload;
+    function Comunicar(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string): string; overload;
+    function Comunicar(const ACommand: TRpDataFlashCommand; const AExecutorCallBack: ILRDataFlashExecutorCallBack): string; overload;
     // autenticações de usuário
     function Autenticar(out AErrorMessage : string) : Boolean; overload;
     function Autenticar(const AUsername, APassword : string; out AErrorMessage : string) : Boolean; overload;
@@ -524,7 +524,7 @@ type
 
   TLRDataFlashConexaoCliente = class(TRpDataFlashCustomClientConnection)
   protected
-    function DoComunicarComThred(const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
+    function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : ILRDataFlashExecutorCallBack) : string; override;
     function GetConnectionHelperClass : TLRDataFlashConnectionHelperCustomClass; override;
 
@@ -558,7 +558,7 @@ type
 
   TLRDataFlashConexaoREST = class(TRpDataFlashCustomClientConnection)
   protected
-    function DoComunicarComThred(const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
+    function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : ILRDataFlashExecutorCallBack) : string; override;
     procedure InternalEnviar(const AHandler : TIdHTTP; const AValor, ANomeComando : string;
       out AResponse : TStringStream); reintroduce;
@@ -643,7 +643,7 @@ type
     procedure Execute; override;
     procedure DoTerminate; override;
   public
-    constructor Create(const AClient : TRpDataFlashCustomClientConnection; const AComando: TRpDataFlashCommand;
+    constructor Create(const AClient : TRpDataFlashCustomClientConnection; const ACommand: TRpDataFlashCommand;
       const ACallBackClassName: string; const AExecutorCallBack: ILRDataFlashExecutorCallBack);
 
     property Comando : TRpDataFlashCommand read FComando write FComando;
@@ -666,8 +666,8 @@ type
     FBusyCallback : TRpDataFlashBusyCallback;
     procedure ProcessaErroComunicacao(const pMessage : string);
     procedure DoAoProcessarErroComunicacao; virtual;
-    procedure DoComunicar(const AComando : TLRDataFlashComandoEnvio);
-    function DoEnviar(const ANomeComando: string; const AParams: TRpDataFlashCommandParameters) : Boolean;
+    procedure DoComunicar(const ACommand : TLRDataFlashComandoEnvio);
+    function DoEnviar(const ANomeComando: string; const AParams: TRpDataFlashCommandParameterList) : Boolean;
   public
     constructor Create(ATcpClient: TRpDataFlashCustomClientConnection;
       ABusyCallback : TRpDataFlashBusyCallback; const ASharedClient : Boolean = False);
@@ -1256,9 +1256,11 @@ begin
 
         // carrega os parametros do REST para o componente conseguir executar
         for i := 0 to lComando.GetParams.Count - 1 do
-          if (lComando.GetParams.Item[i].Tipo in [tpInput, tpInputNoReload])
-          or ((lComando.GetParams.Item[i].Tipo = tpInternal) and (lComando.GetParams.Item[i].Nome = C_PARAM_INT_FORMAT_TYPE)) then
-            lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Nome];
+        begin
+          if (lComando.GetParams.Item[i].ParamType in [tpInput, tpInputNoReload])
+          or ((lComando.GetParams.Item[i].ParamType = tpInternal) and (lComando.GetParams.Item[i].Name = C_PARAM_INT_FORMAT_TYPE)) then
+            lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Name];
+        end;
 
         Result := lComando.GetParams.Serializar;
       end
@@ -1531,7 +1533,7 @@ begin
 end;
 
 procedure TRpDataFlashCustomConnection.SeparaComando(const pComandoCompleto: string;
-  out AComando, AGuid: string);
+  out ACommand, AGuid: string);
 var
   lLen : Integer;
   lFinal: string;
@@ -1547,7 +1549,7 @@ begin
 
   if lLen > -1 then
   begin
-    AComando := Copy(pComandoCompleto, 1, lLen);
+    ACommand := Copy(pComandoCompleto, 1, lLen);
     AGuid := Copy(pComandoCompleto, lLen + 1, 38);
   end
   else
@@ -1557,7 +1559,7 @@ begin
     if (Length(lFinal) = 38) and (lFinal[1] = '{') and (lFinal[38] = '}') then
     begin
       AGuid := lFinal;
-      AComando := Copy(pComandoCompleto, 1, Length(pComandoCompleto) - 38);
+      ACommand := Copy(pComandoCompleto, 1, Length(pComandoCompleto) - 38);
     end;
   end;
 end;
@@ -1585,11 +1587,11 @@ end;
 { TLRDataFlashConexaoServer }
 
 function TRpDataFlashServerConnection.CarregarComandoViaControllers(
-  const AComando : string; out AObjComando : IRpDataFlashCommandInterfaced;
-  out AParametros : TRpDataFlashCommandParameters) : Boolean;
+  const ACommand : string; out AObjComando : IRpDataFlashCommandInterfaced;
+  out AParametros : TRpDataFlashCommandParameterList) : Boolean;
 begin
-  AParametros := TRpDataFlashCommandParameters.Create(Self);
-  AParametros.Carregar(AComando);
+  AParametros := TRpDataFlashCommandParameterList.Create(Self);
+  AParametros.Carregar(ACommand);
 
   AObjComando := nil;
 
@@ -1603,11 +1605,11 @@ begin
 end;
 
 function TRpDataFlashServerConnection.CarregarComandoViaProviders(
-  const AComando: string; out AObjComando: IRpDataFlashCommandInterfaced;
-  out AParametros: TRpDataFlashCommandParameters): Boolean;
+  const ACommand: string; out AObjComando: IRpDataFlashCommandInterfaced;
+  out AParametros: TRpDataFlashCommandParameterList): Boolean;
 begin
-  AParametros := TRpDataFlashCommandParameters.Create(Self);
-  AParametros.Carregar(AComando);
+  AParametros := TRpDataFlashCommandParameterList.Create(Self);
+  AParametros.Carregar(ACommand);
 
   AObjComando := nil;
 
@@ -1661,7 +1663,7 @@ begin
 end;
 
 function TRpDataFlashServerConnection.ComandoRequerAutenticacao(const AClasseComando: string;
-  const AParametros : TRpDataFlashCommandParameters): Boolean;
+  const AParametros : TRpDataFlashCommandParameterList): Boolean;
 var
   lIgnorados: Boolean;
 
@@ -1850,7 +1852,7 @@ function TRpDataFlashServerConnection.ExecutarComando(const AItem : TRpDataFlash
   AResponseInfo: TIdHTTPResponseInfo = nil) : Boolean;
 var
   lComando: IRpDataFlashCommandInterfaced;
-  lParametros: TRpDataFlashCommandParameters;
+  lParametros: TRpDataFlashCommandParameterList;
   lTcpClient: TRpDataFlashCustomClientConnection;
   lContinuar: Boolean;
   lStatusProcessamento: TRpDataFlashProcessingStatus;
@@ -2148,14 +2150,14 @@ begin
   FServidor := GetNomeComputadorLocal;
 end;
 
-function TRpDataFlashServerConnection.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
+function TRpDataFlashServerConnection.FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
 var
   I: Integer;
 begin
   Result := nil;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AComando then
+    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = ACommand then
     begin
       Result := (FInterfaceList[I] as IRpDataFlashCommandInterfaced);
       Exit;
@@ -2433,7 +2435,7 @@ begin
   FUtilizarControllers := Value;
 end;
 
-procedure TRpDataFlashServerConnection.AdicionarInstancia(const AInstancia: IRpDataFlashCommandInterfaced);
+procedure TRpDataFlashServerConnection.AddInstance(const AInstance: IRpDataFlashCommandInterfaced);
 var
   I : Integer;
   lExiste: Boolean;
@@ -2442,13 +2444,13 @@ begin
   lExiste := False;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstancia.GetCommand;
+    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstance.GetCommand;
     if lExiste then
       Break;
   end;
 
   if not lExiste then
-    FInterfaceList.Add(AInstancia);
+    FInterfaceList.Add(AInstance);
 end;
 
 procedure TRpDataFlashServerConnection.AfterConstruction;
@@ -2586,8 +2588,8 @@ end;
 
 { TLRDataFlashConexaoItem }
 
-procedure TRpDataFlashConnectionItem.AdicionarInstancia(
-  const AInstancia: IRpDataFlashCommandInterfaced);
+procedure TRpDataFlashConnectionItem.AddInstance(
+  const AInstance: IRpDataFlashCommandInterfaced);
 var
   I : Integer;
   lExiste: Boolean;
@@ -2596,13 +2598,13 @@ begin
   lExiste := False;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstancia.GetCommand;
+    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstance.GetCommand;
     if lExiste then
       Break;
   end;
 
   if not lExiste then
-    FInterfaceList.Add(AInstancia);
+    FInterfaceList.Add(AInstance);
 end;
 
 constructor TRpDataFlashConnectionItem.Create(AOwner : TRpDataFlashCustomConnection; pHandler: TIdIOHandler);
@@ -2669,14 +2671,14 @@ begin
   Result := FNomeCliente;
 end;
 
-function TRpDataFlashConnectionItem.LocalizarInstancia(const AComando: string): IRpDataFlashCommandInterfaced;
+function TRpDataFlashConnectionItem.FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
 var
   I: Integer;
 begin
   Result := nil;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AComando then
+    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = ACommand then
     begin
       Result := (FInterfaceList[I] as IRpDataFlashCommandInterfaced);
       Exit;
@@ -2778,9 +2780,9 @@ begin
   end;
 end;
 
-function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand): string;
 begin
-  Result := Comunicar(AComando, AComando.Parametros);
+  Result := Comunicar(ACommand, ACommand.Parametros);
 end;
 
 function TRpDataFlashCustomClientConnection.Autenticar(out AErrorMessage: string): Boolean;
@@ -2832,18 +2834,18 @@ begin
   end;
 end;
 
-function TRpDataFlashCustomClientConnection.Comunicar(const AComando: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameterList): string;
 begin
-  AParametros.Command := AComando.Command;
-  AComando.DoSerialize(AParametros);
+  AParametros.Command := ACommand.Command;
+  ACommand.DoSerialize(AParametros);
   Result := Comunicar(TAG_COMMAND, AParametros.Serializar);
   AParametros.Carregar(Result);
-  AComando.DoLoad(loReceive, AParametros);
+  ACommand.DoLoad(loReceive, AParametros);
 end;
 
-function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string;
+function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string): string;
 begin
-  Result := DoComunicarComThred(AComando, ACallBackClassName, nil);
+  Result := DoComunicarComThred(ACommand, ACallBackClassName, nil);
 end;
 
 constructor TRpDataFlashCustomClientConnection.Create(AOwner: TComponent);
@@ -3182,7 +3184,7 @@ procedure TRpDataFlashCustomClientConnection.TentaExecutarCallBack(const AProtoc
 var
   lCallBack: ILRDataFlashExecutorCallBack;
   lComandoClass: TRpDataFlashAbstractClass;
-  lParametros: TRpDataFlashCommandParameters;
+  lParametros: TRpDataFlashCommandParameterList;
 begin
   if AProtocol.Identifier = TAG_CALLBACK then
   begin
@@ -3192,7 +3194,7 @@ begin
     try
       if (FExecutorCallBackClass <> EmptyStr) or Assigned(FExecutorCallBackInterfaced) then
       begin
-        lParametros := TRpDataFlashCommandParameters.Create(Self);
+        lParametros := TRpDataFlashCommandParameterList.Create(Self);
         lParametros.Carregar( AProtocol.Message );
       end;
 
@@ -3213,10 +3215,10 @@ begin
   end;
 end;
 
-function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand;
+function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand;
   const AExecutorCallBack: ILRDataFlashExecutorCallBack): string;
 begin
-  Result := DoComunicarComThred(AComando, EmptyStr, AExecutorCallBack);
+  Result := DoComunicarComThred(ACommand, EmptyStr, AExecutorCallBack);
 end;
 
 { TLRDataFlashSyncLogEvent }
@@ -3321,7 +3323,7 @@ end;
 
 { TThreadCallback }
 
-constructor TThreadCallback.Create(const AClient : TRpDataFlashCustomClientConnection; const AComando: TRpDataFlashCommand;
+constructor TThreadCallback.Create(const AClient : TRpDataFlashCustomClientConnection; const ACommand: TRpDataFlashCommand;
   const ACallBackClassName: string; const AExecutorCallBack: ILRDataFlashExecutorCallBack);
 begin
   inherited Create(False);
@@ -3337,7 +3339,7 @@ begin
   FConexaoClient := AClient.Create(nil);
 
   FConexaoClient.ClonarDe( AClient );
-  FComando           := AComando;
+  FComando           := ACommand;
   FCallbackClassName := ACallBackClassName;
   FExecutorCallBack  := AExecutorCallBack
 end;
@@ -3401,7 +3403,7 @@ begin
   Result := True;
 end;
 
-function TLRDataFlashExecutorCallBack.ExecutarCallBack(const AParametrosCallback: TRpDataFlashCommandParameters): Boolean;
+function TLRDataFlashExecutorCallBack.ExecutarCallBack(const AParametrosCallback: TRpDataFlashCommandParameterList): Boolean;
 begin
   Result := DoBeforeCallback(AParametrosCallback);
   if Result then
@@ -3501,17 +3503,17 @@ begin
 // dummy
 end;
 
-procedure TCustomProxyClient.DoComunicar(const AComando: TLRDataFlashComandoEnvio);
+procedure TCustomProxyClient.DoComunicar(const ACommand: TLRDataFlashComandoEnvio);
 begin
-  AComando.SerializationFormat := FSerializationFormat;
+  ACommand.SerializationFormat := FSerializationFormat;
   if Assigned(FClient) then
-    FClient.Comunicar(AComando)
+    FClient.Comunicar(ACommand)
   else
     raise Exception.Create('Proxy não possui configuração cliente informada.');
 end;
 
 function TCustomProxyClient.DoEnviar(const ANomeComando: string;
-  const AParams: TRpDataFlashCommandParameters): Boolean;
+  const AParams: TRpDataFlashCommandParameterList): Boolean;
 var
   lCmd: TLRDataFlashComandoEnvio;
 begin
@@ -3592,7 +3594,7 @@ end;
 { TLRDataFlashConexaoCliente }
 
 function TLRDataFlashConexaoCliente.DoComunicarComThred(
-  const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
+  const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
   const AExecutorCallBack: ILRDataFlashExecutorCallBack): string;
 var
   lClient : TLRDataFlashConexaoCliente;
@@ -3609,7 +3611,7 @@ begin
       else
         raise Exception.Create('Retorno de Callback sem controlador definido.');
 
-    Result := lClient.Comunicar(AComando, AComando.Parametros);
+    Result := lClient.Comunicar(ACommand, ACommand.Parametros);
   finally
     if Assigned(lClient) then
     begin
@@ -3723,7 +3725,7 @@ begin
 end;
 
 function TLRDataFlashConexaoREST.DoComunicarComThred(
-  const AComando: TRpDataFlashCommand; const ACallBackClassName: string;
+  const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
   const AExecutorCallBack: ILRDataFlashExecutorCallBack): string;
 var
   lClient : TLRDataFlashConexaoREST;
@@ -3740,7 +3742,7 @@ begin
       else
         raise Exception.Create('Retorno de Callback sem controlador definido.');
 
-    Result := lClient.Comunicar(AComando, AComando.Parametros);
+    Result := lClient.Comunicar(ACommand, ACommand.Parametros);
   finally
     if Assigned(lClient) then
     begin
