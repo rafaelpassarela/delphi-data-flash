@@ -18,9 +18,9 @@ type
   protected
     FProvider: TLRDataFlashCustomDataSetProvider;
     // from TLRDataFlashComando
-    function GetComando: string; override;
+    function GetCommand: string; override;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameters) : Boolean; override;
-    function GetTipoProcessamento : TRpDataFlashProcessType; override;
+    function GetProcessType : TRpDataFlashProcessType; override;
     function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
     // all the decendents must implement this
@@ -194,7 +194,7 @@ begin
     Executor.ExecuteSQL(lAuxSQL);
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetComando: string;
+function TLRDataFlashDataSetCommandProvider.GetCommand: string;
 begin
   Result := FProvider.Name;
 end;
@@ -219,7 +219,7 @@ begin
   Result := FProvider.SelectSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetTipoProcessamento: TRpDataFlashProcessType;
+function TLRDataFlashDataSetCommandProvider.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := FProvider.TipoProcessamento;
 end;

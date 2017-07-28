@@ -10,8 +10,8 @@ type
   TLRDataFlashComandoAutenticar = class(TRpDataFlashCommand)
   protected
     function DoExecutar : Boolean; override;
-    procedure DoRegistrarParametros; override;
-    function GetTipoProcessamento : TRpDataFlashProcessType; override;
+    procedure DoRegisterParams; override;
+    function GetProcessType: TRpDataFlashProcessType; override;
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
   public
@@ -37,7 +37,7 @@ begin
       lCmd.Parametro['Password'].AsBase64 := APassword;
 
       ATcpClient.Comunicar(lCmd);
-      Result := lCmd.StatusRetorno;
+      Result := lCmd.ReturnStatus;
       if Result then
       begin
         Result := lCmd.Retorno['Autenticado'].AsBoolean;
@@ -116,7 +116,7 @@ begin
   AContinuar := False;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoRegistrarParametros;
+procedure TLRDataFlashComandoAutenticar.DoRegisterParams;
 begin
   inherited;
   NovoParametro('Username', tvpString);
@@ -127,7 +127,7 @@ begin
   NovoRetorno('ResultMSG', tvpString);
 end;
 
-function TLRDataFlashComandoAutenticar.GetTipoProcessamento: TRpDataFlashProcessType;
+function TLRDataFlashComandoAutenticar.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := prtRemoteOnly;
 end;

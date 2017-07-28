@@ -11,7 +11,7 @@ uses
 type
   TLRDataFlashComandoHelper = class(TRpDataFlashCommand)
   protected
-    procedure DoRegistrarParametros; override;
+    procedure DoRegisterParams; override;
     function DoExecutar : Boolean; override;
   end;
 
@@ -82,7 +82,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashComandoHelper.DoRegistrarParametros;
+procedure TLRDataFlashComandoHelper.DoRegisterParams;
 begin
   inherited;
   NovoParametro('Object', tvpBase64, True);

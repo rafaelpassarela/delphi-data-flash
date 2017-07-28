@@ -15,19 +15,19 @@ type
   private
     FItem : TLRDataFlashComandItemBase;
   protected
-    function GetComando: string; override;
+    function GetCommand: string; override;
     function DoExecutar : Boolean; override;
     function DoCallBack(var AParamsCallback : TRPDataFlashCommandParameters) : Boolean; override;
-    function GetTipoProcessamento : TRpDataFlashProcessType; override;
+    function GetProcessType : TRpDataFlashProcessType; override;
     function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
     procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
     procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
-    procedure DoRegistrarParametros; overload; override;
+    procedure DoRegisterParams; overload; override;
 
-    procedure DoSerializar; override;
-    procedure DoCarregar; override;
-    procedure DoErroExecucao(const AErrorMsg : string); override;
+    procedure DoSerialize; override;
+    procedure DoLoad; override;
+    procedure DoExecutionError(const AErrorMsg : string); override;
     procedure DoValidarParametros; override;
     procedure DoExecutarAntesComunicarPonte(var AContinuar : Boolean); override;
   public
@@ -342,14 +342,14 @@ begin
   Result := Assigned(FItem.OnSendCallback) and FItem.OnSendCallback(Self, AParamsCallback);
 end;
 
-procedure TLRDataFlashComandoItem.DoCarregar;
+procedure TLRDataFlashComandoItem.DoLoad;
 begin
   inherited;
   if Assigned(FItem.OnCarregar) then
     FItem.OnCarregar(Self);
 end;
 
-procedure TLRDataFlashComandoItem.DoErroExecucao(const AErrorMsg: string);
+procedure TLRDataFlashComandoItem.DoExecutionError(const AErrorMsg: string);
 begin
   inherited;
   if Assigned(FItem.OnErroExecucao) then
@@ -384,7 +384,7 @@ begin
     FItem.OnExecutarPonteInvalida(Self, AContinuar);
 end;
 
-procedure TLRDataFlashComandoItem.DoRegistrarParametros;
+procedure TLRDataFlashComandoItem.DoRegisterParams;
 var
   lEnum: TCollectionEnumerator;
   lItem: TLRDataFlashParametroItem;
@@ -402,7 +402,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashComandoItem.DoSerializar;
+procedure TLRDataFlashComandoItem.DoSerialize;
 begin
   inherited;
   if Assigned(FItem.OnSerializar) then
@@ -416,7 +416,7 @@ begin
     FItem.OnValidarParametros(Self);
 end;
 
-function TLRDataFlashComandoItem.GetComando: string;
+function TLRDataFlashComandoItem.GetCommand: string;
 begin
   Result := FItem.Nome;
 end;
@@ -426,7 +426,7 @@ begin
   Result := FItem.LifeCycle;
 end;
 
-function TLRDataFlashComandoItem.GetTipoProcessamento: TRpDataFlashProcessType;
+function TLRDataFlashComandoItem.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := FItem.TipoProcessamento;
 end;

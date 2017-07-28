@@ -157,7 +157,7 @@ type
     function GerarProxy : string;
     function GerarClassUnit : string;
     function DoExecutar : Boolean; override;
-    procedure DoRegistrarParametros; override;
+    procedure DoRegisterParams; override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -969,7 +969,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashComandoList.DoRegistrarParametros;
+procedure TLRDataFlashComandoList.DoRegisterParams;
 begin
   inherited;
 {
@@ -1352,8 +1352,8 @@ var
     lCmd : IRpDataFlashCommandInterfaced;
   begin
     lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
-    if (lCmd <> nil) and (Assigned(lCmd.GetParametros)) then
-      Result := lCmd.GetDescricao;
+    if (lCmd <> nil) and (Assigned(lCmd.GetParams)) then
+      Result := lCmd.GetDescription;
   end;
 
 begin
@@ -1430,12 +1430,12 @@ var
   i : Integer;
 begin
   lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
-  if (lCmd <> nil) and (Assigned(lCmd.GetParametros)) then
+  if (lCmd <> nil) and (Assigned(lCmd.GetParams)) then
   begin
     // cria a lista de parametros de entrada
-    for i := 0 to lCmd.GetParametros.Count - 1 do
-      if lCmd.GetParametros[i].Tipo <> tpInternal then
-        ListaParametros.AddParametro(lCmd.GetParametros[i]);
+    for i := 0 to lCmd.GetParams.Count - 1 do
+      if lCmd.GetParams[i].Tipo <> tpInternal then
+        ListaParametros.AddParametro(lCmd.GetParams[i]);
   end;
 end;
 

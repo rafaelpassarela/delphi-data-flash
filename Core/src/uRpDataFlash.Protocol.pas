@@ -1,6 +1,6 @@
 unit uRpDataFlash.Protocol;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -163,13 +163,13 @@ type
     function AddBreak : TRpDataFlashProtocolBreaker;
   public
     function Find(const AGuid : string) : TRpDataFlashProtocolBreaker;
-           aqui \/
-    procedure Delete(const AQuebra : TRpDataFlashProtocolBreaker); overload;
+
+    procedure Delete(const AObject : TRpDataFlashProtocolBreaker); overload;
 
     property Item[Index : Integer]: TRpDataFlashProtocolBreaker read GetItem write SetItem; default;
 
-    function DoBreak(const AValor : string) : TRpDataFlashProtocolBreaker;
-    function Carregar(const AValor : string) : TRpDataFlashProtocolBreaker;
+    function DoBreak(const AValue : string) : TRpDataFlashProtocolBreaker;
+    function Load(const AValue: string) : TRpDataFlashProtocolBreaker;
   end;
 
 function CharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
@@ -989,20 +989,20 @@ begin
   Add(Result);
 end;
 
-function TRpDataFlashProtocolBreakerList.Carregar(const AValor: string): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.Load(const AValue: string): TRpDataFlashProtocolBreaker;
 var
   lGuid: TGUID;
 begin
-  lGuid := TRpDataFlashProtocolBreaker.GuidValue(AValor);
+  lGuid := TRpDataFlashProtocolBreaker.GuidValue(AValue);
   Result := Find(GUIDToString(lGuid));
   if Result = nil then
     Result := AddBreak;
-  Result.AddValue(AValor);
+  Result.AddValue(AValue);
 end;
 
-procedure TRpDataFlashProtocolBreakerList.Delete(const AQuebra: TRpDataFlashProtocolBreaker);
+procedure TRpDataFlashProtocolBreakerList.Delete(const AObject: TRpDataFlashProtocolBreaker);
 begin
-  Remove(AQuebra);
+  Remove(AObject);
 end;
 
 function TRpDataFlashProtocolBreakerList.Find(const AGuid: string): TRpDataFlashProtocolBreaker;
@@ -1026,10 +1026,10 @@ begin
   Result := TRpDataFlashProtocolBreaker(inherited Items[Index]);
 end;
 
-function TRpDataFlashProtocolBreakerList.DoBreak(const AValor: string): TRpDataFlashProtocolBreaker;
+function TRpDataFlashProtocolBreakerList.DoBreak(const AValue : string): TRpDataFlashProtocolBreaker;
 begin
   Result := AddBreak;
-  Result.AddValue(AValor);
+  Result.AddValue(AValue);
 end;
 
 procedure TRpDataFlashProtocolBreakerList.SetItem(Index: Integer; const Value: TRpDataFlashProtocolBreaker);

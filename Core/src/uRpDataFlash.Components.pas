@@ -1,6 +1,6 @@
 unit uRpDataFlash.Components;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -22,19 +22,19 @@ type
   TRpDataFlashComandControllerList = class;
   TRpDataFlashProviderControllerList = class;
 
-  TRpDataFlashOnGenericReceipt         = function(Sender : TObject; const AMenssage : string; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
-  TRpDataFlashOnReceiving              = function(Sender : TObject; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
-  TRpDataFlashOnNewLog                 = procedure(Sender : TObject; ALogType : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TRpDataFlashClientInfo) of object;
-  TRpDataFlashOnException              = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
+  TRpDataFlashOnGenericReceipt = function(Sender : TObject; const AMenssage : string; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
+  TRpDataFlashOnReceiving = function(Sender : TObject; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
+  TRpDataFlashOnNewLog = procedure(Sender : TObject; ALogType : TRpDataFlashServiceLog; const ALog : string; const AClientInfo : TRpDataFlashClientInfo) of object;
+  TRpDataFlashOnException = procedure(Sender : TObject; AException : Exception; var ARaise : Boolean) of object;
   TRpDataFlashOnBeforeClientConnection = procedure(Sender : TObject; var AAllow : Boolean) of object;
-  TRpDataFlashOnClientConnection       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
+  TRpDataFlashOnClientConnection = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
+  TRpDataFlashOnSendingError = procedure(Sender : TObject; const AProtocol : TRpDataFlashProtocol; const AException : Exception) of object;
+  TRpDataFlashOnManualProcess = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
 
-  TRpDataFlashOnSendingError           = procedure(Sender : TObject; const AProtocol : TRpDataFlashProtocol; const AException : Exception) of object;
-  TLRDataFlashOnProcessamentoManual       = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem) of object;
-  TLRDataFlashOnCriarExecutor             = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
-  TLRDataFlashOnAutenticarCliente         = procedure(Sender : TObject; const AConnectionItem : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
-  TLRDataFlashOnTimeOutCheck              = procedure(Sender : TObject; const AOrigem : TRpDataFlashValidationOrigin; var AContinue : Boolean) of object;
-  TLRDataFlashOnBeforeExecuteCommand      = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem; var AContinue : Boolean; out AMessage : string) of object;
+  TLRDataFlashOnCriarExecutor = procedure(Sender : TObject; out AExecutor : IRpPackageCommandExecutor) of object;
+  TLRDataFlashOnAutenticarCliente      = procedure(Sender : TObject; const AConnectionItem : IAutenticationProvider; out AAutenticado : Boolean; out AErrorMessage : string) of object;
+  TLRDataFlashOnTimeOutCheck           = procedure(Sender : TObject; const AOrigem : TRpDataFlashValidationOrigin; var AContinue : Boolean) of object;
+  TLRDataFlashOnBeforeExecuteCommand   = procedure(Sender : TObject; const AConnectionItem : TRpDataFlashConnectionItem; var AContinue : Boolean; out AMessage : string) of object;
   // DataSet
   TLRDataFlashOnExecSQL = function (const AComando: IRpDataFlashCommandInterfaced; var ASQL: string; var AContinue : Boolean) : Boolean of object;
   TLRDataFlashOnSelect = function (const AComando: IRpDataFlashCommandInterfaced; var ASelectSQL : string; var AContinue : Boolean): Boolean of object;
@@ -311,7 +311,7 @@ type
     FProviders: TRpDataFlashProviderControllerList;
     FOnRecebimentoGenerico: TRpDataFlashOnGenericReceipt;
     FInterfaceList : TInterfaceList;
-    FOnProcessamentoManual: TLRDataFlashOnProcessamentoManual;
+    FOnProcessamentoManual: TRpDataFlashOnManualProcess;
     FOnAutenticarCliente: TLRDataFlashOnAutenticarCliente;
     FOnBeforeExecuteCommand: TLRDataFlashOnBeforeExecuteCommand;
     FOnBeforeDataSetStartTransaction: TLRDataFlashOnStartTransactionEvent;
@@ -409,7 +409,7 @@ type
     property OnConexaoCliente : TRpDataFlashOnClientConnection read FOnConexaoCliente write FOnConexaoCliente;
     property OnDesconexaoCliente : TRpDataFlashOnClientConnection read FOnDesconexaoCliente write FOnDesconexaoCliente;
     property OnRecebimentoGenerico : TRpDataFlashOnGenericReceipt read FOnRecebimentoGenerico write FOnRecebimentoGenerico;
-    property OnProcessamentoManual : TLRDataFlashOnProcessamentoManual read FOnProcessamentoManual write FOnProcessamentoManual;
+    property OnProcessamentoManual : TRpDataFlashOnManualProcess read FOnProcessamentoManual write FOnProcessamentoManual;
     property OnAutenticarCliente : TLRDataFlashOnAutenticarCliente read FOnAutenticarCliente write FOnAutenticarCliente;
     property OnBeforeExecuteCommand : TLRDataFlashOnBeforeExecuteCommand read FOnBeforeExecuteCommand write FOnBeforeExecuteCommand;
     property OnObjectRequest : TRpDataFlashOnObjectRequest read FOnObjectRequest write FOnObjectRequest;
@@ -1252,15 +1252,15 @@ begin
       begin
         // verifica se algum parametro de entrada passado pelo REST nao existe
         for i := 0 to ARequestInfo.Params.Count - 1 do
-          lComando.GetParametros.Parametro[ ARequestInfo.Params.Names[i] ];
+          lComando.GetParams.Parametro[ ARequestInfo.Params.Names[i] ];
 
         // carrega os parametros do REST para o componente conseguir executar
-        for i := 0 to lComando.GetParametros.Count - 1 do
-          if (lComando.GetParametros.Item[i].Tipo in [tpInput, tpInputNoReload])
-          or ((lComando.GetParametros.Item[i].Tipo = tpInternal) and (lComando.GetParametros.Item[i].Nome = C_PARAM_INT_FORMAT_TYPE)) then
-            lComando.GetParametros.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParametros.Item[i].Nome];
+        for i := 0 to lComando.GetParams.Count - 1 do
+          if (lComando.GetParams.Item[i].Tipo in [tpInput, tpInputNoReload])
+          or ((lComando.GetParams.Item[i].Tipo = tpInternal) and (lComando.GetParams.Item[i].Nome = C_PARAM_INT_FORMAT_TYPE)) then
+            lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Nome];
 
-        Result := lComando.GetParametros.Serializar;
+        Result := lComando.GetParams.Serializar;
       end
       else
         raise ERpDataFlashException.Create('Comando não suportado: ' + sLineBreak + 'Comando: ''' + lNomeClasseComando + '''');
@@ -1595,8 +1595,8 @@ begin
 
   if FControllers <> nil then
   begin
-    if FControllers.Localizar(AParametros.Comando, AObjComando) then
-      AObjComando.DoCarregar(loSend, AParametros);
+    if FControllers.Localizar(AParametros.Command, AObjComando) then
+      AObjComando.DoLoad(loSend, AParametros);
   end;
 
   Result := AObjComando <> nil;
@@ -1613,8 +1613,8 @@ begin
 
   if FProviders <> nil then
   begin
-    if FProviders.Localizar(AParametros.Comando, AObjComando) then
-      AObjComando.DoCarregar(loSend, AParametros);
+    if FProviders.Localizar(AParametros.Command, AObjComando) then
+      AObjComando.DoLoad(loSend, AParametros);
   end;
 
   Result := AObjComando <> nil;
@@ -1680,9 +1680,9 @@ var
   end;
 
 begin
-  // estes comandos são ignorados pela autenticação
+  // commands ignored by auth
   lIgnorados := TLRDataFlashComandoAutenticar.ClassNameIs( AClasseComando )
-             or TLRDataFlashComandoPing.ClassNameIs( AClasseComando )
+             or TRpDataFlashPingCommand.ClassNameIs( AClasseComando )
              or TLRDataFlashComandoList.ClassNameIs( AClasseComando )
              or ComandoNaLista
              or ParametroEmDesigning;
@@ -1868,12 +1868,12 @@ var
   begin
     try
       PrepararExecucaoComando;
-      ASaida := lComando.Executar(lParametros, AItem.Executor);
+      ASaida := lComando.Execute(lParametros, AItem.Executor);
       lComando.SetConexaoItem( nil );
-      NovoLog(slOnCommand, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' executado !', AContext);
+      NovoLog(slOnCommand, 'Tipo = ' + IntToStr(Integer(lComando.ProcessType)) + ' - Comando ' + lComando.Command + ' executado !', AContext);
     except on E:Exception do
       begin
-        NovoLog(slOnError, 'Tipo = ' + IntToStr(Integer(lComando.TipoProcessamento)) + ' - Comando ' + lComando.Comando + ' Erro -> ' + E.Message, AContext);
+        NovoLog(slOnError, 'Tipo = ' + IntToStr(Integer(lComando.ProcessType)) + ' - Comando ' + lComando.Command + ' Erro -> ' + E.Message, AContext);
         AItem.Executor.DisconnectDataComponent;
         raise;
       end;
@@ -1886,7 +1886,7 @@ var
   begin
     lContinuar := False;
     PrepararExecucaoComando;
-    ASaida := lComando.ExecutarPonteInvalida(lParametros, AItem.Executor, lContinuar);
+    ASaida := lComando.ExecuteRemoteError(lParametros, AItem.Executor, lContinuar);
     lComando.SetConexaoItem( nil );
     if not lContinuar then
     begin
@@ -1906,7 +1906,7 @@ var
   begin
     lContinuar := True;
     PrepararExecucaoComando;
-    ASaida := lComando.ExecutarPonteBemSucedida(lParametros, AItem.Executor, lContinuar);
+    ASaida := lComando.ExecuteRemoteSuccessfully(lParametros, AItem.Executor, lContinuar);
     lComando.SetConexaoItem( nil );
     if not lContinuar then
     begin
@@ -1920,7 +1920,7 @@ var
   function DoValidarAntesComunicar : Boolean;
   begin
     Result := True;
-    lComando.ExecutarAntesComunicarPonte(lComando.GetParametros, AItem.Executor, Result);
+    lComando.ExecuteBeforeRemoteConnection(lComando.GetParams, AItem.Executor, Result);
   end;
 
   procedure Comunicar;
@@ -1941,12 +1941,12 @@ var
           // se vai comunicar, a ponte deve estar onLine (quando processa no servidor,
           // o status muda para tspServidor, então volta para a ponte com o sinal de OnLine)
           lParametros.StatusProcessamento := psBridgeOnLine;
-          lComando.DoCarregar(loReceive, lParametros);
+          lComando.DoLoad(loReceive, lParametros);
           ASaida := lParametros.Serializar;
 
           NovoLog(slOnBridge, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
-            [lComando.Comando, lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]), AContext);
-          lExecutado := lComando.StatusRetorno;
+            [lComando.Command, lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]), AContext);
+          lExecutado := lComando.ReturnStatus;
         end;
       except
       end;
@@ -1954,15 +1954,15 @@ var
 
     if not lExecutado then
     begin
-      if (lComando.TipoProcessamento = prtRemote) then
+      if (lComando.ProcessType = prtRemote) then
         Executar
       else
-        if (lComando.TipoProcessamento = prtRemoteOnly) then
+        if (lComando.ProcessType = prtRemoteOnly) then
           ExecutarPonteInvalida;
     end
     else
     begin
-      if (lComando.TipoProcessamento = prtRemoteOnly) then
+      if (lComando.ProcessType = prtRemoteOnly) then
         ExecutarPonteBemSucedida;
     end;
   end;
@@ -2008,18 +2008,18 @@ begin
       lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocol.Message, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
-      raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Comando]);
+      raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Command]);
 
-    lNomeComando := lComando.Comando;
+    lNomeComando := lComando.Command;
     lComando.RequestInfo := ARequestInfo;
     lComando.ResponseInfo := AResponseInfo;
 
     // se tem rotina de autenticacao e o comando recebido nao é para autenticar, aborta o processo
-    if Assigned(FOnAutenticarCliente) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParametros) then
+    if Assigned(FOnAutenticarCliente) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
       raise ERpDataFlashUserNotFound.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
-    if lComando.TipoProcessamento = prtLocal then
+    if lComando.ProcessType = prtLocal then
       lStatusProcessamento := psLocal //tspServidor
     else
       lStatusProcessamento := CarregarStatusProcessamento(AItem, lTcpClient);
@@ -2155,7 +2155,7 @@ begin
   Result := nil;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Comando = AComando then
+    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AComando then
     begin
       Result := (FInterfaceList[I] as IRpDataFlashCommandInterfaced);
       Exit;
@@ -2442,7 +2442,7 @@ begin
   lExiste := False;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Comando = AInstancia.GetComando;
+    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstancia.GetCommand;
     if lExiste then
       Break;
   end;
@@ -2596,7 +2596,7 @@ begin
   lExiste := False;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Comando = AInstancia.GetComando;
+    lExiste := (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AInstancia.GetCommand;
     if lExiste then
       Break;
   end;
@@ -2676,7 +2676,7 @@ begin
   Result := nil;
   for I := 0 to FInterfaceList.Count - 1 do
   begin
-    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Comando = AComando then
+    if (FInterfaceList[I] as IRpDataFlashCommandInterfaced).Command = AComando then
     begin
       Result := (FInterfaceList[I] as IRpDataFlashCommandInterfaced);
       Exit;
@@ -2834,11 +2834,11 @@ end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const AComando: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameters): string;
 begin
-  AParametros.Comando := AComando.Comando;
-  AComando.DoSerializar(AParametros);
+  AParametros.Command := AComando.Command;
+  AComando.DoSerialize(AParametros);
   Result := Comunicar(TAG_COMMAND, AParametros.Serializar);
   AParametros.Carregar(Result);
-  AComando.DoCarregar(loReceive, AParametros);
+  AComando.DoLoad(loReceive, AParametros);
 end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const AComando: TRpDataFlashCommand; const ACallBackClassName: string): string;
@@ -3524,7 +3524,7 @@ begin
     lCmd.Parametros.Assign(AParams);
     DoComunicar(lCmd);
     AParams.Assign(lCmd.Parametros);
-    Result := lCmd.StatusRetorno;
+    Result := lCmd.ReturnStatus;
     FStatusProcessamento := lCmd.StatusProcessamento;
     if not Result then
       FLastError := lCmd.LastError;

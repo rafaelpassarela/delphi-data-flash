@@ -100,7 +100,7 @@ begin
     end;
 
     FConexaoCliente.Comunicar( lCmd );
-    Result := lCmd.StatusRetorno;
+    Result := lCmd.ReturnStatus;
     FLastError := lCmd.LastError;
     FLastStatusProcessamento := lCmd.StatusProcessamento;
 

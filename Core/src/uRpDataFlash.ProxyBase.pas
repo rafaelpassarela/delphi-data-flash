@@ -12,7 +12,7 @@ type
   TLRDataFlashComandoProxy = class(TRpDataFlashCommand)
   protected
     FLastError : string;
-    function GetComando: string; override;
+    function GetCommand: string; override;
     procedure DoBeforeExecute; virtual;
     procedure DoAfterExecute(const AResult : string); virtual;
     function DoExecutar : Boolean; override;
@@ -25,7 +25,7 @@ type
 
   TLRDataFlashComandoServer = class(TRpDataFlashCommand)
   protected
-    procedure DoCarregar; override;
+    procedure DoLoad; override;
     function DoExecutar: Boolean; override;
   end;
 
@@ -68,7 +68,7 @@ begin
   pTcpClient.AoErroEnvio := nil;
 end;
 
-function TLRDataFlashComandoProxy.GetComando: string;
+function TLRDataFlashComandoProxy.GetCommand: string;
 begin
   Result := Self.ClassName;
   if LowerCase(RightStr(Result, 5)) = 'proxy' then
@@ -91,7 +91,7 @@ end;
 
 { TLRDataFlashComandoServer }
 
-procedure TLRDataFlashComandoServer.DoCarregar;
+procedure TLRDataFlashComandoServer.DoLoad;
 begin
 // definir os parametros de rotorno para o cliente
 end;

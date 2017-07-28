@@ -300,7 +300,7 @@ begin
       lCommandList.Insert(0, IntToStr(lCommandList.Count));
       FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := lCommandList.Text;
       FConexaoCliente.Comunicar(FComandoEnviar);
-      if FComandoEnviar.StatusRetorno then
+      if FComandoEnviar.ReturnStatus then
       begin
         Result := FComandoEnviar.Retorno['ApplyErrCount'].AsInteger;
         if Result > MaxErrors then
@@ -352,7 +352,7 @@ begin
     FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := PreparaSelect( GetSQL(opdsSelect), GetDefaultFormatter);
     FConexaoCliente.Comunicar(FComandoEnviar);
 
-    if FComandoEnviar.StatusRetorno then
+    if FComandoEnviar.ReturnStatus then
     begin
       FLockData := True;
       try
@@ -415,7 +415,7 @@ begin
 
   FConexaoCliente.Comunicar(FComandoEnviar);
 
-  if not FComandoEnviar.StatusRetorno then
+  if not FComandoEnviar.ReturnStatus then
     raise ELRDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
 end;
 
@@ -480,7 +480,7 @@ begin
     begin
       FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := GetSQL(opdsSelect);
       FConexaoCliente.Comunicar(FComandoEnviar);
-      if FComandoEnviar.StatusRetorno then
+      if FComandoEnviar.ReturnStatus then
       begin
         lCds := nil;
         try
@@ -717,7 +717,7 @@ begin
     PreparaComando(opdsPrepare);
     FConexaoCliente.Comunicar(FComandoEnviar);
 
-    if FComandoEnviar.StatusRetorno then
+    if FComandoEnviar.ReturnStatus then
       FInternalProvider.SetFromString( FComandoEnviar.Retorno['XMLData'].AsBase64 )
     else
       raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
@@ -740,7 +740,7 @@ begin
 
   FConexaoCliente.Comunicar(FComandoEnviar);
 
-  if not FComandoEnviar.StatusRetorno then
+  if not FComandoEnviar.ReturnStatus then
     raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
 end;
 
@@ -765,7 +765,7 @@ begin
   if PreparaComando(opdsStartTrans) then
   begin
     FConexaoCliente.Comunicar(FComandoEnviar);
-    if not FComandoEnviar.StatusRetorno then
+    if not FComandoEnviar.ReturnStatus then
       raise ELRDataFlashDataSetConexaoResult.Create('Erro iniciando transação. ' + FComandoEnviar.LastError);
   end;
 end;

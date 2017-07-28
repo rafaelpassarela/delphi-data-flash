@@ -7,11 +7,11 @@ interface
 uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types;
 
 type
-  TLRDataFlashComandoPing = class(TRpDataFlashCommand)
+  TRpDataFlashPingCommand = class(TRpDataFlashCommand)
   protected
     function DoExecutar : Boolean; override;
-    procedure DoRegistrarParametros; override;
-    function GetTipoProcessamento : TRpDataFlashProcessType; override;
+    procedure DoRegisterParams; override;
+    function GetProcessType : TRpDataFlashProcessType; override;
   public
     class function Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string) : Boolean;
   end;
@@ -23,29 +23,29 @@ uses
 
 { TLRDataFlashComandoPing }
 
-function TLRDataFlashComandoPing.DoExecutar: Boolean;
+function TRpDataFlashPingCommand.DoExecutar: Boolean;
 begin
   Retorno['PinkOk'].AsBoolean := True;
   Result := True;
 end;
 
-procedure TLRDataFlashComandoPing.DoRegistrarParametros;
+procedure TRpDataFlashPingCommand.DoRegisterParams;
 begin
   inherited;
   NovoRetorno('PinkOk', tvpBoolean);
   NovoRetorno('Msg', tvpString);
 end;
 
-function TLRDataFlashComandoPing.GetTipoProcessamento: TRpDataFlashProcessType;
+function TRpDataFlashPingCommand.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := prtLocal;
 end;
 
-class function TLRDataFlashComandoPing.Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string): Boolean;
+class function TRpDataFlashPingCommand.Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string): Boolean;
 var
-  lCmd : TLRDataFlashComandoPing;
+  lCmd : TRpDataFlashPingCommand;
 begin
-  lCmd := TLRDataFlashComandoPing.Create;
+  lCmd := TRpDataFlashPingCommand.Create;
   try
     try
       ATcpClient.Comunicar(lCmd);
@@ -64,6 +64,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoPing, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrar(TRpDataFlashPingCommand, C_GROUP_INTERNAL);
 
 end.
