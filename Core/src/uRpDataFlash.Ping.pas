@@ -25,7 +25,7 @@ uses
 
 function TRpDataFlashPingCommand.DoExecutar: Boolean;
 begin
-  Retorno['PinkOk'].AsBoolean := True;
+  ResultParam['PinkOk'].AsBoolean := True;
   Result := True;
 end;
 
@@ -49,8 +49,8 @@ begin
   try
     try
       ATcpClient.Comunicar(lCmd);
-      Result := lCmd.Retorno['PinkOk'].AsBoolean;
-      AResultMSG := lCmd.Retorno['Msg'].AsString;
+      Result := lCmd.ResultParam['PinkOk'].AsBoolean;
+      AResultMSG := lCmd.ResultParam['Msg'].AsString;
     except
       on E:Exception do
       begin

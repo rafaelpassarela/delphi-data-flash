@@ -32,7 +32,7 @@ begin
   lIntf := nil;
   lObjeto := nil;
   Result := False;
-  lClassName := Parametro['ObjectClass'].AsString;
+  lClassName := Param['ObjectClass'].AsString;
   lClass := SerializationClassRegistrer.GetClass(lClassName);
   if lClass = nil then
     raise Exception.CreateFmt('Classe do objeto %s não foi encontrada.', [lClassName])
@@ -41,8 +41,8 @@ begin
     lContinuar := True;
     try
       lObjeto := lClass.Create(nil);
-      lObjeto.LoadFromString(Parametro['Object'].AsBase64);
-      lOperacao := TRpDataFlashHelperAction(Parametro['Operacao'].AsInteger);
+      lObjeto.LoadFromString(Param['Object'].AsBase64);
+      lOperacao := TRpDataFlashHelperAction(Param['Operacao'].AsInteger);
 
       if Assigned(GetServer.OnObjectRequest) then
         GetServer.OnObjectRequest(lOperacao, lObjeto, lContinuar);
@@ -64,7 +64,7 @@ begin
           end;
 
           if Result then
-            Parametro['Object'].AsBase64 := lObjeto.SaveToXmlString;
+            Param['Object'].AsBase64 := lObjeto.SaveToXmlString;
         end
         else
           raise Exception.CreateFmt('A classe "%s" não implementa a interface "IFileBaseHelper".', [lClassName]);

@@ -928,12 +928,12 @@ end;
 
 function TLRDataFlashComandoList.DoExecutar: Boolean;
 begin
-  FTipoBusca := TRLDataFlashTipoRetornoProxy(Parametro['TipoBusca'].AsInteger);
-  FInfoString := Trim( Parametro['InfoString'].AsBase64 );
+  FTipoBusca := TRLDataFlashTipoRetornoProxy(Param['TipoBusca'].AsInteger);
+  FInfoString := Trim( Param['InfoString'].AsBase64 );
 
   if TipoBusca = trpFactory then
   begin
-    Retorno['NomeArquivoProxy'].AsString := C_DEFAULT_PROXY_NAME;
+    ResultParam['NomeArquivoProxy'].AsString := C_DEFAULT_PROXY_NAME;
     FListaSelecionados.Text := FInfoString;
     FGerarClasses := FListaSelecionados.Values['TRANSP'] = 'T';
     FConfigClass := FListaSelecionados.Values['CONFIG'];
@@ -953,15 +953,15 @@ begin
   end
   else
   begin
-    Retorno['NomeArquivoProxy'].AsString := EmptyStr;
+    ResultParam['NomeArquivoProxy'].AsString := EmptyStr;
     FListaSelecionados.Clear;
   end;
 
   TProxyClassSupport.PrefixoCmd := GetServer.PrefixoBaseComandos;
   try
-    Retorno['RetornoProxy'].AsBase64 := GerarProxy;
+    ResultParam['RetornoProxy'].AsBase64 := GerarProxy;
     if (TipoBusca = trpFactory) and (FGerarClasses) then
-      Retorno['RetornoClass'].AsBase64 := GerarClassUnit;
+      ResultParam['RetornoClass'].AsBase64 := GerarClassUnit;
     Result := True;
   except
     on E:Exception do

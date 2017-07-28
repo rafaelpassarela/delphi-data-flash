@@ -395,7 +395,7 @@ begin
     while lEnum.MoveNext do
     begin
       lItem := TLRDataFlashParametroItem(lEnum.Current);
-      Parametros.Novo(lItem.Nome, EmptyStr, lItem.Tipo, lItem.TipoValor);
+      Parametros.AddNew(lItem.Nome, EmptyStr, lItem.Tipo, lItem.TipoValor);
     end;
   finally
     FreeAndNil(lEnum);

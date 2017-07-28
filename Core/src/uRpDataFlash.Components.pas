@@ -1252,7 +1252,7 @@ begin
       begin
         // verifica se algum parametro de entrada passado pelo REST nao existe
         for i := 0 to ARequestInfo.Params.Count - 1 do
-          lComando.GetParams.Parametro[ ARequestInfo.Params.Names[i] ];
+          lComando.GetParams.Param[ ARequestInfo.Params.Names[i] ];
 
         // carrega os parametros do REST para o componente conseguir executar
         for i := 0 to lComando.GetParams.Count - 1 do
@@ -1262,7 +1262,7 @@ begin
             lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Name];
         end;
 
-        Result := lComando.GetParams.Serializar;
+        Result := lComando.GetParams.Serialize;
       end
       else
         raise ERpDataFlashException.Create('Comando não suportado: ' + sLineBreak + 'Comando: ''' + lNomeClasseComando + '''');
@@ -1591,7 +1591,7 @@ function TRpDataFlashServerConnection.CarregarComandoViaControllers(
   out AParametros : TRpDataFlashCommandParameterList) : Boolean;
 begin
   AParametros := TRpDataFlashCommandParameterList.Create(Self);
-  AParametros.Carregar(ACommand);
+  AParametros.Load(ACommand);
 
   AObjComando := nil;
 
@@ -1609,7 +1609,7 @@ function TRpDataFlashServerConnection.CarregarComandoViaProviders(
   out AParametros: TRpDataFlashCommandParameterList): Boolean;
 begin
   AParametros := TRpDataFlashCommandParameterList.Create(Self);
-  AParametros.Carregar(ACommand);
+  AParametros.Load(ACommand);
 
   AObjComando := nil;
 
@@ -1677,8 +1677,8 @@ var
 
   function ParametroEmDesigning : Boolean;
   begin
-    Result := Assigned( AParametros.PorNome('csDesigning', tpInput) )
-          and AParametros.Parametro['csDesigning'].AsBoolean;
+    Result := Assigned( AParametros.FindByName('csDesigning', tpInput) )
+          and AParametros.Param['csDesigning'].AsBoolean;
   end;
 
 begin
@@ -1942,9 +1942,9 @@ var
           ASaida := lTcpClient.Comunicar(lComando, lParametros);
           // se vai comunicar, a ponte deve estar onLine (quando processa no servidor,
           // o status muda para tspServidor, então volta para a ponte com o sinal de OnLine)
-          lParametros.StatusProcessamento := psBridgeOnLine;
+          lParametros.ProcessingStatus := psBridgeOnLine;
           lComando.DoLoad(loReceive, lParametros);
-          ASaida := lParametros.Serializar;
+          ASaida := lParametros.Serialize;
 
           NovoLog(slOnBridge, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
             [lComando.Command, lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]), AContext);
@@ -2026,7 +2026,7 @@ begin
     else
       lStatusProcessamento := CarregarStatusProcessamento(AItem, lTcpClient);
 
-    lParametros.StatusProcessamento := lStatusProcessamento;
+    lParametros.ProcessingStatus := lStatusProcessamento;
 
     if lStatusProcessamento in [psServer, psLocal] then
       Executar
@@ -2838,8 +2838,8 @@ function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: IRpDataFla
 begin
   AParametros.Command := ACommand.Command;
   ACommand.DoSerialize(AParametros);
-  Result := Comunicar(TAG_COMMAND, AParametros.Serializar);
-  AParametros.Carregar(Result);
+  Result := Comunicar(TAG_COMMAND, AParametros.Serialize);
+  AParametros.Load(Result);
   ACommand.DoLoad(loReceive, AParametros);
 end;
 
@@ -3195,7 +3195,7 @@ begin
       if (FExecutorCallBackClass <> EmptyStr) or Assigned(FExecutorCallBackInterfaced) then
       begin
         lParametros := TRpDataFlashCommandParameterList.Create(Self);
-        lParametros.Carregar( AProtocol.Message );
+        lParametros.Load( AProtocol.Message );
       end;
 
       if FExecutorCallBackClass <> EmptyStr then
@@ -3527,7 +3527,7 @@ begin
     DoComunicar(lCmd);
     AParams.Assign(lCmd.Parametros);
     Result := lCmd.ReturnStatus;
-    FStatusProcessamento := lCmd.StatusProcessamento;
+    FStatusProcessamento := lCmd.ProcessingStatus;
     if not Result then
       FLastError := lCmd.LastError;
   except

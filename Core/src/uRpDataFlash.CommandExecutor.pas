@@ -92,30 +92,30 @@ begin
       lParam := Parametros.ByIndex(i);
       if lParam.TipoValor in [tvpBase, tvpBase64, tvpDAO, tvpFile] then
       begin
-        lCmd.Parametros.AddParametro(lParam.Nome, ' ', lParam.TipoValor);
-        lCmd.Parametro[lParam.Nome].AsBase64 := lParam.Valor;
+        lCmd.Parametros.AddParam(lParam.Nome, ' ', lParam.TipoValor);
+        lCmd.Param[lParam.Nome].AsBase64 := lParam.Valor;
       end
       else
-        lCmd.Parametros.AddParametro(lParam.Nome, lParam.Valor, lParam.TipoValor);
+        lCmd.Parametros.AddParam(lParam.Nome, lParam.Valor, lParam.TipoValor);
     end;
 
     FConexaoCliente.Comunicar( lCmd );
     Result := lCmd.ReturnStatus;
     FLastError := lCmd.LastError;
-    FLastStatusProcessamento := lCmd.StatusProcessamento;
+    FLastStatusProcessamento := lCmd.ProcessingStatus;
 
     // copia os parametros do comando para o componente
     for i := 0 to Retornos.Count - 1 do
     begin
       lParam := Retornos.ByIndex(i);
       case lParam.TipoValor of
-        tvpInteger:  lParam.Valor := lCmd.Retorno[lParam.Nome].AsInteger;
-        tvpString:   lParam.Valor := lCmd.Retorno[lParam.Nome].AsString;
-        tvpBoolean:  lParam.Valor := lCmd.Retorno[lParam.Nome].AsBoolean;
-        tvpFloat:    lParam.Valor := lCmd.Retorno[lParam.Nome].AsFloat;
-        tvpBase64:   lParam.Valor := lCmd.Retorno[lParam.Nome].AsBase64;
-        tvpDateTime: lParam.Valor := lCmd.Retorno[lParam.Nome].AsDateTime;
-        tvpFile:     lParam.Valor := lCmd.Retorno[lParam.Nome].AsBase64;
+        tvpInteger:  lParam.Valor := lCmd.ResultParam[lParam.Nome].AsInteger;
+        tvpString:   lParam.Valor := lCmd.ResultParam[lParam.Nome].AsString;
+        tvpBoolean:  lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBoolean;
+        tvpFloat:    lParam.Valor := lCmd.ResultParam[lParam.Nome].AsFloat;
+        tvpBase64:   lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBase64;
+        tvpDateTime: lParam.Valor := lCmd.ResultParam[lParam.Nome].AsDateTime;
+        tvpFile:     lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBase64;
       end;
     end;
 
