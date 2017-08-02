@@ -45,7 +45,7 @@ type
     property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
     property VerificarConexao : Boolean read FVerificarConexao write FVerificarConexao default True;
     property Comando : string read GetComando write SetComando;
-    property Parametros : TLRDataFlashParametrosValueCollection read FParametros write FParametros;
+    property Params : TLRDataFlashParametrosValueCollection read FParametros write FParametros;
     property Retornos : TLRDataFlashRetornosValueCollection read FRetornos write FRetornos;
 
     property OnError : TLRDFErrorExecucao read FOnError write FOnError;
@@ -78,25 +78,25 @@ end;
 
 function TLRDataFlashExecutorComando.DoInternalExecute: Boolean;
 var
-  lCmd : TLRDataFlashComandoEnvio;
   i: Integer;
+  lCmd : TRpDataFlashSendCommand;
   lParam: TLRDataFlashParametroValueItem;
 begin
-  lCmd := TLRDataFlashComandoEnvio.Create;
+  lCmd := TRpDataFlashSendCommand.Create;
   try
     lCmd.SetComando( FComando );
 
     // copia os parametros do componente para o do comando
-    for i := 0 to Parametros.Count - 1 do
+    for i := 0 to Params.Count - 1 do
     begin
-      lParam := Parametros.ByIndex(i);
+      lParam := Params.ByIndex(i);
       if lParam.TipoValor in [tvpBase, tvpBase64, tvpDAO, tvpFile] then
       begin
-        lCmd.Parametros.AddParam(lParam.Nome, ' ', lParam.TipoValor);
+        lCmd.Params.AddParam(lParam.Nome, ' ', lParam.TipoValor);
         lCmd.Param[lParam.Nome].AsBase64 := lParam.Valor;
       end
       else
-        lCmd.Parametros.AddParam(lParam.Nome, lParam.Valor, lParam.TipoValor);
+        lCmd.Params.AddParam(lParam.Nome, lParam.Valor, lParam.TipoValor);
     end;
 
     FConexaoCliente.Comunicar( lCmd );

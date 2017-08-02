@@ -14,7 +14,7 @@ type
 
   TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
 
-  TLRDataFlashDataSetCommandProvider = class(TLRDataFlashComandoDataSetProvider)
+  TLRDataFlashDataSetCommandProvider = class(TRpDataFlashDataSetProviderCommand)
   protected
     FProvider: TLRDataFlashCustomDataSetProvider;
     // from TLRDataFlashComando

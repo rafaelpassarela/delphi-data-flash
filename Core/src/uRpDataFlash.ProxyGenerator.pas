@@ -156,7 +156,7 @@ type
   protected
     function GerarProxy : string;
     function GerarClassUnit : string;
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
     procedure DoRegisterParams; override;
   public
     constructor Create; override;
@@ -926,7 +926,7 @@ begin
   inherited Destroy;
 end;
 
-function TLRDataFlashComandoList.DoExecutar: Boolean;
+function TLRDataFlashComandoList.DoExecute: Boolean;
 begin
   FTipoBusca := TRLDataFlashTipoRetornoProxy(Param['TipoBusca'].AsInteger);
   FInfoString := Trim( Param['InfoString'].AsBase64 );
@@ -980,12 +980,12 @@ begin
    trpDataSetList -> nada
    trpCommandList -> nada
 }
-  NovoParametro('InfoString', tvpBase64);
-  NovoParametro('TipoBusca', tvpInteger);
+  NewParam('InfoString', tvpBase64);
+  NewParam('TipoBusca', tvpInteger);
 
-  NovoRetorno('RetornoProxy', tvpBase64);
-  NovoRetorno('RetornoClass', tvpBase64);
-  NovoRetorno('NomeArquivoProxy', tvpString);
+  NewResult('RetornoProxy', tvpBase64);
+  NewResult('RetornoClass', tvpBase64);
+  NewResult('NomeArquivoProxy', tvpString);
 end;
 
 function TLRDataFlashComandoList.DoRetornaCommandInfo: string;

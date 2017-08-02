@@ -129,12 +129,12 @@ type
     FUsername: string;
     FPassword: string;
     FAutenticado: Boolean;
-    function GetAutenticado: Boolean;
+    function GetAuthenticated: Boolean;
     function GetPassword: string;
     function GetUserName: string;
     procedure SetUsername(const Value : string);
     procedure SetPassword(const Value : string);
-    procedure SetAutenticado(const Value : Boolean);
+    procedure SetAuthenticated(const Value : Boolean);
   public
     constructor Create(AOwner : TRpDataFlashCustomConnection; pHandler : TIdIOHandler);
     destructor Destroy; override;
@@ -150,7 +150,7 @@ type
     property Quebras : TRpDataFlashProtocolBreakerList read FQuebras;
     property Username : string read GetUserName write SetUsername;
     property Password : string read GetPassword write SetPassword;
-    property Autenticado : Boolean read GetAutenticado write SetAutenticado;
+    property Autenticado : Boolean read GetAuthenticated write SetAuthenticated;
     property OnCallBack : TRpDataFlashCallBackEvent read FOnCallBack write FOnCallBack;
   end;
 
@@ -666,7 +666,7 @@ type
     FBusyCallback : TRpDataFlashBusyCallback;
     procedure ProcessaErroComunicacao(const pMessage : string);
     procedure DoAoProcessarErroComunicacao; virtual;
-    procedure DoComunicar(const ACommand : TLRDataFlashComandoEnvio);
+    procedure DoComunicar(const ACommand : TRpDataFlashSendCommand);
     function DoEnviar(const ANomeComando: string; const AParams: TRpDataFlashCommandParameterList) : Boolean;
   public
     constructor Create(ATcpClient: TRpDataFlashCustomClientConnection;
@@ -1192,7 +1192,7 @@ var
 
   function CarregarNomeComando(const ANomeClasseComando : string) : Boolean;
   begin
-    Result := TRpDataFlashCommand.CarregarComando(ANomeClasseComando, lComando, lLifeCycle, nil, nil);
+    Result := TRpDataFlashCommand.LoadCommand(ANomeClasseComando, lComando, lLifeCycle, nil, nil);
   end;
 
   function TentaCarregarComando : Boolean;
@@ -1863,7 +1863,7 @@ var
   begin
     lComando.SetCallBackEvent(AContext, AItem.OnCallBack);
     lComando.SetServer( Self );
-    lComando.SetConexaoItem( AItem );
+    lComando.SetConnectionItem( AItem );
   end;
 
   procedure Executar;
@@ -1871,7 +1871,7 @@ var
     try
       PrepararExecucaoComando;
       ASaida := lComando.Execute(lParametros, AItem.Executor);
-      lComando.SetConexaoItem( nil );
+      lComando.SetConnectionItem( nil );
       NovoLog(slOnCommand, 'Tipo = ' + IntToStr(Integer(lComando.ProcessType)) + ' - Comando ' + lComando.Command + ' executado !', AContext);
     except on E:Exception do
       begin
@@ -1888,8 +1888,8 @@ var
   begin
     lContinuar := False;
     PrepararExecucaoComando;
-    ASaida := lComando.ExecuteRemoteError(lParametros, AItem.Executor, lContinuar);
-    lComando.SetConexaoItem( nil );
+    ASaida := lComando.ExecuteBridgeError(lParametros, AItem.Executor, lContinuar);
+    lComando.SetConnectionItem( nil );
     if not lContinuar then
     begin
       lMsg := Trim(lComando.LastError);
@@ -1908,8 +1908,8 @@ var
   begin
     lContinuar := True;
     PrepararExecucaoComando;
-    ASaida := lComando.ExecuteRemoteSuccessfully(lParametros, AItem.Executor, lContinuar);
-    lComando.SetConexaoItem( nil );
+    ASaida := lComando.ExecuteBridgeSuccessfully(lParametros, AItem.Executor, lContinuar);
+    lComando.SetConnectionItem( nil );
     if not lContinuar then
     begin
       ASaida := 'Ponte Online com execução bem sucedida, mas execucao local falhou!';
@@ -1922,7 +1922,7 @@ var
   function DoValidarAntesComunicar : Boolean;
   begin
     Result := True;
-    lComando.ExecuteBeforeRemoteConnection(lComando.GetParams, AItem.Executor, Result);
+    lComando.ExecuteBeforeBridgeConnection(lComando.GetParams, AItem.Executor, Result);
   end;
 
   procedure Comunicar;
@@ -2007,7 +2007,7 @@ begin
     end;
 
     if not lCarregado then
-      lCarregado := (TRpDataFlashCommand.CarregarComando(AProtocol.Message, lComando, lParametros, Self, AItem));
+      lCarregado := (TRpDataFlashCommand.LoadCommand(AProtocol.Message, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
       raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Command]);
@@ -2651,7 +2651,7 @@ begin
   inherited;
 end;
 
-function TRpDataFlashConnectionItem.GetAutenticado: Boolean;
+function TRpDataFlashConnectionItem.GetAuthenticated: Boolean;
 begin
   Result := FAutenticado;
 end;
@@ -2686,7 +2686,7 @@ begin
   end;
 end;
 
-procedure TRpDataFlashConnectionItem.SetAutenticado(const Value: Boolean);
+procedure TRpDataFlashConnectionItem.SetAuthenticated(const Value: Boolean);
 begin
   FAutenticado := Value;
 end;
@@ -2782,7 +2782,7 @@ end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand): string;
 begin
-  Result := Comunicar(ACommand, ACommand.Parametros);
+  Result := Comunicar(ACommand, ACommand.Params);
 end;
 
 function TRpDataFlashCustomClientConnection.Autenticar(out AErrorMessage: string): Boolean;
@@ -3370,7 +3370,7 @@ begin
     else
       raise Exception.Create('Retorno de Callback sem controlador definido.');
 
-  FResult := FConexaoClient.Comunicar(FComando, FComando.Parametros);
+  FResult := FConexaoClient.Comunicar(FComando, FComando.Params);
 //  while not IsTerminated do
 //  begin
 //    Sleep( C_THRED_CALLBACK_INTERVAL );
@@ -3503,7 +3503,7 @@ begin
 // dummy
 end;
 
-procedure TCustomProxyClient.DoComunicar(const ACommand: TLRDataFlashComandoEnvio);
+procedure TCustomProxyClient.DoComunicar(const ACommand: TRpDataFlashSendCommand);
 begin
   ACommand.SerializationFormat := FSerializationFormat;
   if Assigned(FClient) then
@@ -3515,17 +3515,17 @@ end;
 function TCustomProxyClient.DoEnviar(const ANomeComando: string;
   const AParams: TRpDataFlashCommandParameterList): Boolean;
 var
-  lCmd: TLRDataFlashComandoEnvio;
+  lCmd: TRpDataFlashSendCommand;
 begin
   FBusyCallback(True);
   FLastError := EmptyStr;
   FStatusProcessamento := psNone;
-  lCmd := TLRDataFlashComandoEnvio.Create;
+  lCmd := TRpDataFlashSendCommand.Create;
   try
     lCmd.SetComando( ANomeComando );
-    lCmd.Parametros.Assign(AParams);
+    lCmd.Params.Assign(AParams);
     DoComunicar(lCmd);
-    AParams.Assign(lCmd.Parametros);
+    AParams.Assign(lCmd.Params);
     Result := lCmd.ReturnStatus;
     FStatusProcessamento := lCmd.ProcessingStatus;
     if not Result then
@@ -3611,7 +3611,7 @@ begin
       else
         raise Exception.Create('Retorno de Callback sem controlador definido.');
 
-    Result := lClient.Comunicar(ACommand, ACommand.Parametros);
+    Result := lClient.Comunicar(ACommand, ACommand.Params);
   finally
     if Assigned(lClient) then
     begin
@@ -3742,7 +3742,7 @@ begin
       else
         raise Exception.Create('Retorno de Callback sem controlador definido.');
 
-    Result := lClient.Comunicar(ACommand, ACommand.Parametros);
+    Result := lClient.Comunicar(ACommand, ACommand.Params);
   finally
     if Assigned(lClient) then
     begin

@@ -55,7 +55,7 @@ type
   TLRDataFlashDataSet = class(TCustomClientDataSet)
   private
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
-    FComandoEnviar: TLRDataFlashComandoEnvio;
+    FComandoEnviar: TRpDataFlashSendCommand;
     FConexaoCliente: TLRDataFlashConexaoCliente;
     FProviderCustom: TRpDataFlashCustomProvider;
     FInternalProvider: TRpDataFlashCustomProvider;
@@ -586,22 +586,22 @@ end;
 
 procedure TLRDataFlashDataSet.PrepararComandoEnvio;
 begin
-  FComandoEnviar := TLRDataFlashComandoEnvio.Create;
+  FComandoEnviar := TRpDataFlashSendCommand.Create;
 
-  FComandoEnviar.Parametros.AddParam('Operacao', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('Operacao', 0, tvpInteger);
 
-  FComandoEnviar.Parametros.AddParam('Operacao', 0, tvpInteger);
-  FComandoEnviar.Parametros.AddParam('SQLInstruct', EmptyStr, tvpBase64);
-  FComandoEnviar.Parametros.AddParam('MaxErrors', 0, tvpInteger);
-  FComandoEnviar.Parametros.AddParam('csDesigning', False, tvpBoolean);
+  FComandoEnviar.Params.AddParam('Operacao', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('SQLInstruct', EmptyStr, tvpBase64);
+  FComandoEnviar.Params.AddParam('MaxErrors', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('csDesigning', False, tvpBoolean);
   // passa cada SQL
 //  FComandoEnviar.Parametros.AddParametro('CustomParams', '', tvpBase64);
   // ou a classe registrada no servidor
-  FComandoEnviar.Parametros.AddParam('ProviderClass', EmptyStr, tvpString);
+  FComandoEnviar.Params.AddParam('ProviderClass', EmptyStr, tvpString);
 
   // Retornos
-  FComandoEnviar.Parametros.AddResult('XMLData', EmptyStr, tvpBase64);
-  FComandoEnviar.Parametros.AddResult('ApplyErrCount', 0, tvpInteger);
+  FComandoEnviar.Params.AddResult('XMLData', EmptyStr, tvpBase64);
+  FComandoEnviar.Params.AddResult('ApplyErrCount', 0, tvpInteger);
 end;
 
 function TLRDataFlashDataSet.PreparaSelect(const pSQLBase: string;

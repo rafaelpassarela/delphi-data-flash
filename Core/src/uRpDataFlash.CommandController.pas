@@ -16,20 +16,20 @@ type
     FItem : TLRDataFlashComandItemBase;
   protected
     function GetCommand: string; override;
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; override;
     function GetProcessType : TRpDataFlashProcessType; override;
     function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
-    procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
-    procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
+    procedure DoExecuteBridgeError(var AContinue : Boolean); override;
+    procedure DoExecuteBridgeSuccessfully(var AContinue : Boolean); override;
     procedure DoRegisterParams; overload; override;
 
     procedure DoSerialize; override;
     procedure DoLoad; override;
     procedure DoExecutionError(const AErrorMsg : string); override;
-    procedure DoValidarParametros; override;
-    procedure DoExecutarAntesComunicarPonte(var AContinuar : Boolean); override;
+    procedure DoValidateParams; override;
+    procedure DoExecuteBeforeBridgeConnection(var AContinue : Boolean); override;
   public
     constructor Create(const AItem : TLRDataFlashComandItemBase); reintroduce;
   end;
@@ -38,7 +38,7 @@ type
   TLRDataFlashOnCarregarEvent = TLRDataFlashNotifyEvent;
   TLRDataFlashOnSerializarEvent = TLRDataFlashNotifyEvent;
   TLRDataFlashOnValidarParametrosEvent = TLRDataFlashNotifyEvent;
-  TLRDataFlashValidateExecuteEvent = procedure (const AComando : IRpDataFlashCommandInterfaced; var AContinuar : Boolean) of object;
+  TLRDataFlashValidateExecuteEvent = procedure (const AComando : IRpDataFlashCommandInterfaced; var AContinue : Boolean) of object;
   TLRDataFlashOnExecutarPonteInvalida = TLRDataFlashValidateExecuteEvent;
   TLRDataFlashOnExecutarPonteBemSucedidaEvent = TLRDataFlashValidateExecuteEvent;
   TLRDataFlashOnExecutarAntesComunicarPonteEvent = TLRDataFlashValidateExecuteEvent;
@@ -356,32 +356,32 @@ begin
     FItem.OnErroExecucao(Self, AErrorMsg);
 end;
 
-function TLRDataFlashComandoItem.DoExecutar: Boolean;
+function TLRDataFlashComandoItem.DoExecute: Boolean;
 begin
   Result := Assigned(FItem.OnExecute) and FItem.OnExecute(Self);
 end;
 
-procedure TLRDataFlashComandoItem.DoExecutarAntesComunicarPonte(
-  var AContinuar: Boolean);
+procedure TLRDataFlashComandoItem.DoExecuteBeforeBridgeConnection(
+  var AContinue: Boolean);
 begin
   inherited;
   if Assigned(FItem.OnExecutarAntesComunicarPonte) then
-    FItem.OnExecutarAntesComunicarPonte(Self, AContinuar);
+    FItem.OnExecutarAntesComunicarPonte(Self, AContinue);
 end;
 
-procedure TLRDataFlashComandoItem.DoExecutarPonteBemSucedida(
-  var AContinuar: Boolean);
+procedure TLRDataFlashComandoItem.DoExecuteBridgeSuccessfully(
+  var AContinue: Boolean);
 begin
   inherited;
   if Assigned(FItem.OnExecutarPonteBemSucedida) then
-    FItem.OnExecutarPonteBemSucedida(Self, AContinuar);
+    FItem.OnExecutarPonteBemSucedida(Self, AContinue);
 end;
 
-procedure TLRDataFlashComandoItem.DoExecutarPonteInvalida(var AContinuar: Boolean);
+procedure TLRDataFlashComandoItem.DoExecuteBridgeError(var AContinue: Boolean);
 begin
   inherited;
   if Assigned(FItem.OnExecutarPonteInvalida) then
-    FItem.OnExecutarPonteInvalida(Self, AContinuar);
+    FItem.OnExecutarPonteInvalida(Self, AContinue);
 end;
 
 procedure TLRDataFlashComandoItem.DoRegisterParams;
@@ -395,7 +395,7 @@ begin
     while lEnum.MoveNext do
     begin
       lItem := TLRDataFlashParametroItem(lEnum.Current);
-      Parametros.AddNew(lItem.Nome, EmptyStr, lItem.Tipo, lItem.TipoValor);
+      Params.AddNew(lItem.Nome, EmptyStr, lItem.Tipo, lItem.TipoValor);
     end;
   finally
     FreeAndNil(lEnum);
@@ -409,7 +409,7 @@ begin
     FItem.OnSerializar(Self);
 end;
 
-procedure TLRDataFlashComandoItem.DoValidarParametros;
+procedure TLRDataFlashComandoItem.DoValidateParams;
 begin
   inherited;
   if Assigned(FItem.OnValidarParametros) then

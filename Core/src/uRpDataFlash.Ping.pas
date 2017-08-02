@@ -9,7 +9,7 @@ uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types;
 type
   TRpDataFlashPingCommand = class(TRpDataFlashCommand)
   protected
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
     procedure DoRegisterParams; override;
     function GetProcessType : TRpDataFlashProcessType; override;
   public
@@ -23,7 +23,7 @@ uses
 
 { TLRDataFlashComandoPing }
 
-function TRpDataFlashPingCommand.DoExecutar: Boolean;
+function TRpDataFlashPingCommand.DoExecute: Boolean;
 begin
   ResultParam['PinkOk'].AsBoolean := True;
   Result := True;
@@ -32,8 +32,8 @@ end;
 procedure TRpDataFlashPingCommand.DoRegisterParams;
 begin
   inherited;
-  NovoRetorno('PinkOk', tvpBoolean);
-  NovoRetorno('Msg', tvpString);
+  NewResult('PinkOk', tvpBoolean);
+  NewResult('Msg', tvpString);
 end;
 
 function TRpDataFlashPingCommand.GetProcessType: TRpDataFlashProcessType;

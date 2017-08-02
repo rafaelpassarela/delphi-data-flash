@@ -12,14 +12,14 @@ type
   TLRDataFlashComandoHelper = class(TRpDataFlashCommand)
   protected
     procedure DoRegisterParams; override;
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
   end;
 
 implementation
 
 { TSPITCPComandoHelperBase }
 
-function TLRDataFlashComandoHelper.DoExecutar: Boolean;
+function TLRDataFlashComandoHelper.DoExecute: Boolean;
 var
   lContinuar: Boolean;
   lClass: TCustomSerializableObjectClass;
@@ -85,9 +85,9 @@ end;
 procedure TLRDataFlashComandoHelper.DoRegisterParams;
 begin
   inherited;
-  NovoParametro('Object', tvpBase64, True);
-  NovoParametro('ObjectClass', tvpString);
-  NovoParametro('Operacao', tvpInteger);
+  NewParam('Object', tvpBase64, True);
+  NewParam('ObjectClass', tvpString);
+  NewParam('Operacao', tvpInteger);
 end;
 
 initialization

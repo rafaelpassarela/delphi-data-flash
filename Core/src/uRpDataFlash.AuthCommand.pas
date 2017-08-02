@@ -9,11 +9,11 @@ uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, SysUtils
 type
   TLRDataFlashComandoAutenticar = class(TRpDataFlashCommand)
   protected
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
     procedure DoRegisterParams; override;
     function GetProcessType: TRpDataFlashProcessType; override;
-    procedure DoExecutarPonteInvalida(var AContinuar : Boolean); override;
-    procedure DoExecutarPonteBemSucedida(var AContinuar : Boolean); override;
+    procedure DoExecuteBridgeError(var AContinue : Boolean); override;
+    procedure DoExecuteBridgeSuccessfully(var AContinue : Boolean); override;
   public
     class function Autenticar(ATcpClient : TRpDataFlashCustomClientConnection;
       const AUsername, APassword : string; out AResultMSG : string) : Boolean;
@@ -57,14 +57,14 @@ begin
   end;
 end;
 
-function TLRDataFlashComandoAutenticar.DoExecutar: Boolean;
+function TLRDataFlashComandoAutenticar.DoExecute: Boolean;
 var
   lAutenticado: Boolean;
   lMens: string;
 begin
   if (GetServer <> nil) and Assigned(GetServer.OnAutenticarCliente) then
   begin
-    if not Assigned(FConexaoItem) then
+    if not Assigned(FConnectionItem) then
     begin
       Result := True;
       lAutenticado := False;
@@ -72,11 +72,11 @@ begin
     end
     else
       try
-        FConexaoItem.Username := Param['Username'].AsString;
-        FConexaoItem.Password := Param['Password'].AsBase64;
-        GetServer.OnAutenticarCliente(GetServer, FConexaoItem, lAutenticado, lMens);
+        FConnectionItem.Username := Param['Username'].AsString;
+        FConnectionItem.Password := Param['Password'].AsBase64;
+        GetServer.OnAutenticarCliente(GetServer, FConnectionItem, lAutenticado, lMens);
 
-        FConexaoItem.Authenticated := lAutenticado;
+        FConnectionItem.Authenticated := lAutenticado;
 
         Result := True;
       except
@@ -99,32 +99,32 @@ begin
   ResultParam['ResultMSG'].AsString := lMens;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoExecutarPonteBemSucedida(var AContinuar: Boolean);
+procedure TLRDataFlashComandoAutenticar.DoExecuteBridgeSuccessfully(var AContinue: Boolean);
 begin
   inherited;
-  AContinuar := True;
+  AContinue := True;
   // atualiza os dados da conexao local (quando retorna da ponte [servidor real] )
-  FConexaoItem.Username := Param['Username'].AsString;
-  FConexaoItem.Password := Param['Password'].AsBase64;
-  FConexaoItem.Authenticated := ResultParam['Authenticated'].AsBoolean;
+  FConnectionItem.Username := Param['Username'].AsString;
+  FConnectionItem.Password := Param['Password'].AsBase64;
+  FConnectionItem.Authenticated := ResultParam['Authenticated'].AsBoolean;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoExecutarPonteInvalida(var AContinuar: Boolean);
+procedure TLRDataFlashComandoAutenticar.DoExecuteBridgeError(var AContinue: Boolean);
 begin
   inherited;
-  FConexaoItem.Authenticated := False;
-  AContinuar := False;
+  FConnectionItem.Authenticated := False;
+  AContinue := False;
 end;
 
 procedure TLRDataFlashComandoAutenticar.DoRegisterParams;
 begin
   inherited;
-  NovoParametro('Username', tvpString);
+  NewParam('Username', tvpString);
   // envia a senha criptografada
-  NovoParametro('Password', tvpBase64);
+  NewParam('Password', tvpBase64);
 
-  NovoRetorno('Authenticated', tvpBoolean);
-  NovoRetorno('ResultMSG', tvpString);
+  NewResult('Authenticated', tvpBoolean);
+  NewResult('ResultMSG', tvpString);
 end;
 
 function TLRDataFlashComandoAutenticar.GetProcessType: TRpDataFlashProcessType;

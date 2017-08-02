@@ -15,7 +15,7 @@ type
     function GetCommand: string; override;
     procedure DoBeforeExecute; virtual;
     procedure DoAfterExecute(const AResult : string); virtual;
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
   private
     procedure OnErroEnvio(Sender: TObject; const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
   public
@@ -26,7 +26,7 @@ type
   TLRDataFlashComandoServer = class(TRpDataFlashCommand)
   protected
     procedure DoLoad; override;
-    function DoExecutar: Boolean; override;
+    function DoExecute: Boolean; override;
   end;
 
 implementation
@@ -46,7 +46,7 @@ begin
 
 end;
 
-function TLRDataFlashComandoProxy.DoExecutar: Boolean;
+function TLRDataFlashComandoProxy.DoExecute: Boolean;
 begin
   Result := True;
 end;
@@ -59,7 +59,7 @@ begin
   try
     DoBeforeExecute;
     pTcpClient.AoErroEnvio := OnErroEnvio;
-    lStrResult := pTcpClient.Comunicar(Self, Parametros);
+    lStrResult := pTcpClient.Comunicar(Self, Params);
     DoAfterExecute(lStrResult);
     Result := True;
   except
@@ -96,7 +96,7 @@ begin
 // definir os parametros de rotorno para o cliente
 end;
 
-function TLRDataFlashComandoServer.DoExecutar: Boolean;
+function TLRDataFlashComandoServer.DoExecute: Boolean;
 begin
   Result := False;
 end;
