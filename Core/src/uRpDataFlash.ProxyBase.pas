@@ -1,28 +1,32 @@
-unit uLRDF.ProxyBase;
+unit uRpDataFlash.ProxyBase;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
-uses uLRDF.Component, uLRDF.Comando, uLRDF.Protocolo, SysUtils;
+uses
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Protocol,
+  SysUtils;
 
 type
-  TLRDataFlashComandoProxy = class(TLRDataFlashComando)
+  TLRDataFlashComandoProxy = class(TRpDataFlashCommand)
   protected
-    FLastError : string;  
-    function GetComando: string; override;
+    FLastError : string;
+    function GetCommand: string; override;
     procedure DoBeforeExecute; virtual;
     procedure DoAfterExecute(const AResult : string); virtual;
-    function DoExecutar : Boolean; override;
+    function DoExecute : Boolean; override;
   private
-    procedure OnErroEnvio(Sender: TObject; const AProtocolo: TProtocolo; const AException: Exception);
+    procedure OnErroEnvio(Sender: TObject; const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
   public
     function GetLastError : string;
     function Executar(const pTcpClient : TLRDataFlashConexaoCliente) : Boolean; reintroduce;
   end;
 
-  TLRDataFlashComandoServer = class(TLRDataFlashComando)
+  TLRDataFlashComandoServer = class(TRpDataFlashCommand)
   protected
-    procedure DoCarregar; override;
-    function DoExecutar: Boolean; override;
+    procedure DoLoad; override;
+    function DoExecute: Boolean; override;
   end;
 
 implementation
@@ -42,7 +46,7 @@ begin
 
 end;
 
-function TLRDataFlashComandoProxy.DoExecutar: Boolean;
+function TLRDataFlashComandoProxy.DoExecute: Boolean;
 begin
   Result := True;
 end;
@@ -55,7 +59,7 @@ begin
   try
     DoBeforeExecute;
     pTcpClient.AoErroEnvio := OnErroEnvio;
-    lStrResult := pTcpClient.Comunicar(Self, Parametros);
+    lStrResult := pTcpClient.Comunicar(Self, Params);
     DoAfterExecute(lStrResult);
     Result := True;
   except
@@ -64,7 +68,7 @@ begin
   pTcpClient.AoErroEnvio := nil;
 end;
 
-function TLRDataFlashComandoProxy.GetComando: string;
+function TLRDataFlashComandoProxy.GetCommand: string;
 begin
   Result := Self.ClassName;
   if LowerCase(RightStr(Result, 5)) = 'proxy' then
@@ -80,19 +84,19 @@ begin
 end;
 
 procedure TLRDataFlashComandoProxy.OnErroEnvio(Sender: TObject;
-  const AProtocolo: TProtocolo; const AException: Exception);
+  const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
 begin
-  FLastError := AException.Message + AProtocolo.Mensagem;
+  FLastError := AException.Message + AProtocolo.Message;
 end;
 
 { TLRDataFlashComandoServer }
 
-procedure TLRDataFlashComandoServer.DoCarregar;
+procedure TLRDataFlashComandoServer.DoLoad;
 begin
 // definir os parametros de rotorno para o cliente
 end;
 
-function TLRDataFlashComandoServer.DoExecutar: Boolean;
+function TLRDataFlashComandoServer.DoExecute: Boolean;
 begin
   Result := False;
 end;

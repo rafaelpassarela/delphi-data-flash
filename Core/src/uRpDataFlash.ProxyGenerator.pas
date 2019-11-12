@@ -1,11 +1,14 @@
-unit uLRDF.ProxyGenerator;
+unit uRpDataFlash.ProxyGenerator;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Classes, uLRDF.Comando, SysUtils, Contnrs, uLRDF.Types, uLRDF.Component,
-  uLRDF.ComandController, uLRDF.DataSetProvider, uLRDF.ComandoGetCommandList,
-  DBClient, DB, Forms, uLRDF.ObjectReg;
+  Classes, uRpDataFlash.Command, SysUtils, Contnrs, uRpDataFlash.Types,
+  uRpDataFlash.Components, uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
+  uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg,
+  uRpDataFlash.Utils, uRpResourceString;
 
 const
   C_DEFAULT_PROXY_NAME = 'uClassesProxyGenerator';
@@ -32,13 +35,13 @@ type
   TProxyParametroComandoItem = class
   private
     FNome: string;
-    FTipoParametro: TLRDataFlashTipoParametro;
-    FTipoValor: TLRDataFlashTipoValorParametro;
+    FTipoParametro: TRpDataFlashParamType;
+    FTipoValor: TRpDataFlashParamValueType;
     FBaseClass: string;
   public
     property Nome : string read FNome write FNome;
-    property TipoParametro : TLRDataFlashTipoParametro read FTipoParametro write FTipoParametro;
-    property TipoValor : TLRDataFlashTipoValorParametro read FTipoValor write FTipoValor;
+    property TipoParametro : TRpDataFlashParamType read FTipoParametro write FTipoParametro;
+    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
     property BaseClass : string read FBaseClass write FBaseClass;
     function TipoValorAsString(const pNatural : Boolean = True) : string;
   end;
@@ -49,7 +52,7 @@ type
     function GetListaParametros : string;
   public
     property Parametros[const AIndex : Integer] : TProxyParametroComandoItem read GetParametros; default;
-    procedure AddParametro(const PParams : TLRDataFlashParametroComando); overload;
+    procedure AddParametro(const PParams : TRpDataFlashCommandParameter); overload;
     procedure AddParametro(const PParams : TLRDataFlashParametroItem); overload;
     function GetAsString(const pCommandName : string; const pIdentCount : Smallint;
       const pNomeGrupo : string) : string;
@@ -59,7 +62,7 @@ type
   private class var
     PrefixoCmd : string;
   public
-    class function GetInterfaceForClass(const pClass: TLRDataFlashAbstractClass): IComandoTCPInterfaced;
+    class function GetInterfaceForClass(const pClass: TRpDataFlashAbstractClass): IRpDataFlashCommandInterfaced;
     class function GetNomeComando(const AClassName: string): string;
   end;
 
@@ -120,7 +123,7 @@ type
     function ImplementarGrupos : string;
   end;
 
-  TLRDataFlashComandoList = class(TLRDataFlashComando)
+  TLRDataFlashComandoList = class(TRpDataFlashCommand)
   private
     FGrupos : TProxyGruposList;
     FTipoBusca: TRLDataFlashTipoRetornoProxy;
@@ -153,8 +156,8 @@ type
   protected
     function GerarProxy : string;
     function GerarClassUnit : string;
-    function DoExecutar : Boolean; override;
-    procedure DoRegistrarParametros; override;
+    function DoExecute : Boolean; override;
+    procedure DoRegisterParams; override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -259,7 +262,7 @@ begin
     lHint.Add('// TCP buscando as classes de serviço registradas no servidor.');
     lHint.Add('// - Gerado em...: '  + FormatDateTime('dd/mm/yyyy hh:nn:ss', Now) );
     lHint.Add('// - App Servidor: "' + Application.ExeName + '"');
-    lHint.Add('// - Server......: '  + TLRDataFlashUtils.GetNomeComputadorLocal);
+    lHint.Add('// - Server......: '  + TRpDataFlashUtils.GetLocalComputerName);
 
     Result := TrimRight(lHint.Text);
   finally
@@ -844,7 +847,7 @@ var
   lEnumGrupos: TListEnumerator;
   lEnumComandos: TCollectionEnumerator;
 
-  lController: TLRDataFlashComandController;
+  lController: TRpDataFlashComandController;
   lItemComando: TLRDataFlashComandItem;
 begin
   // registrar os comandos do Collection
@@ -854,7 +857,7 @@ begin
     lEnumGrupos := GetServer.Controllers.GetEnumerator;
     while (lEnumGrupos.MoveNext) do
     begin
-      lController := TLRDataFlashComandController(lEnumGrupos.Current);
+      lController := TRpDataFlashComandController(lEnumGrupos.Current);
       lEnumComandos := lController.Comandos.GetEnumerator;
       try
         while lEnumComandos.MoveNext do
@@ -879,12 +882,12 @@ var
 
   function InternalPodeGerarGrupo(const ANomeGrupo : string) : Boolean;
   begin
-    Result := ANomeGrupo <> C_GRUPO_INTERNO;
+    Result := ANomeGrupo <> C_GROUP_INTERNAL;
     // se não for interno, realiza testes especificos para cada FTipoBusca
     if Result then
     begin
-      Result := ((ANomeGrupo =  C_GRUPO_DATASET) and (FTipoBusca = trpDataSetList))   // se for um DataSet
-             or ((ANomeGrupo <> C_GRUPO_DATASET) and (FTipoBusca <> trpDataSetList)); // se for um grupo qualquer mas nao buscando por DataSet
+      Result := ((ANomeGrupo =  C_GROUP_DATASET) and (FTipoBusca = trpDataSetList))   // se for um DataSet
+             or ((ANomeGrupo <> C_GROUP_DATASET) and (FTipoBusca <> trpDataSetList)); // se for um grupo qualquer mas nao buscando por DataSet
     end;
   end;
 
@@ -923,14 +926,14 @@ begin
   inherited Destroy;
 end;
 
-function TLRDataFlashComandoList.DoExecutar: Boolean;
+function TLRDataFlashComandoList.DoExecute: Boolean;
 begin
-  FTipoBusca := TRLDataFlashTipoRetornoProxy(Parametro['TipoBusca'].AsInteger);
-  FInfoString := Trim( Parametro['InfoString'].AsBase64 );
+  FTipoBusca := TRLDataFlashTipoRetornoProxy(Param['TipoBusca'].AsInteger);
+  FInfoString := Trim( Param['InfoString'].AsBase64 );
 
   if TipoBusca = trpFactory then
   begin
-    Retorno['NomeArquivoProxy'].AsString := C_DEFAULT_PROXY_NAME;
+    ResultParam['NomeArquivoProxy'].AsString := C_DEFAULT_PROXY_NAME;
     FListaSelecionados.Text := FInfoString;
     FGerarClasses := FListaSelecionados.Values['TRANSP'] = 'T';
     FConfigClass := FListaSelecionados.Values['CONFIG'];
@@ -950,15 +953,15 @@ begin
   end
   else
   begin
-    Retorno['NomeArquivoProxy'].AsString := EmptyStr;
+    ResultParam['NomeArquivoProxy'].AsString := EmptyStr;
     FListaSelecionados.Clear;
   end;
 
   TProxyClassSupport.PrefixoCmd := GetServer.PrefixoBaseComandos;
   try
-    Retorno['RetornoProxy'].AsBase64 := GerarProxy;
+    ResultParam['RetornoProxy'].AsBase64 := GerarProxy;
     if (TipoBusca = trpFactory) and (FGerarClasses) then
-      Retorno['RetornoClass'].AsBase64 := GerarClassUnit;
+      ResultParam['RetornoClass'].AsBase64 := GerarClassUnit;
     Result := True;
   except
     on E:Exception do
@@ -966,7 +969,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashComandoList.DoRegistrarParametros;
+procedure TLRDataFlashComandoList.DoRegisterParams;
 begin
   inherited;
 {
@@ -977,12 +980,12 @@ begin
    trpDataSetList -> nada
    trpCommandList -> nada
 }
-  NovoParametro('InfoString', tvpBase64);
-  NovoParametro('TipoBusca', tvpInteger);
+  NewParam('InfoString', tvpBase64);
+  NewParam('TipoBusca', tvpInteger);
 
-  NovoRetorno('RetornoProxy', tvpBase64);
-  NovoRetorno('RetornoClass', tvpBase64);
-  NovoRetorno('NomeArquivoProxy', tvpString);
+  NewResult('RetornoProxy', tvpBase64);
+  NewResult('RetornoClass', tvpBase64);
+  NewResult('NomeArquivoProxy', tvpString);
 end;
 
 function TLRDataFlashComandoList.DoRetornaCommandInfo: string;
@@ -1346,11 +1349,11 @@ var
 
   function InternalGetDescription : string;
   var
-    lCmd : IComandoTCPInterfaced;
+    lCmd : IRpDataFlashCommandInterfaced;
   begin
     lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
-    if (lCmd <> nil) and (Assigned(lCmd.GetParametros)) then
-      Result := lCmd.GetDescricao;
+    if (lCmd <> nil) and (Assigned(lCmd.GetParams)) then
+      Result := lCmd.GetDescription;
   end;
 
 begin
@@ -1423,16 +1426,16 @@ end;
 
 procedure TProxyComandosItem.LoadParams(const pRegistroComando: TTcpClassRegisterItem);
 var
-  lCmd : IComandoTCPInterfaced;
+  lCmd : IRpDataFlashCommandInterfaced;
   i : Integer;
 begin
   lCmd := TProxyClassSupport.GetInterfaceForClass( pRegistroComando.ProxyClass );
-  if (lCmd <> nil) and (Assigned(lCmd.GetParametros)) then
+  if (lCmd <> nil) and (Assigned(lCmd.GetParams)) then
   begin
     // cria a lista de parametros de entrada
-    for i := 0 to lCmd.GetParametros.Count - 1 do
-      if lCmd.GetParametros[i].Tipo <> tpInterno then
-        ListaParametros.AddParametro(lCmd.GetParametros[i]);
+    for i := 0 to lCmd.GetParams.Count - 1 do
+      if lCmd.GetParams[i].ParamType <> tpInternal then
+        ListaParametros.AddParametro(lCmd.GetParams[i]);
   end;
 end;
 
@@ -1457,7 +1460,7 @@ begin
     Result.NomeClasse := pCommandName;
     Result.Descricao := pDescricaoComando;
     Add(Result);
-  end;  
+  end;
 end;
 
 function TProxyComandosList.DeclararComandos: string;
@@ -1471,7 +1474,7 @@ begin
     for i := 0 to Self.Count - 1 do
     begin
       lComent := 'Comando: ' + Self[i].NomeClasse;
-      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> C_COMANDO_NO_DESCRIPTION) then
+      if (Self[i].Descricao <> EmptyStr) and (Self[i].Descricao <> R_DATAFLASH_CMD_NO_DESCRIPTION) then
         lComent := lComent + '|' + Self[i].Descricao;
 
       lTexto.Add( FormatParamLine(4, '{ ' + lComent + ' }', ' ') );
@@ -1529,7 +1532,7 @@ begin
       // para o tipo tvpBinaryFile, o arquivo deve ser enviado antes por FTP
       lEnviaArquivo := False;
       for j := 0 to Self[i].ListaParametros.Count - 1 do
-        if  (Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar])
+        if  (Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload])
         and (Self[i].ListaParametros[j].TipoValor = tvpBinaryFile) then
         begin
           lEnviaArquivo := True;
@@ -1539,7 +1542,7 @@ begin
       // passa os parâmetros para o TcpClient
       // lCmd.Parametros.Novo('VAL1', pVAL1, tpEntrada, tvpFloat);
       for j := 0 to Self[i].ListaParametros.Count - 1 do
-        if Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar] then
+        if Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload] then
         begin
           lValorFuncao := 'p' + Self[i].ListaParametros[j].Nome;
 
@@ -1572,7 +1575,7 @@ begin
       lNumeroRetornos := 0;
       for j := 0 to Self[i].ListaParametros.Count - 1 do
       begin
-        if Self[i].ListaParametros[j].TipoParametro = tpSaida then
+        if Self[i].ListaParametros[j].TipoParametro = tpOutput then
         begin
           Inc(lNumeroRetornos);
           if lNumeroRetornos = 1 then
@@ -1614,7 +1617,7 @@ begin
         end
         else
         begin
-          if (Self[i].ListaParametros[j].TipoParametro <> tpEntradaSemRecaregar)
+          if (Self[i].ListaParametros[j].TipoParametro <> tpInputNoReload)
           and (Self[i].ListaParametros[j].TipoValor in [tvpBase, tvpDAO]) then
           begin
             Inc(lNumeroRetornos);
@@ -1643,7 +1646,7 @@ begin
         lTexto.Add('    try');
         // para o tipo tvpBinaryFile, envia confirmacao de recebimento para o servidor
         for j := 0 to Self[i].ListaParametros.Count - 1 do
-          if  (Self[i].ListaParametros[j].TipoParametro in [tpEntrada, tpEntradaSemRecaregar])
+          if  (Self[i].ListaParametros[j].TipoParametro in [tpInput, tpInputNoReload])
           and (Self[i].ListaParametros[j].TipoValor = tvpBinaryFile) then
           begin
             lTexto.Add('      FClient.ConfirmFileReceipt(p' + Self[i].ListaParametros[j].Nome + '.FileID, True, False, nil);');
@@ -1665,15 +1668,15 @@ end;
 
 { TProxyParametroComandoList }
 
-procedure TProxyParametroComandoList.AddParametro(const PParams: TLRDataFlashParametroComando);
+procedure TProxyParametroComandoList.AddParametro(const PParams: TRpDataFlashCommandParameter);
 var
   lParametro : TProxyParametroComandoItem;
 begin
   lParametro := TProxyParametroComandoItem.Create;
 
-  lParametro.Nome := PParams.Nome;
-  lParametro.TipoParametro := PParams.Tipo;
-  lParametro.TipoValor := PParams.TipoValor;
+  lParametro.Nome := PParams.Name;
+  lParametro.TipoParametro := PParams.ParamType;
+  lParametro.TipoValor := PParams.ValueType;
   lParametro.BaseClass := PParams.BaseClass;
 
   Self.Add( lParametro );
@@ -1718,14 +1721,14 @@ begin
   // cria a lista de parametros de entrada
   for i := 0 to Self.Count - 1 do
   begin
-    if Self[i].TipoParametro in [tpEntrada, tpEntradaSemRecaregar] then
+    if Self[i].TipoParametro in [tpInput, tpInputNoReload] then
       Result := Result + '; const p' + Self[i].Nome + ': ' + Self[i].TipoValorAsString;
   end;
 
   // cria a lista de parametros de entrada
   for i := 0 to Self.Count - 1 do
   begin
-    if Self[i].TipoParametro = tpSaida then
+    if Self[i].TipoParametro = tpOutput then
     begin
       if Self[i].TipoValor in [tvpFile, tvpBinaryFile] then
         lAux := ''
@@ -1766,19 +1769,19 @@ end;
 { TProxyClassSupport }
 
 class function TProxyClassSupport.GetInterfaceForClass(
-  const pClass: TLRDataFlashAbstractClass): IComandoTCPInterfaced;
+  const pClass: TRpDataFlashAbstractClass): IRpDataFlashCommandInterfaced;
 begin
   if (pClass <> nil) then
   begin
-    if Supports(pClass, IComandoTCPInterfaced) then
+    if Supports(pClass, IRpDataFlashCommandInterfaced) then
     begin
       if pClass.InheritsFrom(TComponent) then
-        Result := (TComponentClass(pClass).Create(nil) as IComandoTCPInterfaced)
+        Result := (TComponentClass(pClass).Create(nil) as IRpDataFlashCommandInterfaced)
       else
-        if pClass.InheritsFrom(TLRDataFlashComando) then
-          Result := (TLRDataFlashComandoClass(pClass).Create as IComandoTCPInterfaced)
+        if pClass.InheritsFrom(TRpDataFlashCommand) then
+          Result := (TRpDataFlashCommandClass(pClass).Create as IRpDataFlashCommandInterfaced)
         else
-          Result  := (TLRDataFlashComando(pClass.Create) as IComandoTCPInterfaced);
+          Result  := (TRpDataFlashCommand(pClass.Create) as IRpDataFlashCommandInterfaced);
     end;
   end;
 end;
@@ -1809,6 +1812,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoList, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoList, C_GROUP_INTERNAL);
 
 end.

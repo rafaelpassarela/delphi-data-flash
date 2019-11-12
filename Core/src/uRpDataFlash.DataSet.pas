@@ -1,13 +1,13 @@
-unit uLRDF.DataSet;
+unit uRpDataFlash.DataSet;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  uLRDF.Component, Classes, DB, DBClient, SysUtils, uLRDF.Comando, uLRDF.Types,
-  uLRDF.FieldFormatter, Variants, Provider, StrUtils, Dialogs, Windows,
-  uRpAlgoritmos, uRpStringFunctions;
+  uRpDataFlash.Components, Classes, DB, DBClient, SysUtils, uRpDataFlash.Command,
+  uRpDataFlash.Types, uRpDataFlash.FieldFormatter, Variants, Provider, StrUtils,
+  Dialogs, Windows, uRpAlgorithms, uRpStringFunctions;
 
 type
   TLRDataFlashDataSet = class;
@@ -55,29 +55,29 @@ type
   TLRDataFlashDataSet = class(TCustomClientDataSet)
   private
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
-    FComandoEnviar: TLRDataFlashComandoEnvio;
+    FComandoEnviar: TRpDataFlashSendCommand;
     FConexaoCliente: TLRDataFlashConexaoCliente;
-    FProviderCustom: TLRDataFlashCustomProvider;
-    FInternalProvider: TLRDataFlashCustomProvider;
+    FProviderCustom: TRpDataFlashCustomProvider;
+    FInternalProvider: TRpDataFlashCustomProvider;
     FProviderClass: string;
     FPrepared: Boolean;
     FAutoCreateParams: Boolean;
-    FParams: TDataSetParams;
+    FParams: TRpDataSetParams;
     FOpenWhere: string;
     FFormatter: IFormaterMaskValues;
     FInfoQuery: Boolean;
-    function PreparaComando(const pOperacao : TLRDataFlashOperacaoDataSet) : Boolean;
+    function PreparaComando(const pOperacao : TRpDataFlashDataSetOperations) : Boolean;
     function PreparaSQL(const pSQLBase : string; const pFields : TFields;
       pFormatterMask : IFormaterMaskValues) : string;
     function PreparaSelect(const pSQLBase : string; pFormatterMask : IFormaterMaskValues) : string;
     function DoInternalApplyUpdates(MaxErrors: Integer; AFormatter : IFormaterMaskValues) : Integer;
-    function GetSQL(const pOperacao : TLRDataFlashOperacaoDataSet) : string;
+    function GetSQL(const pOperacao : TRpDataFlashDataSetOperations) : string;
     function GetProviderClass: string;
     function GetDefaultFormatter : IFormaterMaskValues; //TFormatValuesDefault;
     function ValidServer : Boolean;
     procedure Prepare;
-    procedure SetParams(const Value: TDataSetParams);
-    function GetParams: TDataSetParams;
+    procedure SetParams(const Value: TRpDataSetParams);
+    function GetParams: TRpDataSetParams;
     procedure PrepararComandoEnvio;
   protected
     // override to init fields on designing
@@ -129,7 +129,7 @@ type
 //    property ConnectionBroker;
 //    property FileName;
 //    property ProviderName;
-//    property RemoteServer;  
+//    property RemoteServer;
     property Active;
     property Aggregates;
     property AggregatesActive;
@@ -188,10 +188,10 @@ type
     property Ranged;
     // custom propertyes
     property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
-    property ProviderCustom : TLRDataFlashCustomProvider read FProviderCustom write FProviderCustom;
+    property ProviderCustom : TRpDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
-    property Params : TDataSetParams read GetParams write SetParams;
+    property Params : TRpDataSetParams read GetParams write SetParams;
     property Formatter : IFormaterMaskValues read FFormatter write FFormatter;
   end;
 
@@ -225,10 +225,10 @@ begin
   inherited Create(AOwner);
   FLockData := False;
   AutoCreateParams := True;
-  FParams := TDataSetParams.Create(Self);
+  FParams := TRpDataSetParams.Create(Self);
   FOpenWhere := EmptyStr;
-  FProviderCustom := TLRDataFlashCustomProvider.Create;
-  FInternalProvider := TLRDataFlashCustomProvider.Create;
+  FProviderCustom := TRpDataFlashCustomProvider.Create;
+  FInternalProvider := TRpDataFlashCustomProvider.Create;
 //  FDummyProvider := TDummyProvider.Create(Self);
 
   PrepararComandoEnvio;
@@ -288,7 +288,7 @@ begin
       end;
 
       if lPrepared then
-        lCommandList.Append( IntToStr(lCommandList.Count) + '=' + Algoritimos.Base64CompressedString(lSQL) );
+        lCommandList.Append( IntToStr(lCommandList.Count) + '=' + Algorithms.Base64CompressedString(lSQL) );
       lChange.Next;
     end;
 
@@ -298,11 +298,11 @@ begin
       PreparaComando(opdsApplyUpdates);
       // adiciona o total de comandos na primeira linha
       lCommandList.Insert(0, IntToStr(lCommandList.Count));
-      FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := lCommandList.Text;
+      FComandoEnviar.Param['SQLInstruct'].AsBase64 := lCommandList.Text;
       FConexaoCliente.Comunicar(FComandoEnviar);
-      if FComandoEnviar.StatusRetorno then
+      if FComandoEnviar.ReturnStatus then
       begin
-        Result := FComandoEnviar.Retorno['ApplyErrCount'].AsInteger;
+        Result := FComandoEnviar.ResultParam['ApplyErrCount'].AsInteger;
         if Result > MaxErrors then
           raise ELRDataFlashDataSetConexaoResult.Create('Erro aplicando alterações no banco de dados. ' + FComandoEnviar.LastError);
         // marca internamente as alterações como resolvidas, para não entrarem em um novo apply
@@ -349,10 +349,10 @@ begin
 
   if PreparaComando(opdsSelect) then
   begin
-    FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := PreparaSelect( GetSQL(opdsSelect), GetDefaultFormatter);
+    FComandoEnviar.Param['SQLInstruct'].AsBase64 := PreparaSelect( GetSQL(opdsSelect), GetDefaultFormatter);
     FConexaoCliente.Comunicar(FComandoEnviar);
 
-    if FComandoEnviar.StatusRetorno then
+    if FComandoEnviar.ReturnStatus then
     begin
       FLockData := True;
       try
@@ -361,7 +361,7 @@ begin
           EmptyDataSet;
           Close;
         end;
-        Self.XMLData := FComandoEnviar.Retorno['XMLData'].AsBase64
+        Self.XMLData := FComandoEnviar.ResultParam['XMLData'].AsBase64
       finally
         FLockData := False;
       end;
@@ -402,8 +402,8 @@ begin
   else
     raise ELRDataFlashDataSetConexaoResult.Create('O dataset não está aberto.');
 
-  // verificar um meio mais "elegante" de evitar o AfterRefresh do TCustomClintDataSet  
-  SysUtils.Abort;  
+  // verificar um meio mais "elegante" de evitar o AfterRefresh do TCustomClintDataSet
+  SysUtils.Abort;
 end;
 
 procedure TLRDataFlashDataSet.DoCommit(const pRetaining: Boolean);
@@ -414,8 +414,8 @@ begin
     PreparaComando(opdsCommit);
 
   FConexaoCliente.Comunicar(FComandoEnviar);
-  
-  if not FComandoEnviar.StatusRetorno then
+
+  if not FComandoEnviar.ReturnStatus then
     raise ELRDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
 end;
 
@@ -436,7 +436,7 @@ begin
     Result := TFormatValuesDefault.Create;
 end;
 
-function TLRDataFlashDataSet.GetParams: TDataSetParams;
+function TLRDataFlashDataSet.GetParams: TRpDataSetParams;
 begin
   FParams.AutoCreateParam := FAutoCreateParams;
   Result := FParams;
@@ -447,7 +447,7 @@ begin
   Result := Trim(FProviderClass);
 end;
 
-function TLRDataFlashDataSet.GetSQL(const pOperacao: TLRDataFlashOperacaoDataSet): string;
+function TLRDataFlashDataSet.GetSQL(const pOperacao: TRpDataFlashDataSetOperations): string;
 var
   lTemProvider: Boolean;
 begin
@@ -478,15 +478,15 @@ begin
 
     if PreparaComando(opdsSelect) then
     begin
-      FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := GetSQL(opdsSelect);
+      FComandoEnviar.Param['SQLInstruct'].AsBase64 := GetSQL(opdsSelect);
       FConexaoCliente.Comunicar(FComandoEnviar);
-      if FComandoEnviar.StatusRetorno then
+      if FComandoEnviar.ReturnStatus then
       begin
         lCds := nil;
         try
           { ?? Rever esta parte, pois ele irá trazer todos os dados da tabela ?? }
           lCds := TCustomClientDataSet.Create(Self);
-          lCds.XMLData := FComandoEnviar.Retorno['XMLData'].AsBase64;
+          lCds.XMLData := FComandoEnviar.ResultParam['XMLData'].AsBase64;
 
           FLockData := True;
 
@@ -561,7 +561,7 @@ begin
 *)
 end;
 
-function TLRDataFlashDataSet.PreparaComando(const pOperacao: TLRDataFlashOperacaoDataSet): Boolean;
+function TLRDataFlashDataSet.PreparaComando(const pOperacao: TRpDataFlashDataSetOperations): Boolean;
 begin
   // vai no servidor buscar o XML Data
   if ProviderClass <> EmptyStr then
@@ -575,33 +575,33 @@ begin
     FComandoEnviar.SetComando( FProviderCustom.CustomCommand );
 //    FComandoEnviar.Parametro['CustomParams'].AsBase64 := ProviderCustom.GetAsString;
   end;
-  FComandoEnviar.Parametro['Operacao'].AsInteger := Ord(pOperacao);
-  FComandoEnviar.Parametro['ProviderClass'].AsString := ProviderClass;
-  FComandoEnviar.Parametro['SQLInstruct'].AsBase64 := EmptyStr;
-  FComandoEnviar.Parametro['MaxErrors'].AsInteger := 0;
-  FComandoEnviar.Parametro['csDesigning'].AsBoolean := FInfoQuery; //csDesigning in ComponentState;
+  FComandoEnviar.Param['Operacao'].AsInteger := Ord(pOperacao);
+  FComandoEnviar.Param['ProviderClass'].AsString := ProviderClass;
+  FComandoEnviar.Param['SQLInstruct'].AsBase64 := EmptyStr;
+  FComandoEnviar.Param['MaxErrors'].AsInteger := 0;
+  FComandoEnviar.Param['csDesigning'].AsBoolean := FInfoQuery; //csDesigning in ComponentState;
 
   Result := True;
 end;
 
 procedure TLRDataFlashDataSet.PrepararComandoEnvio;
 begin
-  FComandoEnviar := TLRDataFlashComandoEnvio.Create;
+  FComandoEnviar := TRpDataFlashSendCommand.Create;
 
-  FComandoEnviar.Parametros.AddParametro('Operacao', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('Operacao', 0, tvpInteger);
 
-  FComandoEnviar.Parametros.AddParametro('Operacao', 0, tvpInteger);
-  FComandoEnviar.Parametros.AddParametro('SQLInstruct', EmptyStr, tvpBase64);
-  FComandoEnviar.Parametros.AddParametro('MaxErrors', 0, tvpInteger);
-  FComandoEnviar.Parametros.AddParametro('csDesigning', False, tvpBoolean);
+  FComandoEnviar.Params.AddParam('Operacao', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('SQLInstruct', EmptyStr, tvpBase64);
+  FComandoEnviar.Params.AddParam('MaxErrors', 0, tvpInteger);
+  FComandoEnviar.Params.AddParam('csDesigning', False, tvpBoolean);
   // passa cada SQL
 //  FComandoEnviar.Parametros.AddParametro('CustomParams', '', tvpBase64);
   // ou a classe registrada no servidor
-  FComandoEnviar.Parametros.AddParametro('ProviderClass', EmptyStr, tvpString);
+  FComandoEnviar.Params.AddParam('ProviderClass', EmptyStr, tvpString);
 
   // Retornos
-  FComandoEnviar.Parametros.AddRetorno('XMLData', EmptyStr, tvpBase64);
-  FComandoEnviar.Parametros.AddRetorno('ApplyErrCount', 0, tvpInteger);
+  FComandoEnviar.Params.AddResult('XMLData', EmptyStr, tvpBase64);
+  FComandoEnviar.Params.AddResult('ApplyErrCount', 0, tvpInteger);
 end;
 
 function TLRDataFlashDataSet.PreparaSelect(const pSQLBase: string;
@@ -639,7 +639,7 @@ begin
         if Pos(':' + UpperCase(FParams[i].Name), UpperCase(lSqlTratado)) > 0 then
         begin
           // quando ja existir, troca somente o valor
-          lSqlTratado := TStringReplace.StringReplaceWholeWord(
+          lSqlTratado := TRpStrings.StringReplaceWholeWord(
             lSqlTratado, ':' + FParams[i].Name, lFormatter.SQLValue, [rfIgnoreCase, rfReplaceAll]);
         end
         else
@@ -689,7 +689,7 @@ var
 
       lValue := lFormatter.SQLValue;
 
-      Result := TStringReplace.StringReplaceWholeWord(
+      Result := TRpStrings.StringReplaceWholeWord(
         Result, ':' + pFieldName, lValue, [rfIgnoreCase, rfReplaceAll]);
     end;
   end;
@@ -717,8 +717,8 @@ begin
     PreparaComando(opdsPrepare);
     FConexaoCliente.Comunicar(FComandoEnviar);
 
-    if FComandoEnviar.StatusRetorno then
-      FInternalProvider.SetFromString( FComandoEnviar.Retorno['XMLData'].AsBase64 )
+    if FComandoEnviar.ReturnStatus then
+      FInternalProvider.SetFromString( FComandoEnviar.ResultParam['XMLData'].AsBase64 )
     else
       raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
   end;
@@ -740,7 +740,7 @@ begin
 
   FConexaoCliente.Comunicar(FComandoEnviar);
 
-  if not FComandoEnviar.StatusRetorno then
+  if not FComandoEnviar.ReturnStatus then
     raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
 end;
 
@@ -754,7 +754,7 @@ begin
   DoRollback(True);
 end;
 
-procedure TLRDataFlashDataSet.SetParams(const Value: TDataSetParams);
+procedure TLRDataFlashDataSet.SetParams(const Value: TRpDataSetParams);
 begin
 //  FParams := Value;
   FParams.Assign(Value);
@@ -765,7 +765,7 @@ begin
   if PreparaComando(opdsStartTrans) then
   begin
     FConexaoCliente.Comunicar(FComandoEnviar);
-    if not FComandoEnviar.StatusRetorno then
+    if not FComandoEnviar.ReturnStatus then
       raise ELRDataFlashDataSetConexaoResult.Create('Erro iniciando transação. ' + FComandoEnviar.LastError);
   end;
 end;

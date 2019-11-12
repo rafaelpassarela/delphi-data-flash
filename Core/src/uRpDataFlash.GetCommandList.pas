@@ -1,40 +1,42 @@
-unit uLRDF.ComandoGetCommandList;
+unit uRpDataFlash.GetCommandList;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  SysUtils, uLRDF.Comando, uLRDF.Types, uLRDF.Component, Classes,
-  uRpFileHelper, XMLIntf, uLRDF.DataSetProvider;
+  SysUtils, uRpDataFlash.Command, uRpDataFlash.Types, uRpDataFlash.Components,
+  Classes, uRpSerialization, XMLIntf, uRpDataFlash.DataSetProvider;
 
 type
-  TLRDFParametrosInfoComando = class(TFileCustomObject)
+  TLRDFParametrosInfoComando = class(TCustomSerializableObject)
   private
     FNome: string;
-    FTipoValor: TLRDataFlashTipoValorParametro;
-    FTipo: TLRDataFlashTipoParametro;
+    FTipoValor: TRpDataFlashParamValueType;
+    FTipo: TRpDataFlashParamType;
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode: IXMLNode); override;
   public
     procedure Reset; override;
-    procedure FromOther(const AOther: IFileBase); override;
+    procedure FromOther(const AOther: ISerializableBase); override;
 
     property Nome : string read FNome write FNome;
-    property Tipo : TLRDataFlashTipoParametro read FTipo write FTipo;
-    property TipoValor : TLRDataFlashTipoValorParametro read FTipoValor write FTipoValor;
+    property Tipo : TRpDataFlashParamType read FTipo write FTipo;
+    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
   end;
 
-  TLRDFParametrosTransportList = class(TFileCustomList)
+  TLRDFParametrosTransportList = class(TCustomSerializableList)
   private
     function GetItems(Index: Integer): TLRDFParametrosInfoComando;
   protected
-    function GetItemClass : TFileCustomObjectClass; override;
+    function GetItemClass : TCustomSerializableObjectClass; override;
   public
     property Items[Index : Integer] : TLRDFParametrosInfoComando read GetItems; default;
     function AddParam : TLRDFParametrosInfoComando;
   end;
 
-  TLRDFInfoComando = class(TFileCustomObject)
+  TLRDFInfoComando = class(TCustomSerializableObject)
   private
     FNomeComando: string;
     FListaParametros: TLRDFParametrosTransportList;
@@ -46,7 +48,7 @@ type
     procedure Finalize; override;
   public
     procedure Reset; override;
-    procedure FromOther(const AOther: IFileBase); override;
+    procedure FromOther(const AOther: ISerializableBase); override;
 
     property NomeComando : string read FNomeComando write FNomeComando;
     property ListaParametros : TLRDFParametrosTransportList read FListaParametros;
@@ -77,7 +79,7 @@ begin
   inherited;
 end;
 
-procedure TLRDFInfoComando.FromOther(const AOther: IFileBase);
+procedure TLRDFInfoComando.FromOther(const AOther: ISerializableBase);
 var
   lInfo : TLRDFInfoComando absolute AOther;
 begin
@@ -114,10 +116,10 @@ begin
   inherited;
   FromNode('Nome', FNome);
   FromNode('TipoValor', lIntAux);
-  FTipoValor := TLRDataFlashTipoValorParametro(lIntAux);
+  FTipoValor := TRpDataFlashParamValueType(lIntAux);
 
   FromNode('Tipo', lIntAux);
-  FTipo := TLRDataFlashTipoParametro(lIntAux);
+  FTipo := TRpDataFlashParamType(lIntAux);
 end;
 
 procedure TLRDFParametrosInfoComando.DoSaveToNode;
@@ -128,7 +130,7 @@ begin
   ToNode('Tipo', Ord(FTipo));
 end;
 
-procedure TLRDFParametrosInfoComando.FromOther(const AOther: IFileBase);
+procedure TLRDFParametrosInfoComando.FromOther(const AOther: ISerializableBase);
 var
   lInfo : TLRDFParametrosInfoComando absolute AOther;
 begin
@@ -142,7 +144,7 @@ procedure TLRDFParametrosInfoComando.Reset;
 begin
   inherited;
   FNome := '';
-  FTipo := tpEntrada;
+  FTipo := tpInput;
   FTipoValor := tvpInteger;
 end;
 
@@ -154,7 +156,7 @@ begin
   Self.Add( Result );
 end;
 
-function TLRDFParametrosTransportList.GetItemClass : TFileCustomObjectClass;
+function TLRDFParametrosTransportList.GetItemClass : TCustomSerializableObjectClass;
 begin
   Result := TLRDFParametrosInfoComando;
 end;

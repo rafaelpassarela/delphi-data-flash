@@ -1,10 +1,13 @@
-unit uLRDF.ObjectReg;
+unit uRpDataFlash.ObjectReg;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, Dialogs, Forms, Variants,
-  uRpFileHelper, uRpAlgoritmos, uLRDF.Types, uLRDF.Comando;
+  uRpSerialization, uRpAlgorithms, uRpDataFlash.Types, uRpDataFlash.Command,
+  uRpDataFlash.Utils;
 
 type
   TPropType = (ptNone, ptNative, ptSet, ptEnum, ptClass);
@@ -78,10 +81,10 @@ type
     procedure AddUnitComent;
     procedure AdicionarScopo(const AClassItem : TImplementationPart);
     procedure AdicionarImplementacao(const AClassItem : TImplementationPart);
-    procedure VerificarComando(const ACommandClass : TLRDataFlashComandoClass; var AGerados : string);
-    function GetXMLFromObject(const AObject : TFileCustomObject) : string;
+    procedure VerificarComando(const ACommandClass : TRpDataFlashCommandClass; var AGerados : string);
+    function GetXMLFromObject(const AObject : TCustomSerializableObject) : string;
     function DoLoadFromRegistry(const AGerados : string; const ACheckIntf : Boolean) : Boolean;
-    function IsHelperSupport(const ABaseClass : TFileCustomObjectClass) : Boolean;
+    function IsHelperSupport(const ABaseClass : TCustomSerializableObjectClass) : Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -90,7 +93,7 @@ type
     function DecodeXML(const AXML : string) : Boolean; overload;
     function DecodeXML(const ANode : IXMLNode; const AIsCompressed : Boolean) : Boolean; overload;
     // transforma uma classe em XML
-    function DecodeClass(const AClass : TFileCustomObjectClass; var AClassesJaGeradas : string;
+    function DecodeClass(const AClass : TCustomSerializableObjectClass; var AClassesJaGeradas : string;
       const AClassName : string) : Boolean;
 
     function GetImplementedUnit(const AUnitName : string) : string;
@@ -151,12 +154,12 @@ begin
   FUnit := TStringList.Create;
 end;
 
-function TLRDataFlashClassSerialization.DecodeClass(const AClass: TFileCustomObjectClass;
+function TLRDataFlashClassSerialization.DecodeClass(const AClass: TCustomSerializableObjectClass;
   var AClassesJaGeradas : string; const AClassName : string): Boolean;
 var
   i: Integer;
-  lBase : TFileCustomObject;
-  lParentClass: TFileCustomObjectClass;
+  lBase : TCustomSerializableObject;
+  lParentClass: TCustomSerializableObjectClass;
   lNode: IXMLNode;
   lInfo: TPropInfo;
 begin
@@ -174,7 +177,7 @@ begin
   begin
     if lNode.ChildNodes.FindNode(AClassName) = nil then
     begin
-      lNode[AClassName] := Algoritimos.Base64CompressedString(
+      lNode[AClassName] := Algorithms.Base64CompressedString(
         Format('<?xml version="1.0" encoding="iso-8859-1"?><root><%s ClassName="%s" ParentClass="Classe não registrada %s"/></root>',
               [AClassName, AClassName, AClassName]));
     end;
@@ -191,9 +194,9 @@ begin
       lNode[AClass.ClassName] := GetXMLFromObject(lBase);
 
       // verifica as classes parent
-      for i := 0 to lBase.Node.ChildNodes.Count - 1 do
+      for i := 0 to lBase.XMLNode.ChildNodes.Count - 1 do
       begin
-        lNode := lBase.Node.ChildNodes[i];
+        lNode := lBase.XMLNode.ChildNodes[i];
         lInfo.Decode(lNode);
         // subclasse
         if (lInfo.PropType = ptClass) and (Pos(';' + lInfo.DataType + ';', AClassesJaGeradas) = 0) then
@@ -201,7 +204,7 @@ begin
           AClassesJaGeradas := AClassesJaGeradas + lInfo.DataType + ';';
           if lInfo.DataType <> lBase.ClassName then
           begin
-            lParentClass := FileClassRegistrer.GetClass(lInfo.DataType);
+            lParentClass := SerializationClassRegistrer.GetClass(lInfo.DataType);
             DecodeClass( lParentClass, AClassesJaGeradas, lInfo.DataType );
           end;
         end;
@@ -211,19 +214,19 @@ begin
           AClassesJaGeradas := AClassesJaGeradas + lInfo.Parent + ';';
           if lInfo.Parent <> lBase.ClassName then
           begin
-            lParentClass := FileClassRegistrer.GetClass(lInfo.Parent);
+            lParentClass := SerializationClassRegistrer.GetClass(lInfo.Parent);
             DecodeClass( lParentClass, AClassesJaGeradas, lInfo.Parent );
           end;
         end;
       end;
       // para listas, verifica a dependencia dos itens
-      if lBase is TFileCustomList then
+      if lBase is TCustomSerializableList then
       begin
-        if Pos(';' + TFileCustomList(lBase).ItemClassName + ';', AClassesJaGeradas) = 0 then
+        if Pos(';' + TCustomSerializableList(lBase).ItemClassName + ';', AClassesJaGeradas) = 0 then
         begin
-          AClassesJaGeradas := AClassesJaGeradas + TFileCustomList(lBase).ItemClassName + ';';
-          lParentClass := FileClassRegistrer.GetClass( TFileCustomList(lBase).ItemClassName );
-          DecodeClass( lParentClass, AClassesJaGeradas, TFileCustomList(lBase).ItemClassName);
+          AClassesJaGeradas := AClassesJaGeradas + TCustomSerializableList(lBase).ItemClassName + ';';
+          lParentClass := SerializationClassRegistrer.GetClass( TCustomSerializableList(lBase).ItemClassName );
+          DecodeClass( lParentClass, AClassesJaGeradas, TCustomSerializableList(lBase).ItemClassName);
         end;
       end;
     end;
@@ -238,7 +241,7 @@ var
   lValorNode: string;
 begin
   if AIsCompressed then
-    lValorNode := Algoritimos.Base64DecompressedString(ANode.Text)
+    lValorNode := Algorithms.Base64DecompressedString(ANode.Text)
   else
     lValorNode := ANode.Text;
 
@@ -325,7 +328,7 @@ function TLRDataFlashClassSerialization.DoLoadFromRegistry(
   const AGerados: string; const ACheckIntf: Boolean): Boolean;
 var
   i: Integer;
-  lClass: TFileCustomObjectClass;
+  lClass: TCustomSerializableObjectClass;
   lGerados: string;
 begin
   Result := False;
@@ -333,9 +336,9 @@ begin
 
   lGerados := AGerados;
   try
-    for i := 0 to FileClassRegistrer.Count - 1 do
+    for i := 0 to SerializationClassRegistrer.Count - 1 do
     begin
-      lClass := FileClassRegistrer.GetClass(i);
+      lClass := SerializationClassRegistrer.GetClass(i);
       if ACheckIntf then
       begin
         if IsHelperSupport(lClass) then
@@ -428,21 +431,21 @@ begin
 end;
 
 function TLRDataFlashClassSerialization.GetXMLFromObject(
-  const AObject: TFileCustomObject): string;
+  const AObject: TCustomSerializableObject): string;
 begin
-  Result := Algoritimos.Base64CompressedString(AObject.SaveToXmlString);
+  Result := Algorithms.Base64CompressedString(AObject.SaveToXmlString);
 end;
 
 function TLRDataFlashClassSerialization.IsHelperSupport(
-  const ABaseClass: TFileCustomObjectClass): Boolean;
+  const ABaseClass: TCustomSerializableObjectClass): Boolean;
 var
   InterfaceEntry: PInterfaceEntry;
-  lBase: TFileCustomObject;
+  lBase: TCustomSerializableObject;
 begin
   lBase := nil;
   lBase := ABaseClass.Create(nil);
   try
-    InterfaceEntry := lBase.GetInterfaceEntry(IFileBaseHelper);
+    InterfaceEntry := lBase.GetInterfaceEntry(ISerializableBase);
     Result := InterfaceEntry <> nil;
   finally
     FreeAndNil(lBase);
@@ -457,7 +460,7 @@ begin
   FUnit.Add('// IFileBaseHelper ou ser utilizada por um comando TCP registrado.' );
   FUnit.Add('// - Gerado em...: '  + FormatDateTime('dd/mm/yyyy hh:nn:ss', Now) );
   FUnit.Add('// - App Servidor: "' + Application.ExeName + '"');
-  FUnit.Add('// - Server......: '  + TLRDataFlashUtils.GetNomeComputadorLocal);
+  FUnit.Add('// - Server......: '  + TRpDataFlashUtils.GetLocalComputerName);
 end;
 
 function TLRDataFlashClassSerialization.LoadClassFromMetadata(const AXMLString: string): Boolean;
@@ -506,7 +509,7 @@ begin
     begin
       lItem := lRegistro.Items[i];
       if (ASelectedList = nil) or ComandoNaLista then
-        VerificarComando(TLRDataFlashComandoClass(lItem.ProxyClass), lGerados);
+        VerificarComando(TRpDataFlashCommandClass(lItem.ProxyClass), lGerados);
     end;
 
     // verifica quais classes possuem a interface IBaseHelper assinada
@@ -524,22 +527,22 @@ begin
 end;
 
 procedure TLRDataFlashClassSerialization.VerificarComando(
-  const ACommandClass: TLRDataFlashComandoClass; var AGerados: string);
+  const ACommandClass: TRpDataFlashCommandClass; var AGerados: string);
 var
-  lCmd: TLRDataFlashComando;
+  lCmd: TRpDataFlashCommand;
   i: Integer;
-  lClass: TFileCustomObjectClass;
+  lClass: TCustomSerializableObjectClass;
 begin
   // cria o comando e verifica nos parametros se possui algum tvpBase com classe identificada
   lCmd := ACommandClass.Create;
   try
     AGerados := EmptyStr;
-    for i := 0 to lCmd.Parametros.Count - 1 do
+    for i := 0 to lCmd.Params.Count - 1 do
     begin
-      if (lCmd.Parametros[i].TipoValor = tvpBase) and (lCmd.Parametros[i].BaseClass <> EmptyStr) then
+      if (lCmd.Params[i].ValueType = tvpBase) and (lCmd.Params[i].BaseClass <> EmptyStr) then
       begin
-        lClass := FileClassRegistrer.GetClass(lCmd.Parametros[i].BaseClass);
-        DecodeClass(lClass, AGerados, lCmd.Parametros[i].BaseClass);
+        lClass := SerializationClassRegistrer.GetClass(lCmd.Params[i].BaseClass);
+        DecodeClass(lClass, AGerados, lCmd.Params[i].BaseClass);
       end;
     end;
   finally

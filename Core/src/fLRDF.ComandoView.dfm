@@ -50,8 +50,6 @@ object frmComandoView: TfrmComandoView
     Height = 37
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 344
-    ExplicitWidth = 546
     object BitBtn1: TBitBtn
       Left = 463
       Top = 7

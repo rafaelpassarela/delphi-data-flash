@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{DF803A41-D94D-4ED6-B2B5-2F99C67B4726}</ProjectGuid>
-			<MainSource>LRDataFlashTCPdcomm.dpk</MainSource>
+			<ProjectGuid>{E3AAB2A7-1BA2-4754-8E07-19834A8DD1BA}</ProjectGuid>
+			<MainSource>RpDataFlashCommR.dpk</MainSource>
 			<Base>True</Base>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<TargetedPlatforms>1</TargetedPlatforms>
@@ -25,24 +25,28 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Platform)'=='Win32' and '$(Cfg_2)'=='true' or '$(Cfg_2_Win32)'!=''">
+			<Cfg_2_Win32>true</Cfg_2_Win32>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<SanitizedProjectName>LRDataFlashTCPdcomm</SanitizedProjectName>
+			<SanitizedProjectName>LRDataFlashTCPcomm</SanitizedProjectName>
 			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
-			<DCC_BplOutput>$(BDSCOMMONDIR)\Bpl\$(Platform)</DCC_BplOutput>
-			<DCC_DcpOutput>$(BDSCOMMONDIR)\Dcp\$(Platform)</DCC_DcpOutput>
-			<DCC_DcuOutput>$(BDSCOMMONDIR)\Dcu\$(Platform)</DCC_DcuOutput>
+			<DCC_DcuOutput>..\Bin\Dcu</DCC_DcuOutput>
+			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
 			<DCC_E>false</DCC_E>
 			<DCC_K>false</DCC_K>
-			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
+			<DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;$(DCC_Namespace)</DCC_Namespace>
 			<DCC_S>false</DCC_S>
-			<GenPackage>true</GenPackage>
+			<GenDll>true</GenDll>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=;CFBundleName=;CFBundleDisplayName=;CFBundleIdentifier=;CFBundleVersion=;CFBundlePackageType=;CFBundleSignature=;CFBundleAllowMixedLocalizations=;CFBundleExecutable=</VerInfo_Keys>
 			<DCC_N>false</DCC_N>
 			<DCC_F>false</DCC_F>
-			<DCC_Description>LRDataFlash - Pacote de Comunicação TCP Designtime</DCC_Description>
-			<DesignOnlyPackage>true</DesignOnlyPackage>
+			<GenPackage>true</GenPackage>
+			<DCC_Description>DataFlash - Runtime Communication Package - Rafael Passarela</DCC_Description>
 			<VerInfo_Locale>1046</VerInfo_Locale>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -56,27 +60,52 @@
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_Optimize>false</DCC_Optimize>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
+		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="LRDataFlashTCPdcomm.dpk">
+			<DelphiCompile Include="RpDataFlashCommR.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="LRDataFlashTCPcommIcons.dcr"/>
-			<DCCReference Include="LRDataFlashTCPcomm.dcp"/>
-			<DCCReference Include="vcldb.dcp"/>
-			<DCCReference Include="src\Editors\uLRDF.ComponentRegister.pas"/>
-			<DCCReference Include="src\Editors\uLRDF.ConexaoClienteEditor.pas"/>
-			<DCCReference Include="src\Editors\uLRDF.ComandControllerEditor.pas"/>
-			<DCCReference Include="src\Editors\uLRDF.DataSetProviderList.pas"/>
-			<DCCReference Include="src\Editors\uLRDF.EditorComandosProvider.pas">
+			<DCCReference Include="IndySystem.dcp"/>
+			<DCCReference Include="IndyProtocols.dcp"/>
+			<DCCReference Include="IndyCore.dcp"/>
+			<DCCReference Include="designide.dcp"/>
+			<DCCReference Include="dsnap.dcp"/>
+			<DCCReference Include="RpSerialization.dcp"/>
+			<DCCReference Include="src\uRpDataFlash.Components.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Protocol.pas"/>
+			<DCCReference Include="src\fLRDF.DefinirConexao.pas">
+				<Form>frmLRDF.DefinirConexao</Form>
+			</DCCReference>
+			<DCCReference Include="src\uRpDataFlash.Command.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ProxyGenerator.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ProxyBase.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Ping.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Types.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ThreadConnection.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Connection.pas"/>
+			<DCCReference Include="src\fLRDF.ComandoView.pas">
+				<Form>frmComandoView</Form>
+			</DCCReference>
+			<DCCReference Include="src\fLRDF.ComandosControllerView.pas">
+				<Form>frmComandosControllerView</Form>
+			</DCCReference>
+			<DCCReference Include="src\uRpDataFlash.CommandController.pas"/>
+			<DCCReference Include="src\uRpDataFlash.XMLController.pas"/>
+			<DCCReference Include="src\uRpDataFlash.DataSet.pas"/>
+			<DCCReference Include="src\uRpDataFlash.FieldFormatter.pas"/>
+			<DCCReference Include="src\uRpDataFlash.DataSetProvider.pas"/>
+			<DCCReference Include="src\fLRDF.EditorComandosProvider.pas">
 				<Form>frmEditorComandosProvider</Form>
 			</DCCReference>
-			<DCCReference Include="src\Editors\fLRDF.EditorComandosSemAutenticacao.pas">
-				<Form>FormComandosSemAutenticacao</Form>
-			</DCCReference>
-			<DCCReference Include="src\Editors\uLRDF.ExecutorComandoList.pas"/>
-			<DCCReference Include="src\Editors\fLRDF.ProxyFactory.CmdSelector.pas">
-				<Form>FormLRDataFlashProxyGenerator</Form>
-			</DCCReference>
+			<DCCReference Include="src\uRpDataFlash.AuthCommand.pas"/>
+			<DCCReference Include="src\uRpDataFlash.CommandExecutor.pas"/>
+			<DCCReference Include="src\uRpDataFlash.GetCommandList.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ConvertUtils.pas"/>
+			<DCCReference Include="src\uRpDataFlash.ObjectReg.pas"/>
+			<DCCReference Include="src\uRpDataFlash.CommandHelper.pas"/>
+			<DCCReference Include="src\uRpDataFlash.Utils.pas"/>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -97,7 +126,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">LRDataFlashTCPdcomm.dpk</Source>
+						<Source Name="MainSource">RpDataFlashCommR.dpk</Source>
 					</Source>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
@@ -140,6 +169,7 @@
 					</Excluded_Packages>
 				</Delphi.Personality>
 				<Platforms>
+					<Platform value="Android">False</Platform>
 					<Platform value="Win64">False</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>

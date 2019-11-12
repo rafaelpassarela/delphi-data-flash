@@ -1,0 +1,64 @@
+package RpDataFlashCommR;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'DataFlash - Runtime Communication Package - Rafael Passarela'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
+
+requires
+  IndySystem,
+  IndyProtocols,
+  IndyCore,
+  designide,
+  dsnap,
+  RpSerialization;
+
+contains
+  uRpDataFlash.Components in 'src\uRpDataFlash.Components.pas',
+  uRpDataFlash.Protocol in 'src\uRpDataFlash.Protocol.pas',
+  fLRDF.DefinirConexao in 'src\fLRDF.DefinirConexao.pas' {frmLRDF.DefinirConexao},
+  uRpDataFlash.Command in 'src\uRpDataFlash.Command.pas',
+  uRpDataFlash.ProxyGenerator in 'src\uRpDataFlash.ProxyGenerator.pas',
+  uRpDataFlash.ProxyBase in 'src\uRpDataFlash.ProxyBase.pas',
+  uRpDataFlash.Ping in 'src\uRpDataFlash.Ping.pas',
+  uRpDataFlash.Types in 'src\uRpDataFlash.Types.pas',
+  uRpDataFlash.ThreadConnection in 'src\uRpDataFlash.ThreadConnection.pas',
+  uRpDataFlash.Connection in 'src\uRpDataFlash.Connection.pas',
+  fLRDF.ComandoView in 'src\fLRDF.ComandoView.pas' {frmComandoView},
+  fLRDF.ComandosControllerView in 'src\fLRDF.ComandosControllerView.pas' {frmComandosControllerView},
+  uRpDataFlash.CommandController in 'src\uRpDataFlash.CommandController.pas',
+  uRpDataFlash.XMLController in 'src\uRpDataFlash.XMLController.pas',
+  uRpDataFlash.DataSet in 'src\uRpDataFlash.DataSet.pas',
+  uRpDataFlash.FieldFormatter in 'src\uRpDataFlash.FieldFormatter.pas',
+  uRpDataFlash.DataSetProvider in 'src\uRpDataFlash.DataSetProvider.pas',
+  fLRDF.EditorComandosProvider in 'src\fLRDF.EditorComandosProvider.pas' {frmEditorComandosProvider},
+  uRpDataFlash.AuthCommand in 'src\uRpDataFlash.AuthCommand.pas',
+  uRpDataFlash.CommandExecutor in 'src\uRpDataFlash.CommandExecutor.pas',
+  uRpDataFlash.GetCommandList in 'src\uRpDataFlash.GetCommandList.pas',
+  uRpDataFlash.ConvertUtils in 'src\uRpDataFlash.ConvertUtils.pas',
+  uRpDataFlash.ObjectReg in 'src\uRpDataFlash.ObjectReg.pas',
+  uRpDataFlash.CommandHelper in 'src\uRpDataFlash.CommandHelper.pas',
+  uRpDataFlash.Utils in 'src\uRpDataFlash.Utils.pas';
+
+end.

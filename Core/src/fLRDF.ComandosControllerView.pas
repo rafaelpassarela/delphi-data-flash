@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, ComCtrls, StdCtrls, Buttons, fLRDF.ComandoView,
-  uLRDF.ComandController;
+  uRpDataFlash.CommandController;
 
 type
   TfrmComandosControllerView = class(TForm)

@@ -1,24 +1,27 @@
-unit uLRDF.DataSetProvider;
+unit uRpDataFlash.DataSetProvider;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
- 
+
 uses
-  uLRDF.Comando, Classes, uLRDF.Component, SysUtils, uLRDF.Types;
+  uRpDataFlash.Command, Classes, uRpDataFlash.Components, SysUtils,
+  uRpDataFlash.Types, uRpDataFlash.Utils;
 
 type
   TLRDataFlashCustomDataSetProvider = class;
 //  TLRDataFlashMasterDataSetProvider = class;
 
-  TLRDataFlashOnProviderSendCallback = function (const AComando: IComandoTCPInterfaced; var AParamsCallback : TLRDataFlashParametrosComando) : Boolean of object;
+  TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
 
-  TLRDataFlashDataSetCommandProvider = class(TLRDataFlashComandoDataSetProvider)
+  TLRDataFlashDataSetCommandProvider = class(TRpDataFlashDataSetProviderCommand)
   protected
     FProvider: TLRDataFlashCustomDataSetProvider;
     // from TLRDataFlashComando
-    function GetComando: string; override;
-    function DoCallBack(var AParamsCallback : TLRDataFlashParametrosComando) : Boolean; override;
-    function GetTipoProcessamento : TLRDataFlashTipoProcessamento; override;
-    function GetLifeCycle: TLRDataFlashLifeCycle; override;
+    function GetCommand: string; override;
+    function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; override;
+    function GetProcessType : TRpDataFlashProcessType; override;
+    function GetLifeCycle: TRpDataFlashLifeCycle; override;
 
     // all the decendents must implement this
     function ExecSQL(const pSQL : string) : Boolean; override; final;
@@ -42,23 +45,23 @@ type
   TLRDataFlashCustomDataSetProvider = class(TComponent)
   private
     FGrupo: string;
-    FServer: TLRDataFlashConexaoServer;
+    FServer: TRpDataFlashServerConnection;
     FInsertSQL: TStrings;
     FUpdateSQL: TStrings;
     FDeleteSQL: TStrings;
     FSelectSQL: TStrings;
-    FTipoProcessamento: TLRDataFlashTipoProcessamento;
+    FTipoProcessamento: TRpDataFlashProcessType;
     FOnSendCallback: TLRDataFlashOnProviderSendCallback;
 //    FOnCommit: TLRDataFlashOnTransactionEvent;
 //    FOnRollback: TLRDataFlashOnTransactionEvent;
 //    FOnStartTransaction: TLRDataFlashOnStartTransactionEvent;
 //    FMasterProvider: TLRDataFlashMasterDataSetProvider;
-    FLifeCycle: TLRDataFlashLifeCycle;
+    FLifeCycle: TRpDataFlashLifeCycle;
     FOnBeforeDataSetSelectSQL: TLRDataFlashOnSelect;
     FOnBeforeDataSetExecuteSQL: TLRDataFlashOnExecSQL;
     FDescricao: string;
     procedure SetGrupo(const Value: string);
-    procedure SetServer(const Value: TLRDataFlashConexaoServer);
+    procedure SetServer(const Value: TRpDataFlashServerConnection);
     procedure SetInsertSQL(const Value: TStrings);
     procedure SetUpdateSQL(const Value: TStrings);
     procedure SetDeleteSQL(const Value: TStrings);
@@ -66,9 +69,9 @@ type
   protected
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    property Server : TLRDataFlashConexaoServer read FServer write SetServer;
-    property TipoProcessamento : TLRDataFlashTipoProcessamento read FTipoProcessamento write FTipoProcessamento default tprPonte;
-    property LifeCycle : TLRDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
+    property Server : TRpDataFlashServerConnection read FServer write SetServer;
+    property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
+    property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property InsertSQL : TStrings read FInsertSQL write SetInsertSQL;
     property UpdateSQL : TStrings read FUpdateSQL write SetUpdateSQL;
@@ -141,7 +144,7 @@ begin
 end;
 
 function TLRDataFlashDataSetCommandProvider.DoCallBack(
-  var AParamsCallback: TLRDataFlashParametrosComando): Boolean;
+  var AParamsCallback: TRpDataFlashCommandParameterList): Boolean;
 begin
   Result := Assigned(FProvider.OnSendCallback)
         and FProvider.OnSendCallback(Self, AParamsCallback);
@@ -183,7 +186,7 @@ var
 begin
   Result := True;
   lAuxSQL := pSQL;
-  
+
   if Assigned(FProvider.OnBeforeDataSetExecuteSQL) then
     FProvider.OnBeforeDataSetExecuteSQL(Self, lAuxSQL, Result);
 
@@ -191,7 +194,7 @@ begin
     Executor.ExecuteSQL(lAuxSQL);
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetComando: string;
+function TLRDataFlashDataSetCommandProvider.GetCommand: string;
 begin
   Result := FProvider.Name;
 end;
@@ -206,7 +209,7 @@ begin
   Result := FProvider.InsertSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetLifeCycle: TLRDataFlashLifeCycle;
+function TLRDataFlashDataSetCommandProvider.GetLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := FProvider.LifeCycle;
 end;
@@ -216,7 +219,7 @@ begin
   Result := FProvider.SelectSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetTipoProcessamento: TLRDataFlashTipoProcessamento;
+function TLRDataFlashDataSetCommandProvider.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := FProvider.TipoProcessamento;
 end;
@@ -277,7 +280,7 @@ begin
   FSelectSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetServer(const Value: TLRDataFlashConexaoServer);
+procedure TLRDataFlashCustomDataSetProvider.SetServer(const Value: TRpDataFlashServerConnection);
 begin
   if (FServer <> nil) then
     FServer.Providers.Remove(Self);
@@ -296,8 +299,8 @@ end;
 constructor TLRDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
 begin
   inherited;
-  FGrupo := C_SEM_GRUPO_DEFINIDO;
-  FTipoProcessamento := tprPonte;
+  FGrupo := C_WITHOUT_GROUP;
+  FTipoProcessamento := prtRemote;
   FLifeCycle := tlfInstance;
 
   FInsertSQL := TStringList.Create;
@@ -354,9 +357,9 @@ end;
 
 procedure TLRDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
 begin
-  FGrupo := TLRDataFlashValidations.ValidarNome( Value );
+  FGrupo := TRpDataFlashValidations.NameValidation( Value );
   if FGrupo = EmptyStr then
-    FGrupo := C_SEM_GRUPO_DEFINIDO;
+    FGrupo := C_WITHOUT_GROUP;
 end;
 
 procedure TLRDataFlashCustomDataSetProvider.SetInsertSQL(const Value: TStrings);

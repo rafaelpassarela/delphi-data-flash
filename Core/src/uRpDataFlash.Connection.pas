@@ -1,12 +1,12 @@
-//{$D-}
-unit uLRDF.Conexao;
+unit uRpDataFlash.Connection;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  IdTCPClient, Classes, uLRDF.Types, IdExceptionCore, IdStack, SysUtils, IdHTTP;
+  IdTCPClient, Classes, uRpDataFlash.Types, IdExceptionCore, IdStack, SysUtils,
+  IdHTTP, uRpDataFlash.Utils;
 
 type
   TLRDataFlashConnectionHelperCustomClass = class of TLRDataFlashConnectionHelperCustom;
@@ -15,11 +15,11 @@ type
   private
     class var _LocalHostIP : string;
   private
-    FDoConectar: TLRDataFlashDoConectarEvent;
-    FDoDesconectar: TLRDataFlashDoConectarEvent;
-    FAoConectar: TLRDataFlashOnConexaoNoServidor;
-    FAoSemServico: TLRDataFlashOnSemServico;
-    FNovaExcecao: TLRDataFlashExeptionHandler;
+    FDoConectar: TRpDataFlashOnConnectEvent;
+    FDoDesconectar: TRpDataFlashOnConnectEvent;
+    FAoConectar: TRpDataFlashOnConnectOnServer;
+    FAoSemServico: TRpDataFlashOnNoService;
+    FNovaExcecao: TRpDataFlashOnExceptionHandler;
     FConector: TIdTCPClientCustom;
     FOwner: TComponent;
     FServidor: string;
@@ -46,11 +46,11 @@ type
 
     property Conector : TIdTCPClientCustom read GetConector;
     property IsConectado : Boolean read GetIsConectado;
-    property AoConectar: TLRDataFlashOnConexaoNoServidor read FAoConectar write FAoConectar;
-    property AoSemServico: TLRDataFlashOnSemServico read FAoSemServico write FAoSemServico;
-    property DoConectar: TLRDataFlashDoConectarEvent read FDoConectar write FDoConectar;
-    property DoDesconectar : TLRDataFlashDoConectarEvent read FDoDesconectar write FDoDesconectar;
-    property NovaExcecao: TLRDataFlashExeptionHandler read FNovaExcecao write FNovaExcecao;
+    property AoConectar: TRpDataFlashOnConnectOnServer read FAoConectar write FAoConectar;
+    property AoSemServico: TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
+    property DoConectar: TRpDataFlashOnConnectEvent read FDoConectar write FDoConectar;
+    property DoDesconectar : TRpDataFlashOnConnectEvent read FDoDesconectar write FDoDesconectar;
+    property NovaExcecao: TRpDataFlashOnExceptionHandler read FNovaExcecao write FNovaExcecao;
     property URL : string read GetURL;
   end;
 
@@ -77,7 +77,7 @@ type
 implementation
 
 uses
-  fLRDF.DefinirConexao, Controls, uLRDF.Component;
+  fLRDF.DefinirConexao, Controls, uRpDataFlash.Components;
 
 { TLRDataFlashConnectionHelper }
 
@@ -88,20 +88,20 @@ begin
   Result := False;
   try
     if (FServidor = EmptyStr) or (FPorta <= 0) then
-      raise ELRDataFlashConexaoInvalida.Create('Servidor/Porta não foi informado.');
+      raise ERpDataFlashInvalidConnection.Create('Servidor/Porta não foi informado.');
 
     InternalConectar;
 
     // se possui informacoes para autenticacao, valida no servidor
-    if (TLRDataFlashConexaoClienteCustom(FOwner).UserName <> '') or (TLRDataFlashConexaoClienteCustom(FOwner).Password <> '') then
+    if (TRpDataFlashCustomClientConnection(FOwner).UserName <> '') or (TRpDataFlashCustomClientConnection(FOwner).Password <> '') then
     begin
-      Result := TLRDataFlashConexaoClienteCustom(FOwner).Autenticar(lAutMessage);
+      Result := TRpDataFlashCustomClientConnection(FOwner).Autenticar(lAutMessage);
 
       if not Result then
       begin
         if lAutMessage = '' then
           lAutMessage := 'Usuário e Senha inválidos.';
-        raise ELRDataFlashFalhaAutenticacao.Create(lAutMessage);
+        raise ERpDataFlashAuthError.Create(lAutMessage);
       end;
     end
     else
@@ -110,10 +110,10 @@ begin
     if Assigned(FAoConectar) then
       FAoConectar(Self, FServidor, FPorta);
   except
-    on E: ELRDataFlashConexaoInvalida do
+    on E: ERpDataFlashInvalidConnection do
       raise;
 
-    on E: ELRDataFlashFalhaAutenticacao do
+    on E: ERpDataFlashAuthError do
     begin
       // pode estar conectado, neste caso desconecta o cliente
       NovaExcecao(E);
@@ -149,8 +149,8 @@ begin
       FServidor := lConfigurador.Server;
       FPorta := lConfigurador.Porta;
       // configura a conexão original
-      TLRDataFlashConexaoClienteCustom(FOwner).Servidor := FServidor;
-      TLRDataFlashConexaoClienteCustom(FOwner).Porta := FPorta;
+      TRpDataFlashCustomClientConnection(FOwner).Servidor := FServidor;
+      TRpDataFlashCustomClientConnection(FOwner).Porta := FPorta;
     end;
   finally
     FreeAndNil(lConfigurador);
@@ -185,7 +185,7 @@ begin
   if AConvert and ((UpperCase(AHost) = 'LOCALHOST') or (AHost = '127.0.0.1')) then
   begin
     if TLRDataFlashConnectionHelperCustom._LocalHostIP = EmptyStr then
-      TLRDataFlashConnectionHelperCustom._LocalHostIP := TLRDataFlashUtils.GetIpComputadorLocal;
+      TLRDataFlashConnectionHelperCustom._LocalHostIP := TRpDataFlashUtils.GetLocalComputerIp;
     Result := TLRDataFlashConnectionHelperCustom._LocalHostIP;
   end else
     Result := AHost;

@@ -1,6 +1,6 @@
-unit uLRDF.ExecutorComandos;
+unit uRpDataFlash.CommandExecutor;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
@@ -10,7 +10,8 @@ uses
   {$ELSE}
   Classes, SysUtils,
   {$ENDIF}
-  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uLRDF.ComandController;
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Types,
+  uRpDataFlash.CommandController;
 
 type
   TLRDFErrorExecucao = procedure(const AErrorMessage : string; var ARaiseException : Boolean) of object;
@@ -24,7 +25,7 @@ type
     FComando: string;
     FLastError: string;
     FOnError: TLRDFErrorExecucao;
-    FLastStatusProcessamento : TLRDataFlashStatusProcessamento;
+    FLastStatusProcessamento : TRpDataFlashProcessingStatus;
     FParametros: TLRDataFlashParametrosValueCollection;
     FRetornos: TLRDataFlashRetornosValueCollection;
     FOnAfterExecute: TLRDFExecCmdAfterExecute;
@@ -39,12 +40,12 @@ type
 
     function Execute : Boolean;
     function LastError : string;
-    function LastStatusProcessamento : TLRDataFlashStatusProcessamento;
+    function LastStatusProcessamento : TRpDataFlashProcessingStatus;
   published
     property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
     property VerificarConexao : Boolean read FVerificarConexao write FVerificarConexao default True;
     property Comando : string read GetComando write SetComando;
-    property Parametros : TLRDataFlashParametrosValueCollection read FParametros write FParametros;
+    property Params : TLRDataFlashParametrosValueCollection read FParametros write FParametros;
     property Retornos : TLRDataFlashRetornosValueCollection read FRetornos write FRetornos;
 
     property OnError : TLRDFErrorExecucao read FOnError write FOnError;
@@ -62,7 +63,7 @@ begin
 
   FVerificarConexao := True;
   FComando := '';
-  FLastStatusProcessamento := tspNenhum;
+  FLastStatusProcessamento := psNone;
 
   FParametros := TLRDataFlashParametrosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
   FRetornos := TLRDataFlashRetornosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
@@ -77,44 +78,44 @@ end;
 
 function TLRDataFlashExecutorComando.DoInternalExecute: Boolean;
 var
-  lCmd : TLRDataFlashComandoEnvio;
   i: Integer;
+  lCmd : TRpDataFlashSendCommand;
   lParam: TLRDataFlashParametroValueItem;
 begin
-  lCmd := TLRDataFlashComandoEnvio.Create;
+  lCmd := TRpDataFlashSendCommand.Create;
   try
     lCmd.SetComando( FComando );
 
     // copia os parametros do componente para o do comando
-    for i := 0 to Parametros.Count - 1 do
+    for i := 0 to Params.Count - 1 do
     begin
-      lParam := Parametros.ByIndex(i);
+      lParam := Params.ByIndex(i);
       if lParam.TipoValor in [tvpBase, tvpBase64, tvpDAO, tvpFile] then
       begin
-        lCmd.Parametros.AddParametro(lParam.Nome, ' ', lParam.TipoValor);
-        lCmd.Parametro[lParam.Nome].AsBase64 := lParam.Valor;
+        lCmd.Params.AddParam(lParam.Nome, ' ', lParam.TipoValor);
+        lCmd.Param[lParam.Nome].AsBase64 := lParam.Valor;
       end
       else
-        lCmd.Parametros.AddParametro(lParam.Nome, lParam.Valor, lParam.TipoValor);
+        lCmd.Params.AddParam(lParam.Nome, lParam.Valor, lParam.TipoValor);
     end;
 
     FConexaoCliente.Comunicar( lCmd );
-    Result := lCmd.StatusRetorno;
+    Result := lCmd.ReturnStatus;
     FLastError := lCmd.LastError;
-    FLastStatusProcessamento := lCmd.StatusProcessamento;
+    FLastStatusProcessamento := lCmd.ProcessingStatus;
 
     // copia os parametros do comando para o componente
     for i := 0 to Retornos.Count - 1 do
     begin
       lParam := Retornos.ByIndex(i);
       case lParam.TipoValor of
-        tvpInteger:  lParam.Valor := lCmd.Retorno[lParam.Nome].AsInteger;
-        tvpString:   lParam.Valor := lCmd.Retorno[lParam.Nome].AsString;
-        tvpBoolean:  lParam.Valor := lCmd.Retorno[lParam.Nome].AsBoolean;
-        tvpFloat:    lParam.Valor := lCmd.Retorno[lParam.Nome].AsFloat;
-        tvpBase64:   lParam.Valor := lCmd.Retorno[lParam.Nome].AsBase64;
-        tvpDateTime: lParam.Valor := lCmd.Retorno[lParam.Nome].AsDateTime;
-        tvpFile:     lParam.Valor := lCmd.Retorno[lParam.Nome].AsBase64;
+        tvpInteger:  lParam.Valor := lCmd.ResultParam[lParam.Nome].AsInteger;
+        tvpString:   lParam.Valor := lCmd.ResultParam[lParam.Nome].AsString;
+        tvpBoolean:  lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBoolean;
+        tvpFloat:    lParam.Valor := lCmd.ResultParam[lParam.Nome].AsFloat;
+        tvpBase64:   lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBase64;
+        tvpDateTime: lParam.Valor := lCmd.ResultParam[lParam.Nome].AsDateTime;
+        tvpFile:     lParam.Valor := lCmd.ResultParam[lParam.Nome].AsBase64;
       end;
     end;
 
@@ -131,7 +132,7 @@ begin
   lRaise := True;
   lContinue := True;
   Result := False;
-  FLastStatusProcessamento := tspNenhum;
+  FLastStatusProcessamento := psNone;
   try
     if Assigned(FOnBeforeExecute) then
       FOnBeforeExecute(Self, lContinue);
@@ -139,13 +140,13 @@ begin
     if lContinue then
     begin
       if not Assigned(FConexaoCliente) then
-        raise ELRDataFlashConexaoInvalida.Create('Conexão cliente não foi configurada.');
+        raise ERpDataFlashInvalidConnection.Create('Conexão cliente não foi configurada.');
 
       if FVerificarConexao and (not FConexaoCliente.Conectado) then
-        raise ELRDataFlashConexaoInvalida.Create('A conexão ainda não foi estabelecida.');
+        raise ERpDataFlashInvalidConnection.Create('A conexão ainda não foi estabelecida.');
 
       if Trim(FComando) = EmptyStr then
-        raise ELRDataFlashConexaoInvalida.Create('O comando não foi informado.');
+        raise ERpDataFlashInvalidConnection.Create('O comando não foi informado.');
 
       Result := DoInternalExecute;
 
@@ -182,7 +183,7 @@ begin
   Result := FLastError;
 end;
 
-function TLRDataFlashExecutorComando.LastStatusProcessamento: TLRDataFlashStatusProcessamento;
+function TLRDataFlashExecutorComando.LastStatusProcessamento: TRpDataFlashProcessingStatus;
 begin
   Result := FLastStatusProcessamento;
 end;

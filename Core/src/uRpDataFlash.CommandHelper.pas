@@ -1,37 +1,39 @@
-unit uLRDF.ComandoHelper;
+unit uRpDataFlash.CommandHelper;
+
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  uLRDF.Component, uLRDF.Comando, uLRDF.Types, uRpFileHelper, SysUtils, Classes,
-  Windows;
+  uRpDataFlash.Components, uRpDataFlash.Command, uRpDataFlash.Types,
+  uRpSerialization, SysUtils, Classes, Windows;
 
 type
-  TLRDataFlashComandoHelper = class(TLRDataFlashComando)
+  TLRDataFlashComandoHelper = class(TRpDataFlashCommand)
   protected
-    procedure DoRegistrarParametros; override;
-    function DoExecutar : Boolean; override;
+    procedure DoRegisterParams; override;
+    function DoExecute : Boolean; override;
   end;
 
 implementation
 
 { TSPITCPComandoHelperBase }
 
-function TLRDataFlashComandoHelper.DoExecutar: Boolean;
+function TLRDataFlashComandoHelper.DoExecute: Boolean;
 var
   lContinuar: Boolean;
-  lClass: TFileCustomObjectClass;
-  lObjeto: TFileCustomObject;
+  lClass: TCustomSerializableObjectClass;
+  lObjeto: TCustomSerializableObject;
   lClassName: string;
-  lOperacao: TLRDataFlashHelperAction;
-  lIntf : IFileBaseHelper;
+  lOperacao: TRpDataFlashHelperAction;
+  lIntf : ISerializableBaseHelper;
   lDataComponent: TComponent;
 begin
   lIntf := nil;
   lObjeto := nil;
   Result := False;
-  lClassName := Parametro['ObjectClass'].AsString;
-  lClass := FileClassRegistrer.GetClass(lClassName);
+  lClassName := Param['ObjectClass'].AsString;
+  lClass := SerializationClassRegistrer.GetClass(lClassName);
   if lClass = nil then
     raise Exception.CreateFmt('Classe do objeto %s não foi encontrada.', [lClassName])
   else
@@ -39,15 +41,15 @@ begin
     lContinuar := True;
     try
       lObjeto := lClass.Create(nil);
-      lObjeto.LoadFromString(Parametro['Object'].AsBase64);
-      lOperacao := TLRDataFlashHelperAction(Parametro['Operacao'].AsInteger);
+      lObjeto.LoadFromString(Param['Object'].AsBase64);
+      lOperacao := TRpDataFlashHelperAction(Param['Operacao'].AsInteger);
 
       if Assigned(GetServer.OnObjectRequest) then
         GetServer.OnObjectRequest(lOperacao, lObjeto, lContinuar);
 
       if lContinuar then
       begin
-        if Supports(lObjeto, IFileBaseHelper, lIntf) then
+        if Supports(lObjeto, ISerializableBaseHelper, lIntf) then
         begin
           if Assigned(Executor) then
             lDataComponent := Executor.GetDataComponent
@@ -62,7 +64,7 @@ begin
           end;
 
           if Result then
-            Parametro['Object'].AsBase64 := lObjeto.SaveToXmlString;
+            Param['Object'].AsBase64 := lObjeto.SaveToXmlString;
         end
         else
           raise Exception.CreateFmt('A classe "%s" não implementa a interface "IFileBaseHelper".', [lClassName]);
@@ -80,15 +82,15 @@ begin
   end;
 end;
 
-procedure TLRDataFlashComandoHelper.DoRegistrarParametros;
+procedure TLRDataFlashComandoHelper.DoRegisterParams;
 begin
   inherited;
-  NovoParametro('Object', tvpBase64, True);
-  NovoParametro('ObjectClass', tvpString);
-  NovoParametro('Operacao', tvpInteger);
+  NewParam('Object', tvpBase64, True);
+  NewParam('ObjectClass', tvpString);
+  NewParam('Operacao', tvpInteger);
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoHelper, C_GRUPO_INTERNO);
+  TCPClassRegistrer.Registrar(TLRDataFlashComandoHelper, C_GROUP_INTERNAL);
 
 end.

@@ -1,12 +1,12 @@
 //{$D-}
-unit uLRDF.ThreadConexao;
+unit uRpDataFlash.ThreadConnection;
 
-{$I ..\..\Common\src\RpInc.inc}
+//{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Classes;
+  Classes, Windows;
 
 type
   TThreadConexao = class(TThread)
@@ -30,7 +30,7 @@ type
 implementation
 
 uses
-  uLRDF.Component, Windows;
+  uRpDataFlash.Components;
 
 { TThreadConexao }
 
