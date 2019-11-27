@@ -75,7 +75,7 @@ begin
     FCdsComandos := TClientDataSet.Create(nil);
     // chama o comando solicitando a lista de comandos disponiveis no servidor
     lCmdListaClasses.Param['TipoBusca'].AsInteger := Ord(trpFactoryList);
-    (Component as TRpDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
+    (Component as TRpDataFlashClientConnection).Comunicar(lCmdListaClasses);
 
     FCdsComandos.XMLData := lCmdListaClasses.ResultParam['RetornoProxy'].AsBase64;
 
@@ -90,10 +90,10 @@ begin
 
       lCmdListaClasses.Param['InfoString'].AsBase64 := FListaSelecionados.Text;
 
-      if Component is TRpDataFlashConexaoREST then
-        (Component as TRpDataFlashConexaoREST).Comunicar(lCmdListaClasses)
+      if Component is TRpDataFlashRESTClient then
+        (Component as TRpDataFlashRESTClient).Comunicar(lCmdListaClasses)
       else
-        (Component as TRpDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
+        (Component as TRpDataFlashClientConnection).Comunicar(lCmdListaClasses);
 
       lClassesProxy := lCmdListaClasses.ResultParam['RetornoProxy'].AsBase64;
       lNomeArquivo := lCmdListaClasses.ResultParam['NomeArquivoProxy'].AsString;
@@ -165,8 +165,8 @@ begin
       end;
     end;
   finally
-    if not (Component is TRpDataFlashConexaoREST) then
-      (Component as TRpDataFlashConexaoCliente).Desconectar;
+    if not (Component is TRpDataFlashRESTClient) then
+      (Component as TRpDataFlashClientConnection).Disconnect;
 
     lCmdListaClasses.Free;
     FreeAndNil(FListaSelecionados);

@@ -62,7 +62,7 @@ var
   lAutenticado: Boolean;
   lMens: string;
 begin
-  if (GetServer <> nil) and Assigned(GetServer.OnAutenticarCliente) then
+  if (GetServer <> nil) and Assigned(GetServer.OnAuthenticateClient) then
   begin
     if not Assigned(FConnectionItem) then
     begin
@@ -74,7 +74,7 @@ begin
       try
         FConnectionItem.Username := Param['Username'].AsString;
         FConnectionItem.Password := Param['Password'].AsBase64;
-        GetServer.OnAutenticarCliente(GetServer, FConnectionItem, lAutenticado, lMens);
+        GetServer.OnAuthenticateClient(GetServer, FConnectionItem, lAutenticado, lMens);
 
         FConnectionItem.Authenticated := lAutenticado;
 

@@ -59,16 +59,16 @@ type
 
   IRpDataFlashConfigConexaoView = interface
   ['{2268E0B2-DDC2-49E2-939C-48B080099BD1}']
-    function GetPorta: Integer;
+    function GetPort: Integer;
     function GetServer: string;
-    procedure SetPorta(const Value: Integer);
+    procedure SetPort(const Value: Integer);
     procedure SetServer(const Value: string);
 
-    property Porta : Integer read GetPorta write SetPorta;
+    property Port : Integer read GetPort write SetPort;
     property Server : string read GetServer write SetServer;
 
     procedure Cancelar;
-    function Conectar : Boolean;
+    function Connect : Boolean;
   end;
 
   TRpDataFlashComandHelper = class helper for TRpDataFlashCommand
@@ -197,33 +197,33 @@ type
 
   TRpDataFlashCustomConnection = class(TComponent, IRpDataFlashFileTransferSupport)
   private
-    FServidor : string;
+    FServer : string;
     FInternalOnProcessar: TRpDataFlashOnReceiving;
-    FOnNovoLog: TRpDataFlashOnNewLog;
+    FOnNewLog: TRpDataFlashOnNewLog;
     FOnException: TRpDataFlashOnException;
-    FTipoCriptografia: TRpDataFlashEncryptionType;
+    FEncryptionType: TRpDataFlashEncryptionType;
     FIpsReconhecidos: TStringList;
     FQuebrasProtocolosRecebidos: TRpDataFlashProtocolBreakerList;
-    FTipoComunicacao: TRpDataFlashCommunicationType;
-    FTipoMensagem: TRpDataFlashMessageType;
+    FCommunicationType: TRpDataFlashCommunicationType;
+    FMessageType: TRpDataFlashMessageType;
     FOnTimeOutCheck: TRpDataFlashOnTimeOutCheck;
     FOnStatus: TRpDataFlashOnStatus;
-    FConexaoTCPIP: TRpDataFlashConfigConexaoTCPIP;
-    FConexaoREST: TRpDataFlashConfigConexaoREST;
+    FConfigTCPIP: TRpDataFlashConfigConexaoTCPIP;
+    FConfigREST: TRpDataFlashConfigConexaoREST;
     FFileTransfer: TRpDataFlashFileTransfer;
     FFileTransferList : TStrings;
-    procedure SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
+    procedure SetEncryptionType(const Value: TRpDataFlashEncryptionType);
 
     procedure CompressStream(var AEntrada : TMemoryStream); overload;
     procedure DecompressStream(var AEntrada : TMemoryStream); overload;
     procedure SetServidor(const Value: string); virtual;
   protected
-    function GetIdentificador: string; virtual;
-    function GetConectado: Boolean; virtual;
+    function GetIdentifier: string; virtual;
+    function GetConnected: Boolean; virtual;
     function GetNomeComputadorLocal : string;
 
-    procedure DoConectar; virtual; abstract;
-    procedure DoDesconectar; virtual; abstract;
+    procedure DoConnect; virtual; abstract;
+    procedure DoDisconnect; virtual; abstract;
 
     procedure NovaExcecao(const AException : Exception; out AExpandir : Boolean); overload;
     procedure NovaExcecao(const AException : Exception); overload;
@@ -263,33 +263,33 @@ type
     procedure OnFileTransferLog(const ALogMessage: string);
     procedure RemoverArquivosTemporarios;
 
-    property ConexaoTCPIP : TRpDataFlashConfigConexaoTCPIP read FConexaoTCPIP write FConexaoTCPIP;
-    property ConexaoREST : TRpDataFlashConfigConexaoREST read FConexaoREST write FConexaoREST;
+    property ConfigTCPIP : TRpDataFlashConfigConexaoTCPIP read FConfigTCPIP write FConfigTCPIP;
+    property ConfigREST : TRpDataFlashConfigConexaoREST read FConfigREST write FConfigREST;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    procedure SalvarConfiguracoes(const ANode : IXMLNode); overload;
-    procedure SalvarConfiguracoes(const AArquivo : string); overload;
-    procedure CarregarConfiguracoes(const ANode : IXMLNode); overload;
-    procedure CarregarConfiguracoes(const AArquivo : string); overload;
+    procedure SaveConfig(const ANode : IXMLNode); overload;
+    procedure SaveConfig(const AArquivo : string); overload;
+    procedure LoadConfig(const ANode : IXMLNode); overload;
+    procedure LoadConfig(const AArquivo : string); overload;
 
-    procedure Conectar;
-    procedure Desconectar;
+    procedure Connect;
+    procedure Disconnect;
 
     function GetFile(const AFileID : string; AArquivo : IFileProxy) : Boolean; virtual;
     function PutFile(const AArquivo : IFileProxy) : Boolean; virtual;
 
     property OnInternalProcessar : TRpDataFlashOnReceiving read FInternalOnProcessar write FInternalOnProcessar;
-    property Servidor : string read FServidor write SetServidor stored True;
-    property Conectado : Boolean read GetConectado;
-    property TipoCriptografia : TRpDataFlashEncryptionType read FTipoCriptografia write SetTipoCriptografia stored True default tcBase64Compressed;
-    property Identificador : string read GetIdentificador;
-    property TipoComunicacao : TRpDataFlashCommunicationType read FTipoComunicacao write FTipoComunicacao stored True default ctText;
-    property TipoMensagem : TRpDataFlashMessageType read FTipoMensagem write FTipoMensagem stored True default mtCommand;
+    property Server : string read FServer write SetServidor stored True;
+    property Connected : Boolean read GetConnected;
+    property EncryptionType : TRpDataFlashEncryptionType read FEncryptionType write SetEncryptionType stored True default tcBase64Compressed;
+    property Identifier : string read GetIdentifier;
+    property CommunicationType : TRpDataFlashCommunicationType read FCommunicationType write FCommunicationType stored True default ctText;
+    property MessageType : TRpDataFlashMessageType read FMessageType write FMessageType stored True default mtCommand;
     property FileTransfer : TRpDataFlashFileTransfer read FFileTransfer write FFileTransfer;
 
-    property OnNovoLog : TRpDataFlashOnNewLog read FOnNovoLog write FOnNovoLog;
+    property OnNewLog : TRpDataFlashOnNewLog read FOnNewLog write FOnNewLog;
     property OnException : TRpDataFlashOnException read FOnException write FOnException;
     property OnStatus : TRpDataFlashOnStatus read FOnStatus write FOnStatus;
     property OnTimeOutCheck : TRpDataFlashOnTimeOutCheck read FOnTimeOutCheck write FOnTimeOutCheck;
@@ -301,24 +301,24 @@ type
     FConectorREST : TIdHTTPServer;
     FConectorFTP : TIdFTPServer;
 
-    FOnAntesConexaoCliente: TRpDataFlashOnBeforeClientConnection;
-    FOnConexaoCliente: TRpDataFlashOnClientConnection;
-    FOnDesconexaoCliente: TRpDataFlashOnClientConnection;
+    FOnBeforeClientConnection: TRpDataFlashOnBeforeClientConnection;
+    FOnClientConnection: TRpDataFlashOnClientConnection;
+    FOnClientDisconnect: TRpDataFlashOnClientConnection;
     FDesconectandoServer : Boolean;
-    FPonte: TRpDataFlashCustomClientConnection;
+    FBridge: TRpDataFlashCustomClientConnection;
     FControllers: TRpDataFlashComandControllerList;
     FUtilizarControllers: Boolean;
     FProviders: TRpDataFlashProviderControllerList;
-    FOnRecebimentoGenerico: TRpDataFlashOnGenericReceipt;
+    FOnReceivingText: TRpDataFlashOnGenericReceipt;
     FInterfaceList : TInterfaceList;
-    FOnProcessamentoManual: TRpDataFlashOnManualProcess;
-    FOnAutenticarCliente: TRpDataFlashOnAutenticarCliente;
+    FOnManualProcessing: TRpDataFlashOnManualProcess;
+    FOnAuthenticateClient: TRpDataFlashOnAutenticarCliente;
     FOnBeforeExecuteCommand: TRpDataFlashOnBeforeExecuteCommand;
     FOnBeforeDataSetStartTransaction: TRpDataFlashOnStartTransactionEvent;
     FOnBeforeDataSetCommitTransaction: TRpDataFlashOnTransactionEvent;
     FOnBeforeDataSetRollbackTransaction: TRpDataFlashOnTransactionEvent;
-    FComandosSemAutenticacao: string;
-    FPrefixoBaseComandos: string;
+    FWithoutAuthCommands: string;
+    FBaseCommandPrefix: string;
     FNumeroConectados: Integer;
     FOnObjectRequest: TRpDataFlashOnObjectRequest;
     function EnviarCallBack(const AContext: TIdContext; const AMenssage : string) : Boolean;
@@ -344,11 +344,11 @@ type
       AResponseInfo: TIdHTTPResponseInfo = nil);
 
     function GetServidor: string;
-    procedure SetPonte(const Value: TRpDataFlashCustomClientConnection);
+    procedure SetBridge(const Value: TRpDataFlashCustomClientConnection);
     function CarregarConexaoCliente(const AConnectionItem : TRpDataFlashConnectionItem; out AConexao: TRpDataFlashCustomClientConnection) : Boolean;
     function CarregarStatusProcessamento(const AConnectionItem : TRpDataFlashConnectionItem;
       out AConexao: TRpDataFlashCustomClientConnection) : TRpDataFlashProcessingStatus;
-    function GetNumeroClientesConectados: Integer;
+    function GetConnectedClientsCount: Integer;
     // controllers e providers
     function CarregarComandoViaControllers(const ACommand : string; out AObjComando : IRpDataFlashCommandInterfaced;
       out AParametros : TRpDataFlashCommandParameterList) : Boolean;
@@ -356,8 +356,8 @@ type
       out AParametros : TRpDataFlashCommandParameterList) : Boolean;
     function GetControllersCount: Integer;
     function GetProvidersCount: Integer;
-    function GetUtilizarControllers : Boolean;
-    procedure SetUtilizarControllers(const Value : Boolean);
+    function GetUseControllers : Boolean;
+    procedure SetUseControllers(const Value : Boolean);
     function GetControllers: TRpDataFlashComandControllerList;
     function GetProviders: TRpDataFlashProviderControllerList;
     // ftp
@@ -374,9 +374,9 @@ type
   protected
     procedure Inicializar; override;
     procedure Finalizar; override;
-    function GetConectado: Boolean; override;
-    procedure DoConectar; override;
-    procedure DoDesconectar; override;
+    function GetConnected: Boolean; override;
+    procedure DoConnect; override;
+    procedure DoDisconnect; override;
     procedure Limpar; override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     function ComandoRequerAutenticacao(const AClasseComando : string;
@@ -389,38 +389,38 @@ type
     property Controllers : TRpDataFlashComandControllerList read GetControllers;
     property Providers : TRpDataFlashProviderControllerList read GetProviders;
   published
-    property ConexaoTCPIP;
-    property ConexaoREST;
-    property Identificador;
-    property TipoComunicacao;
-    property TipoMensagem;
+    property ConfigTCPIP;
+    property ConfigREST;
+    property Identifier;
+    property CommunicationType;
+    property MessageType;
     property FileTransfer;
-    property NumeroClientesConectados : Integer read GetNumeroClientesConectados;
-    property Conectado;
-    property TipoCriptografia;
+    property ConnectedClientsCount : Integer read GetConnectedClientsCount;
+    property Connected;
+    property EncryptionType;
 
-    property OnNovoLog;
+    property OnNewLog;
     property OnException;
     property OnStatus;
     property OnTimeOutCheck;
     property OnInternalProcessar;
 
-    property OnAntesConexaoCliente : TRpDataFlashOnBeforeClientConnection read FOnAntesConexaoCliente write FOnAntesConexaoCliente;
-    property OnConexaoCliente : TRpDataFlashOnClientConnection read FOnConexaoCliente write FOnConexaoCliente;
-    property OnDesconexaoCliente : TRpDataFlashOnClientConnection read FOnDesconexaoCliente write FOnDesconexaoCliente;
-    property OnRecebimentoGenerico : TRpDataFlashOnGenericReceipt read FOnRecebimentoGenerico write FOnRecebimentoGenerico;
-    property OnProcessamentoManual : TRpDataFlashOnManualProcess read FOnProcessamentoManual write FOnProcessamentoManual;
-    property OnAutenticarCliente : TRpDataFlashOnAutenticarCliente read FOnAutenticarCliente write FOnAutenticarCliente;
+    property OnBeforeClientConnection : TRpDataFlashOnBeforeClientConnection read FOnBeforeClientConnection write FOnBeforeClientConnection;
+    property OnClientConnection : TRpDataFlashOnClientConnection read FOnClientConnection write FOnClientConnection;
+    property OnClientDisconnect : TRpDataFlashOnClientConnection read FOnClientDisconnect write FOnClientDisconnect;
+    property OnReceivingText : TRpDataFlashOnGenericReceipt read FOnReceivingText write FOnReceivingText;
+    property OnManualProcessing : TRpDataFlashOnManualProcess read FOnManualProcessing write FOnManualProcessing;
+    property OnAuthenticateClient : TRpDataFlashOnAutenticarCliente read FOnAuthenticateClient write FOnAuthenticateClient;
     property OnBeforeExecuteCommand : TRpDataFlashOnBeforeExecuteCommand read FOnBeforeExecuteCommand write FOnBeforeExecuteCommand;
     property OnObjectRequest : TRpDataFlashOnObjectRequest read FOnObjectRequest write FOnObjectRequest;
 
-    property Ponte : TRpDataFlashCustomClientConnection read FPonte write SetPonte;
-    property Servidor : string read GetServidor;
+    property Bridge : TRpDataFlashCustomClientConnection read FBridge write SetBridge;
+    property Server : string read GetServidor;
     property ControllersCount : Integer read GetControllersCount;
     property ProvidersCount : Integer read GetProvidersCount;
-    property UtilizarControllers : Boolean read GetUtilizarControllers write SetUtilizarControllers default True;
-    property ComandosSemAutenticacao : string read FComandosSemAutenticacao write FComandosSemAutenticacao;
-    property PrefixoBaseComandos : string read FPrefixoBaseComandos write FPrefixoBaseComandos;
+    property UseControllers : Boolean read GetUseControllers write SetUseControllers default True;
+    property WithoutAuthCommands : string read FWithoutAuthCommands write FWithoutAuthCommands;
+    property BaseCommandPrefix : string read FBaseCommandPrefix write FBaseCommandPrefix;
 
     property OnBeforeDataSetStartTransaction : TRpDataFlashOnStartTransactionEvent read FOnBeforeDataSetStartTransaction write FOnBeforeDataSetStartTransaction;
     property OnBeforeDataSetCommitTransaction : TRpDataFlashOnTransactionEvent read FOnBeforeDataSetCommitTransaction write FOnBeforeDataSetCommitTransaction;
@@ -431,14 +431,14 @@ type
   private
     FThreadConexao: TRpDataFlashThreadConnection;
     FConnectionHelper: TRpDataFlashConnectionHelperCustom;
-    FAoDesconectar: TRpDataFlashOnConnectOnServer;
+    FOnDisconnect: TRpDataFlashOnConnectOnServer;
     FOnConnect: TRpDataFlashOnConnectOnServer;
-    FAoSemServico: TRpDataFlashOnNoService;
-    FConfigurarConexao: Boolean;
-    FAoErroEnvio: TRpDataFlashOnSendingError;
+    FOnNoService: TRpDataFlashOnNoService;
+    FLoginPrompt: Boolean;
+    FOnSendingError: TRpDataFlashOnSendingError;
     FTimeOutLeitura: Integer;
     FTimeOutConexao: Integer;
-    FEsperaReconexao: Integer;
+    FReconnectionTimeOut: Integer;
     FUltimaConexao : TDateTime;
     FLazyConnection: Boolean;
     FUserName: string;
@@ -454,15 +454,15 @@ type
     function PodeConectar : Boolean;
     procedure DoNovaExcecao(const E:Exception);
     procedure TentaExecutarCallBack(const AProtocol : TRpDataFlashProtocol);
-    function GetPorta: Integer; virtual;
-    procedure SetPorta(const Value: Integer); virtual;
+    function GetPort: Integer; virtual;
+    procedure SetPort(const Value: Integer); virtual;
     procedure SetServidor(const Value: string); override;
     procedure OnFTPClientStatus(ASender: TObject; const AStatus: TIdStatus; const AStatusText: string);
   protected
     property ExecutorCallBackClass : string read FExecutorCallBackClass write FExecutorCallBackClass;
     property ExecutorCallBackInterfaced : IRpDataFlashExecutorCallBack read FExecutorCallBackInterfaced write FExecutorCallBackInterfaced;
-    function GetIdentificador: string; override;
-    function GetConectado: Boolean; override;
+    function GetIdentifier: string; override;
+    function GetConnected: Boolean; override;
     function GetListaItensServidor : string;
     function InternalConectar : Boolean;
     function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
@@ -472,8 +472,8 @@ type
     procedure Inicializar; override;
     procedure Finalizar; override;
 
-    procedure DoConectar; override;
-    procedure DoDesconectar; override;
+    procedure DoConnect; override;
+    procedure DoDisconnect; override;
     procedure DoSalvarConfiguracoes(const ANode : IXMLNode); override;
     procedure DoCarregarConfiguracoes(const ANode : IXMLNode); override;
     procedure NovoErroEnvio(const AException : Exception; const AProtocol : TRpDataFlashProtocol);
@@ -500,14 +500,14 @@ type
 
     procedure ClonarDe(const AOther: TRpDataFlashCustomClientConnection; const AClonarEnventos : Boolean = False);
     { .:: --> Ao adicionar uma nova propriedade, verificar funcao "ClonarDe" <-- ::. }
-    property Porta : Integer read GetPorta write SetPorta default 8890;
-    property Servidor;
-    property Identificador;
-    property TipoComunicacao;
-    property ConfigurarConexao : Boolean read FConfigurarConexao write FConfigurarConexao default False;
+    property Port : Integer read GetPort write SetPort default 8890;
+    property Server;
+    property Identifier;
+    property CommunicationType;
+    property LoginPrompt : Boolean read FLoginPrompt write FLoginPrompt default False;
     property TimeOutConexao : Integer read FTimeOutConexao write FTimeOutConexao stored True default -1;
     property TimeOutLeitura : Integer read FTimeOutLeitura write FTimeOutLeitura stored True default 0;
-    property EsperaReconexao : Integer read FEsperaReconexao write FEsperaReconexao stored True default 0;
+    property ReconnectionTimeOut : Integer read FReconnectionTimeOut write FReconnectionTimeOut stored True default 0;
     property LazyConnection : Boolean read FLazyConnection write FLazyConnection stored True default False;
     property UserName : string read FUserName write FUserName;
     property Password : string read FPassword write FPassword;
@@ -517,12 +517,12 @@ type
     property OnConnect : TRpDataFlashOnConnectOnServer read FOnConnect write FOnConnect;
     property OnAfterConnect : TRpDataFlashOnConnectOnServer read FOnAfterConnect write FOnAfterConnect;
 
-    property AoDesconectar : TRpDataFlashOnConnectOnServer read FAoDesconectar write FAoDesconectar;
-    property AoSemServico : TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
-    property AoErroEnvio : TRpDataFlashOnSendingError read FAoErroEnvio write FAoErroEnvio;
+    property OnDisconnect : TRpDataFlashOnConnectOnServer read FOnDisconnect write FOnDisconnect;
+    property OnNoService : TRpDataFlashOnNoService read FOnNoService write FOnNoService;
+    property OnSendingError : TRpDataFlashOnSendingError read FOnSendingError write FOnSendingError;
   end;
 
-  TRpDataFlashConexaoCliente = class(TRpDataFlashCustomClientConnection)
+  TRpDataFlashClientConnection = class(TRpDataFlashCustomClientConnection)
   protected
     function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : IRpDataFlashExecutorCallBack) : string; override;
@@ -530,33 +530,33 @@ type
 
     procedure Inicializar; override;
     procedure Finalizar; override;
-    procedure DoConectar; override;
+    procedure DoConnect; override;
     procedure SetServidor(const Value: string); override;
   published
-    property Porta;
-    property Servidor;
-    property Identificador;
-    property TipoComunicacao;
-    property ConfigurarConexao;
+    property Port;
+    property Server;
+    property Identifier;
+    property CommunicationType;
+    property LoginPrompt;
     property TimeOutConexao;
     property TimeOutLeitura;
-    property EsperaReconexao;
+    property ReconnectionTimeOut;
     property LazyConnection;
     property UserName;
     property Password;
-    property TipoCriptografia;
+    property EncryptionType;
     property FileTransfer;
     property ConvertLocalHostToIP;
 
     property OnBeforeConnect;
     property OnConnect;
     property OnAfterConnect;
-    property AoDesconectar;
-    property AoSemServico;
-    property AoErroEnvio;
+    property OnDisconnect;
+    property OnNoService;
+    property OnSendingError;
   end;
 
-  TRpDataFlashConexaoREST = class(TRpDataFlashCustomClientConnection)
+  TRpDataFlashRESTClient = class(TRpDataFlashCustomClientConnection)
   protected
     function DoComunicarComThred(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
       const AExecutorCallBack : IRpDataFlashExecutorCallBack) : string; override;
@@ -564,29 +564,29 @@ type
       out AResponse : TStringStream); reintroduce;
   private
     function Enviar(const AIdentificador, AMenssage, ANomeComando : string) : string; override;
-    function GetPorta: Integer; override;
-    procedure SetPorta(const Value: Integer); override;
+    function GetPort: Integer; override;
+    procedure SetPort(const Value: Integer); override;
     procedure SetServidor(const Value: string); override;
   public
     constructor Create(AOwner : TComponent); override;
     function GetConnectionHelperClass : TRpDataFlashConnectionHelperCustomClass; override;
   published
-    property Porta default 9088;
-    property Servidor;
-    property Identificador;
-    property ConfigurarConexao;
+    property Port default 9088;
+    property Server;
+    property Identifier;
+    property LoginPrompt;
     property UserName;
     property Password;
-    property TipoCriptografia;
+    property EncryptionType;
     property FileTransfer;
     property ConvertLocalHostToIP;
 
     property OnBeforeConnect;
     property OnConnect;
     property OnAfterConnect;
-    property AoDesconectar;
-    property AoSemServico;
-    property AoErroEnvio;
+    property OnDisconnect;
+    property OnNoService;
+    property OnSendingError;
   end;
 
   TRpDataFlashThreadInternalAdapter = class(TRpDataFlashCustomClientConnection)
@@ -692,16 +692,16 @@ uses
 
 { TRpDataFlashCustomConnection }
 
-procedure TRpDataFlashCustomConnection.CarregarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.LoadConfig(const ANode: IXMLNode);
 begin
-  FServidor := ANode['Servidor'];
-  FConexaoTCPIP.Port := ANode['Porta'];
-  FConexaoREST.Port := ANode['PortaRest'];
+  FServer := ANode['Servidor'];
+  FConfigTCPIP.Port := ANode['Porta'];
+  FConfigREST.Port := ANode['PortaRest'];
 
   DoCarregarConfiguracoes(ANode);
 end;
 
-procedure TRpDataFlashCustomConnection.CarregarConfiguracoes(const AArquivo: string);
+procedure TRpDataFlashCustomConnection.LoadConfig(const AArquivo: string);
 var
   lArquivo: TXMLDocument;
   lNodeConfig: IXMLNode;
@@ -710,7 +710,7 @@ begin
   begin
     lArquivo := TXMLDocument.Create(AArquivo);
     lNodeConfig := lArquivo.DocumentElement.ChildNodes.FindNode(Self.ClassName);
-    CarregarConfiguracoes(lNodeConfig);
+    LoadConfig(lNodeConfig);
   end;
 end;
 
@@ -741,9 +741,9 @@ begin
   end;
 end;
 
-procedure TRpDataFlashCustomConnection.Conectar;
+procedure TRpDataFlashCustomConnection.Connect;
 begin
-  DoConectar;
+  DoConnect;
 end;
 
 constructor TRpDataFlashCustomConnection.Create(AOwner: TComponent);
@@ -751,8 +751,8 @@ begin
   inherited;
   FFileTransferList := TStringList.Create;
 
-  FConexaoTCPIP := TRpDataFlashConfigConexaoTCPIP.Create;
-  FConexaoREST  := TRpDataFlashConfigConexaoREST.Create;
+  FConfigTCPIP := TRpDataFlashConfigConexaoTCPIP.Create;
+  FConfigREST  := TRpDataFlashConfigConexaoREST.Create;
 
   FQuebrasProtocolosRecebidos := TRpDataFlashProtocolBreakerList.Create;
   FIpsReconhecidos := TStringList.Create;
@@ -832,9 +832,9 @@ begin
   end;
 end;
 
-procedure TRpDataFlashCustomConnection.Desconectar;
+procedure TRpDataFlashCustomConnection.Disconnect;
 begin
-  DoDesconectar;
+  DoDisconnect;
   RemoverArquivosTemporarios;
 end;
 
@@ -844,8 +844,8 @@ begin
   Finalizar;
   FreeAndNil(FIpsReconhecidos);
   FreeAndNil(FQuebrasProtocolosRecebidos);
-  FreeAndNil(FConexaoTCPIP);
-  FreeAndNil(FConexaoREST);
+  FreeAndNil(FConfigTCPIP);
+  FreeAndNil(FConfigREST);
   FreeAndNil(FFileTransfer);
   FreeAndNil(FFileTransferList);
   inherited;
@@ -894,7 +894,7 @@ begin
       else
       begin
         // neste caso, deve mandar sem a criptografia
-        lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
+        lProtocolo := TRpDataFlashProtocol.Create(EncryptionType);
         try
           lProtocolo.Message := AValor;
           lResposta := lProtocolo.Dismount(AValor);
@@ -1032,7 +1032,7 @@ begin
     FOnStatus(Self, ASituacao, AProcessamentoTotal, AProcessamentoAtual, AStatusMens);
 end;
 
-function TRpDataFlashCustomConnection.GetConectado: Boolean;
+function TRpDataFlashCustomConnection.GetConnected: Boolean;
 begin
   Result := False;
 end;
@@ -1053,7 +1053,7 @@ begin
   Result := FFileTransfer.TempDir;
 end;
 
-function TRpDataFlashCustomConnection.GetIdentificador: string;
+function TRpDataFlashCustomConnection.GetIdentifier: string;
 begin
   Result := EmptyStr;
 end;
@@ -1065,8 +1065,8 @@ end;
 
 procedure TRpDataFlashCustomConnection.Inicializar;
 begin
-  FTipoComunicacao := ctText;
-  FTipoCriptografia := tcBase64Compressed;
+  FCommunicationType := ctText;
+  FEncryptionType := tcBase64Compressed;
 end;
 
 procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandler;
@@ -1171,7 +1171,7 @@ procedure TRpDataFlashCustomConnection.InternalEnviar(const AHandler: TIdIOHandl
 begin
   NovoLog(slOnSend, AValor, EmptyStr);
 
-  case FTipoComunicacao of
+  case FCommunicationType of
     ctText             : EnviarComoTexto;
     ctStream           : EnviarComoStringStream;
     ctCompressedStream : EnviarComoCompressedStream;
@@ -1364,7 +1364,7 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
   end;
 
 begin
-  case FTipoComunicacao of
+  case FCommunicationType of
     ctText              : ReceberComoTexto;
     ctStream            : ReceberComoStringStream;
     ctCompressedStream  : ReceberComoCompressedStream;
@@ -1457,12 +1457,12 @@ var
   end;
 
 begin
-  if Assigned(FOnNovoLog) then
+  if Assigned(FOnNewLog) then
   begin
     lLog := TRpDataFlashSyncLogEvent.Create;
     try
       lLog.FLRDataFlashIP  := Self;
-      lLog.FEvento    := FOnNovoLog;
+      lLog.FEvento    := FOnNewLog;
       lLog.FTipoLog   := ALogType;
       lLog.FLog       := ALog;
       lLog.FClientInfo.Initialize;
@@ -1512,15 +1512,15 @@ begin
   end;
 end;
 
-procedure TRpDataFlashCustomConnection.SalvarConfiguracoes(const ANode: IXMLNode);
+procedure TRpDataFlashCustomConnection.SaveConfig(const ANode: IXMLNode);
 begin
-  ANode['Servidor'] := FServidor;
-  ANode['Porta'] := FConexaoTCPIP.Port;
-  ANode['PortaRest'] := FConexaoREST.Port;
+  ANode['Servidor'] := FServer;
+  ANode['Porta'] := FConfigTCPIP.Port;
+  ANode['PortaRest'] := FConfigREST.Port;
   DoSalvarConfiguracoes(ANode);
 end;
 
-procedure TRpDataFlashCustomConnection.SalvarConfiguracoes(const AArquivo: string);
+procedure TRpDataFlashCustomConnection.SaveConfig(const AArquivo: string);
 var
   lArquivo: TXMLDocument;
   lNodeRoot: IXMLNode;
@@ -1528,7 +1528,7 @@ begin
   lArquivo := TXMLDocument.Create(nil);
   lArquivo.Active := True;
   lNodeRoot := lArquivo.AddChild('root');
-  SalvarConfiguracoes(lNodeRoot.AddChild(Self.ClassName));
+  SaveConfig(lNodeRoot.AddChild(Self.ClassName));
   lArquivo.SaveToFile(AArquivo);
 end;
 
@@ -1566,14 +1566,14 @@ end;
 
 procedure TRpDataFlashCustomConnection.SetServidor(const Value: string);
 begin
-  FServidor := Value;
+  FServer := Value;
 //  if Pos(':', FServidor) > 0 then
 //    Delete(FServidor, Pos(':', FServidor) - 1, Length(FServidor));
 end;
 
-procedure TRpDataFlashCustomConnection.SetTipoCriptografia(const Value: TRpDataFlashEncryptionType);
+procedure TRpDataFlashCustomConnection.SetEncryptionType(const Value: TRpDataFlashEncryptionType);
 begin
-  FTipoCriptografia := Value;
+  FEncryptionType := Value;
 end;
 
 procedure TRpDataFlashCustomConnection.TentaGerarException(const AProtocol : TRpDataFlashProtocol);
@@ -1635,8 +1635,8 @@ begin
     try
       if AConexao <> nil then
       begin
-        AConexao.Conectar;
-        Result := AConexao.Conectado;
+        AConexao.Connect;
+        Result := AConexao.Connected;
       end;
     except
       on E:Exception do
@@ -1672,7 +1672,7 @@ var
     lUpperCmd: string;
   begin
     lUpperCmd := ';' + UpperCase(AClasseComando) + ';';
-    Result := Pos(lUpperCmd, UpperCase(FComandosSemAutenticacao)) > 0;
+    Result := Pos(lUpperCmd, UpperCase(FWithoutAuthCommands)) > 0;
   end;
 
   function ParametroEmDesigning : Boolean;
@@ -1700,7 +1700,7 @@ begin
   Result := FConectorTCP;
 end;
 
-procedure TRpDataFlashServerConnection.DoConectar;
+procedure TRpDataFlashServerConnection.DoConnect;
 begin
   inherited;
   try
@@ -1711,17 +1711,17 @@ begin
     if FConectorREST <> nil then
       FreeAndNil(FConectorREST);
 
-    if FConexaoTCPIP.Enabled then
+    if FConfigTCPIP.Enabled then
     begin
       FConectorTCP := TIdTCPServer.Create(Self);
-      if FConexaoTCPIP.Port = 0 then
+      if FConfigTCPIP.Port = 0 then
         raise ERpDataFlashConnectionError.Create('Porta TCP não informada!');
 
       Conector.OnExecute    := AoExecutarNoServidor;
       Conector.OnConnect    := AoConectarCliente;
       Conector.OnDisconnect := AoDesconectarCliente;
 
-      Conector.DefaultPort  := FConexaoTCPIP.Port;
+      Conector.DefaultPort  := FConfigTCPIP.Port;
       if not Conector.Active then
         Conector.Active := True;
 
@@ -1729,10 +1729,10 @@ begin
         raise ERpDataFlashConnectionError.Create('Não foi possível iniciar a conexão do servidor TCP!');
     end;
 
-    if FConexaoREST.Enabled then
+    if FConfigREST.Enabled then
     begin
       FConectorREST := TIdHTTPServer.Create(Self);
-      if FConexaoREST.Port = 0 then
+      if FConfigREST.Port = 0 then
         raise ERpDataFlashConnectionError.Create('Porta REST não informada!');
 
       FConectorREST.OnConnect := AoConectarCliente;
@@ -1740,7 +1740,7 @@ begin
       FConectorREST.OnCommandGet := AoExecutarNoServidorRest;
       FConectorREST.OnCommandOther := AoExecutarNoServidorRest;
 
-      FConectorREST.DefaultPort  := FConexaoREST.Port;
+      FConectorREST.DefaultPort  := FConfigREST.Port;
       if not FConectorREST.Active then
         FConectorREST.Active := True;
 
@@ -1783,12 +1783,12 @@ begin
   RemoverArquivosTemporarios;
 end;
 
-procedure TRpDataFlashServerConnection.DoDesconectar;
+procedure TRpDataFlashServerConnection.DoDisconnect;
 begin
   FDesconectandoServer := True;
 
   try
-    if (FConexaoTCPIP.Enabled) and (FConectorTCP <> nil) then
+    if (FConfigTCPIP.Enabled) and (FConectorTCP <> nil) then
     begin
       if FConectorTCP.Active then
         FConectorTCP.Active := False;
@@ -1799,7 +1799,7 @@ begin
   end;
 
   try
-    if (FConexaoREST.Enabled) and (FConectorREST <> nil) then
+    if (FConfigREST.Enabled) and (FConectorREST <> nil) then
     begin
       if FConectorREST.Active then
         FConectorREST.Active := False;
@@ -1832,7 +1832,7 @@ var
   lProtocolo: TRpDataFlashProtocol;
   lResposta: string;
 begin
-  lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
+  lProtocolo := TRpDataFlashProtocol.Create(EncryptionType);
   try
     lProtocolo.Identifier := TAG_CALLBACK;
     lProtocolo.Message := AMenssage;
@@ -1894,7 +1894,7 @@ var
     begin
       lMsg := Trim(lComando.LastError);
       if lMsg = EmptyStr then
-        lMsg := Format('Ponte OffLine - servidor: %s porta: %d', [lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]);
+        lMsg := Format('Ponte OffLine - servidor: %s porta: %d', [lTcpClient.Server, lTcpClient.ConfigTCPIP.Port]);
 
       ASaida := lMsg;
 
@@ -1947,7 +1947,7 @@ var
           ASaida := lParametros.Serialize;
 
           NovoLog(slOnBridge, Format('Comando %s repassado para a ponte - servidor: %s porta: %d',
-            [lComando.Command, lTcpClient.Servidor, lTcpClient.ConexaoTCPIP.Port]), AContext);
+            [lComando.Command, lTcpClient.Server, lTcpClient.ConfigTCPIP.Port]), AContext);
           lExecutado := lComando.ReturnStatus;
         end;
       except
@@ -2017,7 +2017,7 @@ begin
     lComando.ResponseInfo := AResponseInfo;
 
     // se tem rotina de autenticacao e o comando recebido nao é para autenticar, aborta o processo
-    if Assigned(FOnAutenticarCliente) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
+    if Assigned(FOnAuthenticateClient) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
       raise ERpDataFlashUserNotFound.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
@@ -2048,37 +2048,37 @@ end;
 procedure TRpDataFlashServerConnection.Finalizar;
 begin
   inherited;
-  Desconectar;
+  Disconnect;
   FreeAndNil(FControllers);
   FreeAndNil(FProviders);
   FreeAndNil(FInterfaceList);
 end;
 
-function TRpDataFlashServerConnection.GetConectado: Boolean;
+function TRpDataFlashServerConnection.GetConnected: Boolean;
 var
   lRestOk: Boolean;
   lTcpOk: Boolean;
 begin
 //  Result := False;
 
-  if FConexaoREST.Enabled then
+  if FConfigREST.Enabled then
     lRestOk := Assigned(FConectorREST) and FConectorREST.Active
   else
     lRestOk := True;
 
-  if FConexaoTCPIP.Enabled then
+  if FConfigTCPIP.Enabled then
     lTcpOk := Assigned(FConectorTCP) and FConectorTCP.Active
   else
     lTcpOk := True;
 
   // 2 ativos
-  if FConexaoREST.Enabled and FConexaoTCPIP.Enabled then
+  if FConfigREST.Enabled and FConfigTCPIP.Enabled then
     Result := lRestOk and lTcpOk
   else // somente Rest
-    if FConexaoREST.Enabled then
+    if FConfigREST.Enabled then
       Result := lRestOk
     else // Somente TCP
-      if FConexaoTCPIP.Enabled then
+      if FConfigTCPIP.Enabled then
         Result := lTcpOk
       else
       begin
@@ -2098,7 +2098,7 @@ begin
   Result := Controllers.Count;
 end;
 
-function TRpDataFlashServerConnection.GetNumeroClientesConectados: Integer;
+function TRpDataFlashServerConnection.GetConnectedClientsCount: Integer;
 begin
   Result := FNumeroConectados;
 end;
@@ -2115,10 +2115,10 @@ end;
 
 function TRpDataFlashServerConnection.GetServidor: string;
 begin
-  Result := FServidor;
+  Result := FServer;
 end;
 
-function TRpDataFlashServerConnection.GetUtilizarControllers: Boolean;
+function TRpDataFlashServerConnection.GetUseControllers: Boolean;
 begin
   Result := FUtilizarControllers;
 end;
@@ -2127,16 +2127,16 @@ procedure TRpDataFlashServerConnection.Inicializar;
 begin
   inherited;
   FInterfaceList := TInterfaceList.Create;
-  FServidor := GetNomeComputadorLocal;
+  FServer := GetNomeComputadorLocal;
   FControllers := TRpDataFlashComandControllerList.Create(False);
   FProviders := TRpDataFlashProviderControllerList.Create(False);
   FUtilizarControllers := True;
-  FPrefixoBaseComandos := 'TComando';
+  FBaseCommandPrefix := 'TComando';
 end;
 
 function TRpDataFlashServerConnection.IsPonte: Boolean;
 begin
-  Result := (FPonte <> nil);
+  Result := (FBridge <> nil);
 end;
 
 function TRpDataFlashServerConnection.ItemConexao(AContext: TIdContext): TRpDataFlashConnectionItem;
@@ -2147,7 +2147,7 @@ end;
 procedure TRpDataFlashServerConnection.Limpar;
 begin
   inherited;
-  FServidor := GetNomeComputadorLocal;
+  FServer := GetNomeComputadorLocal;
 end;
 
 function TRpDataFlashServerConnection.FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
@@ -2185,8 +2185,8 @@ procedure TRpDataFlashServerConnection.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
-  if (Operation = opRemove) and (AComponent = FPonte) then
-    FPonte := nil;
+  if (Operation = opRemove) and (AComponent = FBridge) then
+    FBridge := nil;
 
   if (Operation = opRemove) and (AComponent.InheritsFrom(TRpDataFlashComandController)) then
     FControllers.Remove(AComponent);
@@ -2354,15 +2354,15 @@ begin
       lResultado := EmptyStr;
       lResposta := EmptyStr;
 
-      if Assigned(FOnProcessamentoManual) then
-        FOnProcessamentoManual(Self, lItem)
+      if Assigned(FOnManualProcessing) then
+        FOnManualProcessing(Self, lItem)
       else
       begin
-        if FTipoMensagem = mtCommand then
+        if FMessageType = mtCommand then
         begin
-          lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
+          lProtocolo := TRpDataFlashProtocol.Create(EncryptionType);
           try
-            lProtocolo.MessageType := FTipoMensagem;
+            lProtocolo.MessageType := FMessageType;
 
             if ARequestInfo = nil then
             begin
@@ -2406,8 +2406,8 @@ begin
         else
         begin
           lPedido := InternalReceber(AContext.Connection.IOHandler);
-          if Assigned(FOnRecebimentoGenerico) then
-            lResposta := FOnRecebimentoGenerico(Self, lPedido, lItem);
+          if Assigned(FOnReceivingText) then
+            lResposta := FOnReceivingText(Self, lPedido, lItem);
           InternalEnviar(AContext.Connection.IOHandler, lResposta);
         end;
       end;
@@ -2419,18 +2419,18 @@ begin
   end;
 end;
 
-procedure TRpDataFlashServerConnection.SetPonte(const Value: TRpDataFlashCustomClientConnection);
+procedure TRpDataFlashServerConnection.SetBridge(const Value: TRpDataFlashCustomClientConnection);
 begin
-  if Assigned(FPonte) then
-    FPonte.RemoveFreeNotification(Self);
+  if Assigned(FBridge) then
+    FBridge.RemoveFreeNotification(Self);
 
-  FPonte := Value;
+  FBridge := Value;
 
-  if Assigned(FPonte) then
-    FPonte.FreeNotification(Self);
+  if Assigned(FBridge) then
+    FBridge.FreeNotification(Self);
 end;
 
-procedure TRpDataFlashServerConnection.SetUtilizarControllers(const Value: Boolean);
+procedure TRpDataFlashServerConnection.SetUseControllers(const Value: Boolean);
 begin
   FUtilizarControllers := Value;
 end;
@@ -2464,8 +2464,8 @@ var
   lPermitir: Boolean;
 begin
   lPermitir := True;
-  if Assigned(FOnAntesConexaoCliente) then
-    FOnAntesConexaoCliente(Self, lPermitir);
+  if Assigned(FOnBeforeClientConnection) then
+    FOnBeforeClientConnection(Self, lPermitir);
 
   if lPermitir then
   begin
@@ -2476,7 +2476,7 @@ begin
     AContext.Data := lConexao;
     Inc(FNumeroConectados);
 
-    NotificarConexaoCliente(lConexao, FOnConexaoCliente);
+    NotificarConexaoCliente(lConexao, FOnClientConnection);
 
     NovoLog(slOnConnection, 'Cliente Conectou: ' + AContext.Binding.PeerIP, AContext);
   end
@@ -2496,8 +2496,8 @@ begin
     lItemConexao := TRpDataFlashConnectionItem(AContext.Data);
     NovoLog(slOnDisconnection, 'Desconectando Cliente ' + AContext.Binding.PeerIP, AContext);
     Dec(FNumeroConectados);
-    if (not FDesconectandoServer) and (Assigned(FOnDesconexaoCliente)) then
-      NotificarConexaoCliente(lItemConexao, FOnDesconexaoCliente);
+    if (not FDesconectandoServer) and (Assigned(FOnClientDisconnect)) then
+      NotificarConexaoCliente(lItemConexao, FOnClientDisconnect);
 
     if lItemConexao.Executor <> nil then
       lItemConexao.Executor.DisconnectDataComponent;
@@ -2520,7 +2520,7 @@ begin
       end;
       on E:Exception do
       begin
-        lException := TRpDataFlashProtocol.NewError(Self.TipoCriptografia, CriarException(E));
+        lException := TRpDataFlashProtocol.NewError(Self.EncryptionType, CriarException(E));
         InternalEnviar(AContext.Connection.IOHandler, lException);
       end;
     end;
@@ -2545,7 +2545,7 @@ begin
   begin
     // reverter a criptografia
     try
-      lProtocolo := TRpDataFlashProtocol.Create(TipoCriptografia);
+      lProtocolo := TRpDataFlashProtocol.Create(EncryptionType);
       lProtocolo.Message := ARequestInfo.UnparsedParams;
       lValue := lProtocolo.Message;
       if lValue[1] = '<' then
@@ -2570,7 +2570,7 @@ begin
     except
       on E:Exception do
       begin
-        lException := TRpDataFlashProtocol.NewError(Self.TipoCriptografia, CriarException(E, lType));
+        lException := TRpDataFlashProtocol.NewError(Self.EncryptionType, CriarException(E, lType));
 
         DoInternalEnviar(
           AContext.Connection.IOHandler,
@@ -2620,11 +2620,11 @@ begin
   FInterfaceList := TInterfaceList.Create;
   FExecutor := nil;
 
-  if (AOwner is TRpDataFlashServerConnection) and (TRpDataFlashServerConnection(AOwner).Ponte <> nil) then
+  if (AOwner is TRpDataFlashServerConnection) and (TRpDataFlashServerConnection(AOwner).Bridge <> nil) then
   begin
-    FTcpClientPonte := TRpDataFlashConexaoCliente.Create(nil);
+    FTcpClientPonte := TRpDataFlashClientConnection.Create(nil);
     FTcpClientPonte.Name := 'TcpClientPonte_' + IntToStr(Abs(GetTickCount));
-    lPonte := TRpDataFlashServerConnection(AOwner).Ponte;
+    lPonte := TRpDataFlashServerConnection(AOwner).Bridge;
     FTcpClientPonte.ClonarDe(lPonte);
     FTcpClientPonte.LazyConnection := True;
   end;
@@ -2636,7 +2636,7 @@ destructor TRpDataFlashConnectionItem.Destroy;
 begin
   if (Assigned(FTcpClientPonte) ) then
   begin
-    FTcpClientPonte.Desconectar;
+    FTcpClientPonte.Disconnect;
     FreeAndNil(FTcpClientPonte);
   end;
 
@@ -2727,7 +2727,7 @@ begin
   if (FFileTransfer.Port > 0) and (FFileTransfer.Enabled) then
   begin
     ACliente := TIdFTP.Create(Self);
-    ACliente.Host := Servidor;
+    ACliente.Host := Server;
     ACliente.Port := FileTransfer.Port;
     ACliente.DataPort := FileTransfer.DataPort;
     ACliente.OnStatus := OnFTPClientStatus;
@@ -2799,23 +2799,23 @@ end;
 procedure TRpDataFlashCustomClientConnection.ClonarDe(const AOther: TRpDataFlashCustomClientConnection;
   const AClonarEnventos : Boolean);
 begin
-  FServidor          := AOther.Servidor;
-  FTipoCriptografia  := AOther.TipoCriptografia;
-  FConfigurarConexao := AOther.ConfigurarConexao;
-  FTipoComunicacao   := AOther.TipoComunicacao;
+  FServer          := AOther.Server;
+  FEncryptionType  := AOther.EncryptionType;
+  FLoginPrompt := AOther.LoginPrompt;
+  FCommunicationType   := AOther.CommunicationType;
   FTimeOutConexao    := AOther.TimeOutConexao;
   FTimeOutLeitura    := AOther.TimeOutLeitura;
-  FEsperaReconexao   := AOther.EsperaReconexao;
+  FReconnectionTimeOut   := AOther.ReconnectionTimeOut;
   FLazyConnection    := AOther.LazyConnection;
   FUserName          := AOther.UserName;
   FPassword          := AOther.Password;
   FConvertLocalHostToIP := AOther.ConvertLocalHostToIP;
 
-  FConexaoTCPIP.Port := AOther.ConexaoTCPIP.Port;
-  FConexaoTCPIP.Enabled := AOther.ConexaoTCPIP.Enabled;
+  FConfigTCPIP.Port := AOther.ConfigTCPIP.Port;
+  FConfigTCPIP.Enabled := AOther.ConfigTCPIP.Enabled;
 
-  FConexaoREST.Port := AOther.ConexaoREST.Port;
-  FConexaoREST.Enabled := AOther.ConexaoREST.Enabled;
+  FConfigREST.Port := AOther.ConfigREST.Port;
+  FConfigREST.Enabled := AOther.ConfigREST.Enabled;
 
   FFileTransfer.Port := AOther.FileTransfer.Port;
   FFileTransfer.Enabled := AOther.FileTransfer.Enabled;
@@ -2826,11 +2826,11 @@ begin
   if AClonarEnventos then
   begin
     FOnConnect    := AOther.OnConnect;
-    FAoDesconectar := AOther.AoDesconectar;
-    FAoErroEnvio   := AOther.AoErroEnvio;
-    FAoSemServico  := AOther.AoSemServico;
+    FOnDisconnect := AOther.OnDisconnect;
+    OnSendingError   := AOther.OnSendingError;
+    FOnNoService  := AOther.OnNoService;
     FOnException   := AOther.OnException;
-    FOnNovoLog     := AOther.OnNovoLog;
+    FOnNewLog     := AOther.OnNewLog;
   end;
 end;
 
@@ -2851,10 +2851,10 @@ end;
 constructor TRpDataFlashCustomClientConnection.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  FConfigurarConexao := False;
+  FLoginPrompt := False;
   FTimeOutConexao := -1;
   FTimeOutLeitura := 0;
-  FEsperaReconexao := 0;
+  FReconnectionTimeOut := 0;
   FLazyConnection := False;
   FExecutorCallBackClass := EmptyStr;
   FExecutorCallBackInterfaced := nil;
@@ -2865,20 +2865,20 @@ begin
   inherited;
   ANode['TimeOutLeitura'] := FTimeOutLeitura;
   ANode['TimeOutConexao'] := FTimeOutConexao;
-  ANode['EsperaReconexao'] := FEsperaReconexao;
+  ANode['EsperaReconexao'] := FReconnectionTimeOut;
 end;
 
-procedure TRpDataFlashCustomClientConnection.DoConectar;
+procedure TRpDataFlashCustomClientConnection.DoConnect;
 begin
   inherited;
 end;
 
-procedure TRpDataFlashCustomClientConnection.DoDesconectar;
+procedure TRpDataFlashCustomClientConnection.DoDisconnect;
 begin
   FConnectionHelper.LiberarConector;
 
-  if Assigned(FAoDesconectar) then
-    FAoDesconectar(Self, FServidor, ConexaoTCPIP.Port);
+  if Assigned(FOnDisconnect) then
+    FOnDisconnect(Self, FServer, ConfigTCPIP.Port);
 end;
 
 procedure TRpDataFlashCustomClientConnection.DoNovaExcecao(const E: Exception);
@@ -2891,7 +2891,7 @@ begin
   inherited;
   FTimeOutLeitura := ANode['TimeOutLeitura'];
   FTimeOutConexao := ANode['TimeOutConexao'];
-  FEsperaReconexao := ANode['EsperaReconexao'];
+  FReconnectionTimeOut := ANode['EsperaReconexao'];
 end;
 
 function TRpDataFlashCustomClientConnection.Enviar(const AIdentificador, AMenssage,
@@ -2903,11 +2903,11 @@ var
 begin
   Result := EmptyStr;
   try
-    Conectar;
+    Connect;
 
-    if Conectado then
+    if Connected then
     begin
-      lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
+      lProtocolo := TRpDataFlashProtocol.Create(Self.EncryptionType);
       try
         lProtocolo.Identifier := AIdentificador;
         lProtocolo.Message := AMenssage;
@@ -2941,7 +2941,7 @@ begin
     on E:Exception Do
     begin
       if Pos('closed gracefully', LowerCase(E.Message)) > 0 then
-        Desconectar;
+        Disconnect;
       raise;
     end;
   end;
@@ -2969,7 +2969,7 @@ begin
   FreeAndNil( FConnectionHelper );
 end;
 
-function TRpDataFlashCustomClientConnection.GetConectado: Boolean;
+function TRpDataFlashCustomClientConnection.GetConnected: Boolean;
 begin
   try
     if Assigned(FThreadConexao) then
@@ -3043,7 +3043,7 @@ begin
 //  end;
 end;
 
-function TRpDataFlashCustomClientConnection.GetIdentificador: string;
+function TRpDataFlashCustomClientConnection.GetIdentifier: string;
 begin
   Result:= EmptyStr;
 end;
@@ -3053,9 +3053,9 @@ begin
   Result := Enviar(DEFAULT_ITEM_ID, EmptyStr, EmptyStr);
 end;
 
-function TRpDataFlashCustomClientConnection.GetPorta: Integer;
+function TRpDataFlashCustomClientConnection.GetPort: Integer;
 begin
-  Result := FConexaoTCPIP.Port;
+  Result := FConfigTCPIP.Port;
 end;
 
 procedure TRpDataFlashCustomClientConnection.Inicializar;
@@ -3064,11 +3064,11 @@ begin
   FUltimaConexao := 0;
   FTimeOutLeitura := -1;
   FTimeOutConexao := 0;
-  FEsperaReconexao := 0;
+  FReconnectionTimeOut := 0;
 
   FConnectionHelper := GetConnectionHelperClass.Create(Self);
-  FConnectionHelper.DoConectar := DoConectar;
-  FConnectionHelper.DoDesconectar := DoDesconectar;
+  FConnectionHelper.DoConnect := DoConnect;
+  FConnectionHelper.DoDisconnect := DoDisconnect;
   FConnectionHelper.NovaExcecao := DoNovaExcecao;
 end;
 
@@ -3076,17 +3076,17 @@ function TRpDataFlashCustomClientConnection.InternalConectar : Boolean;
 begin
   // libera o antigo e configura um conector novo
   FConnectionHelper.ReinicializarConector(
-    FServidor,
-    FConfigurarConexao,
-    Porta,
+    FServer,
+    FLoginPrompt,
+    Port,
     FTimeOutConexao,
     FTimeOutLeitura,
     FConvertLocalHostToIP);
   // ajusta os eventos de conexão
-  FConnectionHelper.AoConectar := FOnConnect;
-  FConnectionHelper.AoSemServico := FAoSemServico;
+  FConnectionHelper.OnConnect := FOnConnect;
+  FConnectionHelper.OnNoService := FOnNoService;
   // dispara o processo de conexão
-  Result := FConnectionHelper.Conectar;
+  Result := FConnectionHelper.Connect;
 end;
 
 procedure TRpDataFlashCustomClientConnection.Limpar;
@@ -3097,8 +3097,8 @@ end;
 procedure TRpDataFlashCustomClientConnection.NovoErroEnvio(const AException: Exception;
   const AProtocol : TRpDataFlashProtocol);
 begin
-  if Assigned(FAoErroEnvio) then
-    FAoErroEnvio(Self, AProtocol, AException);
+  if Assigned(OnSendingError) then
+    OnSendingError(Self, AProtocol, AException);
 
   NovoLog(slOnError, AException.Message, nil);
 end;
@@ -3111,8 +3111,8 @@ end;
 
 function TRpDataFlashCustomClientConnection.PodeConectar: Boolean;
 begin
-  Result := ((FEsperaReconexao = 0) or (FUltimaConexao = 0) or (Now >= IncMilliSecond(FUltimaConexao, FEsperaReconexao)))
-    and (not Conectado) and ((FThreadConexao <> nil) and (FThreadConexao.Conectando = False));
+  Result := ((FReconnectionTimeOut = 0) or (FUltimaConexao = 0) or (Now >= IncMilliSecond(FUltimaConexao, FReconnectionTimeOut)))
+    and (not Connected) and ((FThreadConexao <> nil) and (FThreadConexao.Conectando = False));
 
   if Result then
     FUltimaConexao := Now;
@@ -3156,8 +3156,8 @@ var
 begin
   lClient := TIdTCPClient.Create(nil);
   try
-    lClient.Host := FServidor;
-    lClient.Port := FConexaoTCPIP.Port;
+    lClient.Host := FServer;
+    lClient.Port := FConfigTCPIP.Port;
     try
       lClient.Connect;
       Result := True;
@@ -3169,14 +3169,14 @@ begin
   end;
 end;
 
-procedure TRpDataFlashCustomClientConnection.SetPorta(const Value: Integer);
+procedure TRpDataFlashCustomClientConnection.SetPort(const Value: Integer);
 begin
-  FConexaoTCPIP.Port := Value;
+  FConfigTCPIP.Port := Value;
 end;
 
 procedure TRpDataFlashCustomClientConnection.SetServidor(const Value: string);
 begin
-  FServidor := Value;
+  FServer := Value;
   inherited;
 end;
 
@@ -3349,7 +3349,7 @@ begin
   inherited;
   if Assigned(FConexaoClient) then
   begin
-    FConexaoClient.Desconectar;
+    FConexaoClient.Disconnect;
     FreeAndNil(FConexaoClient);
   end;
   Terminate;
@@ -3566,13 +3566,13 @@ begin
   begin
     lTentativas := 0;
     repeat
-      if Assigned(FClient) and (FClient is TRpDataFlashConexaoCliente) and (not FClient.LazyConnection) then
+      if Assigned(FClient) and (FClient is TRpDataFlashClientConnection) and (not FClient.LazyConnection) then
       begin
         Inc(lTentativas);
         DoAoProcessarErroComunicacao;
         Sleep(2000);
-        FClient.Conectar;
-        if FClient.Conectado then
+        FClient.Connect;
+        if FClient.Connected then
         begin
           lTentativas := 5;
           FLastError := 'A conexão com o serviço teve que ser restabelecida.';
@@ -3593,13 +3593,13 @@ end;
 
 { TRpDataFlashConexaoCliente }
 
-function TRpDataFlashConexaoCliente.DoComunicarComThred(
+function TRpDataFlashClientConnection.DoComunicarComThred(
   const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
   const AExecutorCallBack: IRpDataFlashExecutorCallBack): string;
 var
-  lClient : TRpDataFlashConexaoCliente;
+  lClient : TRpDataFlashClientConnection;
 begin
-  lClient := TRpDataFlashConexaoCliente.Create(Self);
+  lClient := TRpDataFlashClientConnection.Create(Self);
   lClient.ClonarDe(Self);
 
   try
@@ -3615,7 +3615,7 @@ begin
   finally
     if Assigned(lClient) then
     begin
-      lClient.Desconectar;
+      lClient.Disconnect;
       FreeAndNil(lClient);
     end;
   end;
@@ -3641,7 +3641,7 @@ begin
 {$ENDREGION}
 end;
 
-procedure TRpDataFlashConexaoCliente.DoConectar;
+procedure TRpDataFlashClientConnection.DoConnect;
 begin
   inherited;
   if PodeConectar then
@@ -3668,7 +3668,7 @@ begin
   end;
 end;
 
-procedure TRpDataFlashConexaoCliente.Finalizar;
+procedure TRpDataFlashClientConnection.Finalizar;
 begin
   inherited;
   FThreadConexao.Terminate;
@@ -3683,19 +3683,19 @@ begin
   FreeAndNil(FThreadConexao);
 end;
 
-function TRpDataFlashConexaoCliente.GetConnectionHelperClass: TRpDataFlashConnectionHelperCustomClass;
+function TRpDataFlashClientConnection.GetConnectionHelperClass: TRpDataFlashConnectionHelperCustomClass;
 begin
   Result := TRpDataFlashConnectionHelperTCP;
 end;
 
-procedure TRpDataFlashConexaoCliente.Inicializar;
+procedure TRpDataFlashClientConnection.Inicializar;
 begin
   inherited;
   FThreadConexao := TRpDataFlashThreadConnection.Create;
   FThreadConexao.Conexao := Self;
 end;
 
-procedure TRpDataFlashConexaoCliente.SetServidor(const Value: string);
+procedure TRpDataFlashClientConnection.SetServidor(const Value: string);
 var
   lPos: Integer;
   lPorta: string;
@@ -3704,33 +3704,33 @@ begin
   // se no nome do servidor tiver a porta, separa as propriedades
   // LOCALHOST:8890
 
-  lPos := Pos(':', FServidor);
+  lPos := Pos(':', FServer);
 
   if lPos > 0 then
   begin
-    lPorta := Copy(FServidor, lPos + 1, Length(FServidor) );
-    Delete(FServidor, lPos, Length(FServidor) );
-    FConexaoTCPIP.Port := StrToIntDef( lPorta, FConexaoTCPIP.Port );
+    lPorta := Copy(FServer, lPos + 1, Length(FServer) );
+    Delete(FServer, lPos, Length(FServer) );
+    FConfigTCPIP.Port := StrToIntDef( lPorta, FConfigTCPIP.Port );
   end;
 end;
 
 { TRpDataFlashConexaoREST }
 
-constructor TRpDataFlashConexaoREST.Create(AOwner: TComponent);
+constructor TRpDataFlashRESTClient.Create(AOwner: TComponent);
 begin
   inherited;
-  Porta := 9088;
-  FConfigurarConexao := False;
-  FTipoComunicacao := ctText;
+  Port := 9088;
+  FLoginPrompt := False;
+  FCommunicationType := ctText;
 end;
 
-function TRpDataFlashConexaoREST.DoComunicarComThred(
+function TRpDataFlashRESTClient.DoComunicarComThred(
   const ACommand: TRpDataFlashCommand; const ACallBackClassName: string;
   const AExecutorCallBack: IRpDataFlashExecutorCallBack): string;
 var
-  lClient : TRpDataFlashConexaoREST;
+  lClient : TRpDataFlashRESTClient;
 begin
-  lClient := TRpDataFlashConexaoREST.Create(Self);
+  lClient := TRpDataFlashRESTClient.Create(Self);
   lClient.ClonarDe(Self);
 
   try
@@ -3746,7 +3746,7 @@ begin
   finally
     if Assigned(lClient) then
     begin
-      lClient.Desconectar;
+      lClient.Disconnect;
       FreeAndNil(lClient);
     end;
   end;
@@ -3772,7 +3772,7 @@ begin
 {$ENDREGION}
 end;
 
-function TRpDataFlashConexaoREST.Enviar(const AIdentificador, AMenssage, ANomeComando: string): string;
+function TRpDataFlashRESTClient.Enviar(const AIdentificador, AMenssage, ANomeComando: string): string;
 var
   lResultado : TStringStream;
   lIdentificadorEnviado: string;
@@ -3784,7 +3784,7 @@ begin
     if not Assigned(FConnectionHelper.Conector) then
       InternalConectar;
 
-    lProtocolo := TRpDataFlashProtocol.Create(Self.TipoCriptografia);
+    lProtocolo := TRpDataFlashProtocol.Create(Self.EncryptionType);
     try
       lProtocolo.Identifier := AIdentificador;
       lProtocolo.Message := AMenssage;
@@ -3822,17 +3822,17 @@ begin
   end;
 end;
 
-function TRpDataFlashConexaoREST.GetConnectionHelperClass: TRpDataFlashConnectionHelperCustomClass;
+function TRpDataFlashRESTClient.GetConnectionHelperClass: TRpDataFlashConnectionHelperCustomClass;
 begin
   Result := TRpDataFlashConnectionHelperREST;
 end;
 
-function TRpDataFlashConexaoREST.GetPorta: Integer;
+function TRpDataFlashRESTClient.GetPort: Integer;
 begin
-  Result := FConexaoREST.Port;
+  Result := FConfigREST.Port;
 end;
 
-procedure TRpDataFlashConexaoREST.InternalEnviar(const AHandler: TIdHTTP;
+procedure TRpDataFlashRESTClient.InternalEnviar(const AHandler: TIdHTTP;
   const AValor, ANomeComando: string; out AResponse: TStringStream);
   procedure EnviarComoTexto;
   var
@@ -3860,7 +3860,7 @@ procedure TRpDataFlashConexaoREST.InternalEnviar(const AHandler: TIdHTTP;
 begin
   NovoLog(slOnSend, AValor, '');
 
-  case FTipoComunicacao of
+  case FCommunicationType of
     ctText,
     ctChar : EnviarComoTexto;
     ctStream,
@@ -3868,12 +3868,12 @@ begin
   end;
 end;
 
-procedure TRpDataFlashConexaoREST.SetPorta(const Value: Integer);
+procedure TRpDataFlashRESTClient.SetPort(const Value: Integer);
 begin
-  FConexaoREST.Port := Value;
+  FConfigREST.Port := Value;
 end;
 
-procedure TRpDataFlashConexaoREST.SetServidor(const Value: string);
+procedure TRpDataFlashRESTClient.SetServidor(const Value: string);
 var
   lPos: Integer;
   lPorta: string;
@@ -3882,13 +3882,13 @@ begin
   // se no nome do servidor tiver a porta, separa as propriedades
   // LOCALHOST:8890
 
-  lPos := Pos(':', FServidor);
+  lPos := Pos(':', FServer);
 
   if lPos > 0 then
   begin
-    lPorta := Copy(FServidor, lPos + 1, Length(FServidor) );
-    Delete(FServidor, lPos, Length(FServidor) );
-    FConexaoREST.Port := StrToIntDef( lPorta, FConexaoREST.Port );
+    lPorta := Copy(FServer, lPos + 1, Length(FServer) );
+    Delete(FServer, lPos, Length(FServer) );
+    FConfigREST.Port := StrToIntDef( lPorta, FConfigREST.Port );
   end;
 end;
 

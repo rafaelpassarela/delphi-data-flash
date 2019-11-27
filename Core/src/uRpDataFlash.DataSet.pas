@@ -51,7 +51,7 @@ type
   private
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
     FComandoEnviar: TRpDataFlashSendCommand;
-    FConexaoCliente: TRpDataFlashConexaoCliente;
+    FConexaoCliente: TRpDataFlashClientConnection;
     FProviderCustom: TRpDataFlashCustomProvider;
     FInternalProvider: TRpDataFlashCustomProvider;
     FProviderClass: string;
@@ -182,7 +182,7 @@ type
     property AfterGetParams;
     property Ranged;
     // custom propertyes
-    property ConexaoCliente : TRpDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
+    property ConexaoCliente : TRpDataFlashClientConnection read FConexaoCliente write FConexaoCliente;
     property ProviderCustom : TRpDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
@@ -749,14 +749,14 @@ begin
   else
   begin
     // se não esta conectado, tenta conectar
-    if not FConexaoCliente.Conectado then
+    if not FConexaoCliente.Connected then
     begin
-      FConexaoCliente.Conectar;
-      if not FConexaoCliente.Conectado then
+      FConexaoCliente.Connect;
+      if not FConexaoCliente.Connected then
       begin
         FPrepared := False;
         raise ERpDataFlashDataSetNoConnection.Create('Não foi possível estabelecer uma conexão com o servidor ('
-        + FConexaoCliente.Servidor + ':' + IntToStr(FConexaoCliente.Porta) + ').');
+        + FConexaoCliente.Server + ':' + IntToStr(FConexaoCliente.Port) + ').');
       end;
     end;
   end;

@@ -51,15 +51,15 @@ procedure Register;
 begin
   RegisterComponents('RpDataFlash - Comunicação TCP',
     [TRpDataFlashServerConnection,
-     TRpDataFlashConexaoCliente,
-     TRpDataFlashConexaoREST,
+     TRpDataFlashClientConnection,
+     TRpDataFlashRESTClient,
      TRpDataFlashComandController,
      TRpDataFlashDataSet,
      TRpDataFlashDataSetProvider,
      TRpDataFlashDataSetFormatter,
      TRpDataFlashCommandExecutor]);
 
-  RegisterComponentEditor(TRpDataFlashConexaoCliente, TRpDataFlashConexaoClienteEditor);
+  RegisterComponentEditor(TRpDataFlashClientConnection, TRpDataFlashConexaoClienteEditor);
   RegisterComponentEditor(TRpDataFlashDataSetProvider, TRpDataFlashEditorComandosProvider);
   RegisterComponentEditor(TRpDataFlashComandController, TRpDataFlashComandControllerEditor);
 
@@ -71,8 +71,8 @@ begin
   RegisterSelectionEditor(TRpDataFlashServerConnection, TRpDataFlashConexaoServerSelectionEditor);
 
   // units inseridas com o Client
-  RegisterSelectionEditor(TRpDataFlashConexaoCliente, TRpDataFlashConexaoClientSelectionEditor);
-  RegisterSelectionEditor(TRpDataFlashConexaoREST,    TRpDataFlashConexaoClientSelectionEditor);
+  RegisterSelectionEditor(TRpDataFlashClientConnection, TRpDataFlashConexaoClientSelectionEditor);
+  RegisterSelectionEditor(TRpDataFlashRESTClient,    TRpDataFlashConexaoClientSelectionEditor);
 
   // units inseridas com o CommandController
   RegisterSelectionEditor(TRpDataFlashComandController, TRpDataFlashCommandControllerSelectionEditor);
@@ -137,7 +137,7 @@ begin
   // force the provider and proxy methods on the server unit place
   Proc('uRpDataFlash.Types');
   Proc('uRpDataFlash.ProxyGenerator');
-  Proc('uRpDataFlash.ComandoHelper');
+  Proc('uRpDataFlash.CommandHelper');
 end;
 
 { TRpDataFlashCommandControllerSelectionEditor }
@@ -165,7 +165,7 @@ begin
   // force the provider and proxy methods on the server unit place
   Proc('uRpDataFlash.Types');
   Proc('uRpDataFlash.ProxyGenerator');
-  Proc('uRpDataFlash.ComandoHelper');
+  Proc('uRpDataFlash.CommandHelper');
 end;
 
 end.

@@ -20,7 +20,7 @@ type
 
   TRpDataFlashCommandExecutor = class(TComponent)
   private
-    FConexaoCliente: TRpDataFlashConexaoCliente;
+    FConexaoCliente: TRpDataFlashClientConnection;
     FVerificarConexao: Boolean;
     FComando: string;
     FLastError: string;
@@ -42,7 +42,7 @@ type
     function LastError : string;
     function LastStatusProcessamento : TRpDataFlashProcessingStatus;
   published
-    property ConexaoCliente : TRpDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
+    property ConexaoCliente : TRpDataFlashClientConnection read FConexaoCliente write FConexaoCliente;
     property VerificarConexao : Boolean read FVerificarConexao write FVerificarConexao default True;
     property Command : string read GetCommand write SetCommand;
     property Params : TRpDataFlashParametrosValueCollection read FParams write FParams;
@@ -142,7 +142,7 @@ begin
       if not Assigned(FConexaoCliente) then
         raise ERpDataFlashInvalidConnection.Create('Conexão cliente não foi configurada.');
 
-      if FVerificarConexao and (not FConexaoCliente.Conectado) then
+      if FVerificarConexao and (not FConexaoCliente.Connected) then
         raise ERpDataFlashInvalidConnection.Create('A conexão ainda não foi estabelecida.');
 
       if Trim(FComando) = EmptyStr then

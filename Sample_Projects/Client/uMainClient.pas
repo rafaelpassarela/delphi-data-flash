@@ -4,9 +4,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, uLRDF.Types, uLRDF.Component, DB, DBClient, uLRDF.DataSet,
-  Grids, DBGrids, ExtCtrls, DBCtrls, OleCtrls, SHDocVw, uLRDF.ProxyGenerator,
-  uLRDF.ExecutorComandos, uLRDF.Comando, Gauges;
+  Dialogs, StdCtrls, DB, DBClient, Grids, DBGrids, ExtCtrls, DBCtrls, OleCtrls, SHDocVw,
+  uRpDataFlash.ProxyGenerator, Gauges, uRpDataFlash.Types,
+  uRpDataFlash.DataSet, uRpDataFlash.CommandExecutor, uRpDataFlash.Components,
+  uRpDataFlash.CommandHelper;
 
 type
   TFormMainClient = class(TForm)
@@ -18,7 +19,7 @@ type
     ButtonConectar: TButton;
     ButtonDesconectar: TButton;
     MemoLog: TMemo;
-    LRDataFlashConexaoClienteTeste: TLRDataFlashConexaoCliente;
+    RpDataFlashClientConnectionTeste: TRpDataFlashClientConnection;
     ScrollBoxComandos: TScrollBox;
     ButtonSomarProxy: TButton;
     DBGrid1: TDBGrid;
@@ -29,21 +30,21 @@ type
     ButtonCloseDS: TButton;
     DBNavigatorPessoas: TDBNavigator;
     ButtonCommit: TButton;
-    LRDataFlashDataSetFormatter1: TLRDataFlashDataSetFormatter;
+    RpDataFlashDataSetFormatter1: TRpDataFlashDataSetFormatter;
     ButtonXMLData: TButton;
     WebBrowser1: TWebBrowser;
     LabelUser: TLabel;
     EditUser: TEdit;
     EditSenha: TEdit;
-    LRDataFlashExecutorComandoSomar: TLRDataFlashExecutorComando;
+    RpDataFlashCommandExecutorSomar: TRpDataFlashCommandExecutor;
     ButtonSomarExecutor: TButton;
     ButtonInverter: TButton;
-    LRDataFlashDataSetPessoas: TLRDataFlashDataSet;
-    LRDataFlashDataSetPessoasID: TIntegerField;
-    LRDataFlashDataSetPessoasNOME: TWideStringField;
-    LRDataFlashDataSetPessoasIDADE: TIntegerField;
-    LRDataFlashDataSetPessoasDATA_CADASTRO: TDateTimeField;
-    LRDataFlashDataSetPessoasSALARIO: TFloatField;
+    RpDataFlashDataSetPessoas: TRpDataFlashDataSet;
+    RpDataFlashDataSetPessoasID: TIntegerField;
+    RpDataFlashDataSetPessoasNOME: TWideStringField;
+    RpDataFlashDataSetPessoasIDADE: TIntegerField;
+    RpDataFlashDataSetPessoasDATA_CADASTRO: TDateTimeField;
+    RpDataFlashDataSetPessoasSALARIO: TFloatField;
     ButtonGetFile: TButton;
     ButtonSendFile: TButton;
     Gauge1: TGauge;
@@ -126,7 +127,7 @@ begin
   lFileData := TFileProxy.Create;
 
   if ProxyFactory.Arquivos.GetFile('c:\Daruma32.log', lFileData) then
-    lFileData.SaveToFile('c:\NOVO.txt')
+    lFileData.SaveToFile('c:\NewFile.txt')
   else
     ShowMessage( ProxyFactory.Arquivos.GetLastError );
 
