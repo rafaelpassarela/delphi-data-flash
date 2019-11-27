@@ -829,7 +829,7 @@ var
 begin
   // registrar os comandos do Collection
   // retorna todos os componentes Provider ligados ao server
-  if GetServer.UtilizarControllers then
+  if GetServer.UseControllers then
   begin
     lEnumProvider := GetServer.Providers.GetEnumerator;
     while (lEnumProvider.MoveNext) do
@@ -851,7 +851,7 @@ var
   lItemComando: TRpDataFlashComandItem;
 begin
   // registrar os comandos do Collection
-  if GetServer.UtilizarControllers then
+  if GetServer.UseControllers then
   begin
     // pega os controllers do servidor
     lEnumGrupos := GetServer.Controllers.GetEnumerator;
@@ -957,7 +957,7 @@ begin
     FListaSelecionados.Clear;
   end;
 
-  TProxyClassSupport.PrefixoCmd := GetServer.PrefixoBaseComandos;
+  TProxyClassSupport.PrefixoCmd := GetServer.BaseCommandPrefix;
   try
     ResultParam['RetornoProxy'].AsBase64 := GerarProxy;
     if (TipoBusca = trpFactory) and (FGerarClasses) then

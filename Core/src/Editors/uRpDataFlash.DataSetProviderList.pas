@@ -61,12 +61,12 @@ var
   i: Integer;
   lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TRpDataFlashConexaoCliente;
+  lClient: TRpDataFlashClientConnection;
 begin
   inherited;
   // obtem lista de comandos registrados
   lLista := TStringList.Create;
-  lClient := TRpDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashClientConnection.Create(nil);
 
   lCmdList := TRpDataFlashComandoList.Create;
 
@@ -87,7 +87,7 @@ begin
       except
         on E: Exception do
         begin
-          lClient.Desconectar;
+          lClient.Disconnect;
           ShowMessage('Erro verificando lista de providers. ' + E.Message);
         end;
       end;

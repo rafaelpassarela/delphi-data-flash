@@ -12,7 +12,7 @@ type
   protected
     procedure CarregaParametros; virtual;
     function CanAddProxyName(const AProxyName : string) : Boolean; virtual;
-    function GetConexaoCliente : TRpDataFlashConexaoCliente; virtual;
+    function GetConexaoCliente : TRpDataFlashClientConnection; virtual;
   public
     constructor Create(const ADesigner: IDesigner; APropCount: Integer); override;
     destructor Destroy; override;
@@ -42,7 +42,7 @@ procedure TRpDataFlashExecutorComandoList.CarregaParametros;
 var
   lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TRpDataFlashConexaoCliente;
+  lClient: TRpDataFlashClientConnection;
   lInfo: TRpDataFlashInfoCommand;
   i: Integer;
 
@@ -71,7 +71,7 @@ begin
   inherited;
   lInfo := nil;
   lLista := TStringList.Create;
-  lClient := TRpDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashClientConnection.Create(nil);
 
   lCmdList := TRpDataFlashComandoList.Create;
 
@@ -104,7 +104,7 @@ begin
       except
         on E: Exception do
         begin
-          lClient.Desconectar;
+          lClient.Disconnect;
           ShowMessage('Erro verificando lista de parâmetros. ' + E.Message);
         end;
       end;
@@ -137,7 +137,7 @@ begin
   Result := [paValueList, paSortList];
 end;
 
-function TRpDataFlashExecutorComandoList.GetConexaoCliente: TRpDataFlashConexaoCliente;
+function TRpDataFlashExecutorComandoList.GetConexaoCliente: TRpDataFlashClientConnection;
 begin
   Result := (GetComponent(0) as TRpDataFlashCommandExecutor).ConexaoCliente;
 end;
@@ -152,13 +152,13 @@ var
   i: Integer;
   lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TRpDataFlashConexaoCliente;
-  lConexCliente: TRpDataFlashConexaoCliente;
+  lClient: TRpDataFlashClientConnection;
+  lConexCliente: TRpDataFlashClientConnection;
 begin
   inherited;
   // obtem lista de comandos registrados
   lLista := TStringList.Create;
-  lClient := TRpDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashClientConnection.Create(nil);
 
   lCmdList := TRpDataFlashComandoList.Create;
 
@@ -179,7 +179,7 @@ begin
       except
         on E: Exception do
         begin
-          lClient.Desconectar;
+          lClient.Disconnect;
           ShowMessage('Erro verificando lista de comandos. ' + E.Message);
         end;
       end;

@@ -55,11 +55,11 @@ begin
   begin
     FormComandosSemAutenticacao := TFormComandosSemAutenticacao.Create(nil);
     try
-      FormComandosSemAutenticacao.LoadFromString( TRpDataFlashServerConnection(GetComponent(0)).ComandosSemAutenticacao );
+      FormComandosSemAutenticacao.LoadFromString( TRpDataFlashServerConnection(GetComponent(0)).WithoutAuthCommands);
 
       if FormComandosSemAutenticacao.ShowModal = mrOk then
       begin
-        TRpDataFlashServerConnection(GetComponent(0)).ComandosSemAutenticacao := FormComandosSemAutenticacao.SaveToString;
+        TRpDataFlashServerConnection(GetComponent(0)).WithoutAuthCommands:= FormComandosSemAutenticacao.SaveToString;
 //        Value := 'Total: ' + IntToStr(FormComandosSemAutenticacao.cdsComandos.RecordCount);
       end;
     finally

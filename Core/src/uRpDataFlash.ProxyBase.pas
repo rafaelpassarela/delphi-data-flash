@@ -17,10 +17,10 @@ type
     procedure DoAfterExecute(const AResult : string); virtual;
     function DoExecute : Boolean; override;
   private
-    procedure OnErroEnvio(Sender: TObject; const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
+    procedure OnSendingError(Sender: TObject; const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
   public
     function GetLastError : string;
-    function Executar(const pTcpClient : TRpDataFlashConexaoCliente) : Boolean; reintroduce;
+    function Executar(const pTcpClient : TRpDataFlashClientConnection) : Boolean; reintroduce;
   end;
 
   TRpDataFlashComandoServer = class(TRpDataFlashCommand)
@@ -51,21 +51,21 @@ begin
   Result := True;
 end;
 
-function TRpDataFlashComandoProxy.Executar(const pTcpClient : TRpDataFlashConexaoCliente): Boolean;
+function TRpDataFlashComandoProxy.Executar(const pTcpClient : TRpDataFlashClientConnection): Boolean;
 var
   lStrResult: string;
 begin
   FLastError := EmptyStr;
   try
     DoBeforeExecute;
-    pTcpClient.AoErroEnvio := OnErroEnvio;
+    pTcpClient.OnSendingError := OnSendingError;
     lStrResult := pTcpClient.Comunicar(Self, Params);
     DoAfterExecute(lStrResult);
     Result := True;
   except
     Result := False;
   end;
-  pTcpClient.AoErroEnvio := nil;
+  pTcpClient.OnSendingError := nil;
 end;
 
 function TRpDataFlashComandoProxy.GetCommand: string;
@@ -83,7 +83,7 @@ begin
   Result := FLastError;
 end;
 
-procedure TRpDataFlashComandoProxy.OnErroEnvio(Sender: TObject;
+procedure TRpDataFlashComandoProxy.OnSendingError(Sender: TObject;
   const AProtocolo: TRpDataFlashProtocol; const AException: Exception);
 begin
   FLastError := AException.Message + AProtocolo.Message;

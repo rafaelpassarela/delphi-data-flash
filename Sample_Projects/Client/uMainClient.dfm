@@ -21,32 +21,31 @@ object FormMainClient: TFormMainClient
   object LabelNomeServer: TLabel
     Left = 8
     Top = 16
-    Width = 70
+    Width = 76
     Height = 13
-    Caption = 'Nome Servidor'
+    Caption = 'Server Name/IP'
   end
   object LabelPorta: TLabel
     Left = 52
     Top = 43
-    Width = 26
+    Width = 20
     Height = 13
-    Caption = 'Porta'
+    Caption = 'Port'
   end
   object LabelFiltro: TLabel
     Left = 421
     Top = 188
-    Width = 81
+    Width = 62
     Height = 13
     Anchors = [akTop, akRight]
-    Caption = 'Filto de Abertura'
-    ExplicitLeft = 418
+    Caption = 'Default Filter'
   end
   object LabelUser: TLabel
     Left = 8
     Top = 72
-    Width = 76
+    Width = 52
     Height = 13
-    Caption = 'Usu'#225'rio / Senha'
+    Caption = 'User / Pwd'
   end
   object Gauge1: TGauge
     Left = 299
@@ -76,7 +75,7 @@ object FormMainClient: TFormMainClient
     Top = 99
     Width = 52
     Height = 25
-    Caption = 'Ver Log'
+    Caption = 'Log'
     TabOrder = 2
     OnClick = ButtonVerLogClick
   end
@@ -85,7 +84,7 @@ object FormMainClient: TFormMainClient
     Top = 99
     Width = 100
     Height = 25
-    Caption = 'Conectar'
+    Caption = 'Connect'
     TabOrder = 3
     OnClick = ButtonConectarClick
   end
@@ -94,7 +93,7 @@ object FormMainClient: TFormMainClient
     Top = 99
     Width = 100
     Height = 25
-    Caption = 'Desconectar'
+    Caption = 'Disconnect'
     Enabled = False
     TabOrder = 4
     OnClick = ButtonDesconectarClick
@@ -111,7 +110,6 @@ object FormMainClient: TFormMainClient
       'group by ID, NOME, IDADE, DATA_CADASTRO, '
       'SALARIO')
     TabOrder = 5
-    ExplicitHeight = 312
   end
   object ScrollBoxComandos: TScrollBox
     Left = 722
@@ -120,7 +118,6 @@ object FormMainClient: TFormMainClient
     Height = 472
     Align = alRight
     TabOrder = 6
-    ExplicitHeight = 448
     object ButtonSomarProxy: TButton
       AlignWithMargins = True
       Left = 8
@@ -177,12 +174,9 @@ object FormMainClient: TFormMainClient
       Margins.Right = 8
       Margins.Bottom = 4
       Align = alTop
-      Caption = 'Solicitar Arquivo'
+      Caption = 'Request File'
       TabOrder = 3
       OnClick = ButtonGetFileClick
-      ExplicitLeft = -30
-      ExplicitTop = 124
-      ExplicitWidth = 131
     end
     object ButtonSendFile: TButton
       AlignWithMargins = True
@@ -195,12 +189,9 @@ object FormMainClient: TFormMainClient
       Margins.Right = 8
       Margins.Bottom = 4
       Align = alTop
-      Caption = 'Enviar Arquivo'
+      Caption = 'Send File'
       TabOrder = 4
       OnClick = ButtonSendFileClick
-      ExplicitLeft = -30
-      ExplicitTop = 124
-      ExplicitWidth = 131
     end
   end
   object DBGrid1: TDBGrid
@@ -223,7 +214,7 @@ object FormMainClient: TFormMainClient
     Width = 112
     Height = 25
     Anchors = [akTop, akRight]
-    Caption = 'Abrir DataSet'
+    Caption = 'Open DataSet'
     TabOrder = 8
     OnClick = ButtonOpenDSClick
   end
@@ -299,22 +290,19 @@ object FormMainClient: TFormMainClient
     Height = 21
     TabOrder = 16
   end
-  object LRDataFlashConexaoClienteTeste: TLRDataFlashConexaoCliente
-    Porta = 7200
-    Servidor = 'localhost'
-    OnNovoLog = LRDataFlashConexaoClienteTesteNovoLog
-    OnStatus = LRDataFlashConexaoClienteTesteStatus
+  object RpDataFlashClientConnectionTeste: TRpDataFlashClientConnection
+    Server = 'LOCALHOST'
     UserName = 'TESTE'
     Password = '1234'
     Left = 256
     Top = 24
   end
   object DataSource1: TDataSource
-    DataSet = LRDataFlashDataSetPessoas
+    DataSet = RpDataFlashDataSetPessoas
     Left = 256
     Top = 88
   end
-  object LRDataFlashDataSetFormatter1: TLRDataFlashDataSetFormatter
+  object RpDataFlashDataSetFormatter1: TRpDataFlashDataSetFormatter
     DateMask = 'dd.mm.yyyy'
     DateTimeMask = 'dd.mm.yyyy hh:nn:ss'
     TimeMask = 'hh:nn:ss:zzz'
@@ -324,27 +312,14 @@ object FormMainClient: TFormMainClient
     Left = 224
     Top = 56
   end
-  object LRDataFlashExecutorComandoSomar: TLRDataFlashExecutorComando
-    ConexaoCliente = LRDataFlashConexaoClienteTeste
-    Comando = 'Somar'
-    Parametros = <
-      item
-        Nome = 'A'
-        TipoValor = tvpFloat
-      end
-      item
-        Nome = 'B'
-        TipoValor = tvpFloat
-      end>
-    Retornos = <
-      item
-        Nome = 'X'
-        TipoValor = tvpFloat
-      end>
+  object RpDataFlashCommandExecutorSomar: TRpDataFlashCommandExecutor
+    ConexaoCliente = RpDataFlashClientConnectionTeste
+    Params = <>
+    ResultParams = <>
     Left = 720
     Top = 40
   end
-  object LRDataFlashDataSetPessoas: TLRDataFlashDataSet
+  object RpDataFlashDataSetPessoas: TRpDataFlashDataSet
     Aggregates = <>
     FieldDefs = <
       item
@@ -375,32 +350,32 @@ object FormMainClient: TFormMainClient
       end>
     IndexDefs = <>
     StoreDefs = True
-    ConexaoCliente = LRDataFlashConexaoClienteTeste
+    ConexaoCliente = RpDataFlashClientConnectionTeste
     ProviderClass = 'DFPCadastro_Pessoas'
     Params = <>
-    Formatter = LRDataFlashDataSetFormatter1
+    Formatter = RpDataFlashDataSetFormatter1
     Left = 256
     Top = 56
-    object LRDataFlashDataSetPessoasID: TIntegerField
+    object RpDataFlashDataSetPessoasID: TIntegerField
       FieldName = 'ID'
       Origin = 'PESSOAS.ID'
       ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
       Required = True
     end
-    object LRDataFlashDataSetPessoasNOME: TWideStringField
+    object RpDataFlashDataSetPessoasNOME: TWideStringField
       FieldName = 'NOME'
       Origin = 'PESSOAS.NOME'
       Size = 30
     end
-    object LRDataFlashDataSetPessoasIDADE: TIntegerField
+    object RpDataFlashDataSetPessoasIDADE: TIntegerField
       FieldName = 'IDADE'
       Origin = 'PESSOAS.IDADE'
     end
-    object LRDataFlashDataSetPessoasDATA_CADASTRO: TDateTimeField
+    object RpDataFlashDataSetPessoasDATA_CADASTRO: TDateTimeField
       FieldName = 'DATA_CADASTRO'
       Origin = 'PESSOAS.DATA_CADASTRO'
     end
-    object LRDataFlashDataSetPessoasSALARIO: TFloatField
+    object RpDataFlashDataSetPessoasSALARIO: TFloatField
       FieldName = 'SALARIO'
       Origin = 'PESSOAS.SALARIO'
     end

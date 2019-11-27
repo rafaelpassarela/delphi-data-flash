@@ -15,10 +15,10 @@ type
   private
     class var _LocalHostIP : string;
   private
-    FDoConectar: TRpDataFlashOnConnectEvent;
-    FDoDesconectar: TRpDataFlashOnConnectEvent;
-    FAoConectar: TRpDataFlashOnConnectOnServer;
-    FAoSemServico: TRpDataFlashOnNoService;
+    FDoConnect: TRpDataFlashOnConnectEvent;
+    FDoDisconnect: TRpDataFlashOnConnectEvent;
+    FOnConnect: TRpDataFlashOnConnectOnServer;
+    FOnNoService: TRpDataFlashOnNoService;
     FNovaExcecao: TRpDataFlashOnExceptionHandler;
     FConector: TIdTCPClientCustom;
     FOwner: TComponent;
@@ -30,7 +30,7 @@ type
     function GetConector: TIdTCPClientCustom; virtual;
     function GetURL: string; virtual;
     procedure Reconectar(const AException : Exception);
-    procedure Desconectar;
+    procedure Disconnect;
     procedure ConfigurarConector(const pConectionTimeout : Integer; const pReadTimeout : Integer); virtual; abstract;
     procedure InternalConectar; virtual;
     function GetServerName(const AConvert : Boolean; const AHost : string) : string;
@@ -42,14 +42,14 @@ type
       const pConfigurarConexao : Boolean; const pPort : Integer;
       const pConectionTimeout : Integer; const pReadTimeout : Integer;
       const pConvertLocalHost : Boolean);
-    function Conectar : Boolean;
+    function Connect : Boolean;
 
     property Conector : TIdTCPClientCustom read GetConector;
     property IsConectado : Boolean read GetIsConectado;
-    property AoConectar: TRpDataFlashOnConnectOnServer read FAoConectar write FAoConectar;
-    property AoSemServico: TRpDataFlashOnNoService read FAoSemServico write FAoSemServico;
-    property DoConectar: TRpDataFlashOnConnectEvent read FDoConectar write FDoConectar;
-    property DoDesconectar : TRpDataFlashOnConnectEvent read FDoDesconectar write FDoDesconectar;
+    property OnConnect: TRpDataFlashOnConnectOnServer read FOnConnect write FOnConnect;
+    property OnNoService: TRpDataFlashOnNoService read FOnNoService write FOnNoService;
+    property DoConnect: TRpDataFlashOnConnectEvent read FDoConnect write FDoConnect;
+    property DoDisconnect : TRpDataFlashOnConnectEvent read FDoDisconnect write FDoDisconnect;
     property NovaExcecao: TRpDataFlashOnExceptionHandler read FNovaExcecao write FNovaExcecao;
     property URL : string read GetURL;
   end;
@@ -81,7 +81,7 @@ uses
 
 { TRpDataFlashConnectionHelperCustom }
 
-function TRpDataFlashConnectionHelperCustom.Conectar: Boolean;
+function TRpDataFlashConnectionHelperCustom.Connect: Boolean;
 var
   lAutMessage: string;
 begin
@@ -107,8 +107,8 @@ begin
     else
       Result := True;
 
-    if Assigned(FAoConectar) then
-      FAoConectar(Self, FServidor, FPorta);
+    if Assigned(FOnConnect) then
+      FOnConnect(Self, FServidor, FPorta);
   except
     on E: ERpDataFlashInvalidConnection do
       raise;
@@ -118,7 +118,7 @@ begin
       // pode estar conectado, neste caso desconecta o cliente
       NovaExcecao(E);
       if IsConectado then
-        Desconectar;
+        Disconnect;
       raise;
     end;
 
@@ -149,8 +149,8 @@ begin
       FServidor := lConfigurador.Server;
       FPorta := lConfigurador.Porta;
       // configura a conexão original
-      TRpDataFlashCustomClientConnection(FOwner).Servidor := FServidor;
-      TRpDataFlashCustomClientConnection(FOwner).Porta := FPorta;
+      TRpDataFlashCustomClientConnection(FOwner).Server := FServidor;
+      TRpDataFlashCustomClientConnection(FOwner).Port := FPorta;
     end;
   finally
     FreeAndNil(lConfigurador);
@@ -162,10 +162,10 @@ begin
   FOwner := AOwner;
 end;
 
-procedure TRpDataFlashConnectionHelperCustom.Desconectar;
+procedure TRpDataFlashConnectionHelperCustom.Disconnect;
 begin
-  if Assigned(FDoDesconectar) then
-    FDoDesconectar; // Desconectar que está no client
+  if Assigned(FDoDisconnect) then
+    FDoDisconnect; // Desconectar que está no client
 end;
 
 function TRpDataFlashConnectionHelperCustom.GetConector: TIdTCPClientCustom;
@@ -215,14 +215,14 @@ begin
              and ConfiguradorConexao;
 
   if lReconectar then
-    DoConectar // DoConectar que esta no Client
+    DoConnect // DoConectar que esta no Client
   else
   begin
-    if Assigned(FAoSemServico) then
-      FAoSemServico(Self, FServidor, FPorta, AException, lReconectar);
+    if Assigned(FOnNoService) then
+      FOnNoService(Self, FServidor, FPorta, AException, lReconectar);
 
     if lReconectar then
-      DoConectar // DoConectar que esta no Client
+      DoConnect // DoConectar que esta no Client
   end;
 end;
 

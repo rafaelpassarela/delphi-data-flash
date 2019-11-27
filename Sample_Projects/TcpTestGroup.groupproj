@@ -1,96 +1,84 @@
-﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-		<PropertyGroup>
-			<ProjectGuid>{690F71C7-EFBE-4BD8-A160-D9B2D357177F}</ProjectGuid>
-		</PropertyGroup>
-		<ItemGroup>
-			<Projects Include="Client\Client.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="Server\Server.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="..\..\Common\RpCriptografia.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="..\..\Functions\RpCommonFunctions.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="..\LRDataFlashTCPcomm.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="..\LRDataFlashTCPdcomm.dproj">
-				<Dependencies/>
-			</Projects>
-		</ItemGroup>
-		<ProjectExtensions>
-			<Borland.Personality>Default.Personality.12</Borland.Personality>
-			<Borland.ProjectType/>
-			<BorlandProject>
-				<Default.Personality/>
-			</BorlandProject>
-		</ProjectExtensions>
-		<Target Name="Client">
-			<MSBuild Projects="Client\Client.dproj"/>
-		</Target>
-		<Target Name="Client:Clean">
-			<MSBuild Projects="Client\Client.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="Client:Make">
-			<MSBuild Projects="Client\Client.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="Server">
-			<MSBuild Projects="Server\Server.dproj"/>
-		</Target>
-		<Target Name="Server:Clean">
-			<MSBuild Projects="Server\Server.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="Server:Make">
-			<MSBuild Projects="Server\Server.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="RpCriptografia">
-			<MSBuild Projects="..\..\Common\RpCriptografia.dproj"/>
-		</Target>
-		<Target Name="RpCriptografia:Clean">
-			<MSBuild Projects="..\..\Common\RpCriptografia.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="RpCriptografia:Make">
-			<MSBuild Projects="..\..\Common\RpCriptografia.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="RpCommonFunctions">
-			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj"/>
-		</Target>
-		<Target Name="RpCommonFunctions:Clean">
-			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="RpCommonFunctions:Make">
-			<MSBuild Projects="..\..\Functions\RpCommonFunctions.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="LRDataFlashTCPcomm">
-			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj"/>
-		</Target>
-		<Target Name="LRDataFlashTCPcomm:Clean">
-			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="LRDataFlashTCPcomm:Make">
-			<MSBuild Projects="..\LRDataFlashTCPcomm.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="LRDataFlashTCPdcomm">
-			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj"/>
-		</Target>
-		<Target Name="LRDataFlashTCPdcomm:Clean">
-			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="LRDataFlashTCPdcomm:Make">
-			<MSBuild Projects="..\LRDataFlashTCPdcomm.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="Build">
-			<CallTarget Targets="Client;Server;RpCriptografia;RpCommonFunctions;LRDataFlashTCPcomm;LRDataFlashTCPdcomm"/>
-		</Target>
-		<Target Name="Clean">
-			<CallTarget Targets="Client:Clean;Server:Clean;RpCriptografia:Clean;RpCommonFunctions:Clean;LRDataFlashTCPcomm:Clean;LRDataFlashTCPdcomm:Clean"/>
-		</Target>
-		<Target Name="Make">
-			<CallTarget Targets="Client:Make;Server:Make;RpCriptografia:Make;RpCommonFunctions:Make;LRDataFlashTCPcomm:Make;LRDataFlashTCPdcomm:Make"/>
-		</Target>
-		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
-	</Project>
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{690F71C7-EFBE-4BD8-A160-D9B2D357177F}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Client\Client.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Server\Server.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Client">
+        <MSBuild Projects="Client\Client.dproj"/>
+    </Target>
+    <Target Name="Client:Clean">
+        <MSBuild Projects="Client\Client.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Client:Make">
+        <MSBuild Projects="Client\Client.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Server">
+        <MSBuild Projects="Server\Server.dproj"/>
+    </Target>
+    <Target Name="Server:Clean">
+        <MSBuild Projects="Server\Server.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Server:Make">
+        <MSBuild Projects="Server\Server.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RpEncryption">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj"/>
+    </Target>
+    <Target Name="RpEncryption:Clean">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RpEncryption:Make">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RpDataFlashCommR">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj"/>
+    </Target>
+    <Target Name="RpDataFlashCommR:Clean">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RpDataFlashCommR:Make">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RpDataFlashCommD">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj"/>
+    </Target>
+    <Target Name="RpDataFlashCommD:Clean">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RpDataFlashCommD:Make">
+        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Client;Server;RpEncryption;RpDataFlashCommR;RpDataFlashCommD"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Client:Clean;Server:Clean;RpEncryption:Clean;RpDataFlashCommR:Clean;RpDataFlashCommD:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Client:Make;Server:Make;RpEncryption:Make;RpDataFlashCommR:Make;RpDataFlashCommD:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
