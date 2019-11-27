@@ -10,14 +10,9 @@ uses
   Dialogs, Windows, uRpAlgorithms, uRpStringFunctions;
 
 type
-  TLRDataFlashDataSet = class;
+  TRpDataFlashDataSet = class;
 
-  ELRDataFlashDataSetNoClient = class(Exception);
-  ELRDataFlashDataSetNoConnection = class(Exception);
-  ELRDataFlashDataSetConexaoResult = class(Exception);
-  ELRDataFlashDataSetNoCommand = class(Exception);
-
-  TLRDataFlashDataSetFormatter = class(TComponent, IFormaterMaskValues)
+  TRpDataFlashDataSetFormatter = class(TComponent, IFormaterMaskValues)
   private
     FDateMask: string;
     FDateTimeMask: string;
@@ -52,11 +47,11 @@ type
     function QuoteChar: Char;
   end;
 
-  TLRDataFlashDataSet = class(TCustomClientDataSet)
+  TRpDataFlashDataSet = class(TCustomClientDataSet)
   private
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
     FComandoEnviar: TRpDataFlashSendCommand;
-    FConexaoCliente: TLRDataFlashConexaoCliente;
+    FConexaoCliente: TRpDataFlashConexaoCliente;
     FProviderCustom: TRpDataFlashCustomProvider;
     FInternalProvider: TRpDataFlashCustomProvider;
     FProviderClass: string;
@@ -187,7 +182,7 @@ type
     property AfterGetParams;
     property Ranged;
     // custom propertyes
-    property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
+    property ConexaoCliente : TRpDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
     property ProviderCustom : TRpDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
@@ -197,30 +192,30 @@ type
 
 implementation
 
-{ TLRDataFlashDataSet }
+{ TRpDataFlashDataSet }
 
-function TLRDataFlashDataSet.ApplyUpdates(MaxErrors: Integer): Integer;
+function TRpDataFlashDataSet.ApplyUpdates(MaxErrors: Integer): Integer;
 begin
   Result := DoInternalApplyUpdates(MaxErrors, GetDefaultFormatter);
 end;
 
-function TLRDataFlashDataSet.ApplyUpdates(MaxErrors: Integer;
+function TRpDataFlashDataSet.ApplyUpdates(MaxErrors: Integer;
   AFormatter: IFormaterMaskValues): Integer;
 begin
   Result := DoInternalApplyUpdates(MaxErrors, AFormatter);
 end;
 
-procedure TLRDataFlashDataSet.Commit;
+procedure TRpDataFlashDataSet.Commit;
 begin
   DoCommit(False);
 end;
 
-procedure TLRDataFlashDataSet.CommitRetaining;
+procedure TRpDataFlashDataSet.CommitRetaining;
 begin
   DoCommit(True);
 end;
 
-constructor TLRDataFlashDataSet.Create(AOwner: TComponent);
+constructor TRpDataFlashDataSet.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FLockData := False;
@@ -234,7 +229,7 @@ begin
   PrepararComandoEnvio;
 end;
 
-destructor TLRDataFlashDataSet.Destroy;
+destructor TRpDataFlashDataSet.Destroy;
 begin
   FreeAndNil(FProviderCustom);
   FreeAndNil(FInternalProvider);
@@ -244,7 +239,7 @@ begin
   inherited Destroy;  //ainda fala sobrescrever alguns métodos para evitar erro
 end;
 
-function TLRDataFlashDataSet.DoInternalApplyUpdates(MaxErrors: Integer;
+function TRpDataFlashDataSet.DoInternalApplyUpdates(MaxErrors: Integer;
   AFormatter: IFormaterMaskValues): Integer;
 var
   lDelta: TCustomClientDataSet;
@@ -304,7 +299,7 @@ begin
       begin
         Result := FComandoEnviar.ResultParam['ApplyErrCount'].AsInteger;
         if Result > MaxErrors then
-          raise ELRDataFlashDataSetConexaoResult.Create('Erro aplicando alterações no banco de dados. ' + FComandoEnviar.LastError);
+          raise ERpDataFlashDataSetConexaoResult.Create('Erro aplicando alterações no banco de dados. ' + FComandoEnviar.LastError);
         // marca internamente as alterações como resolvidas, para não entrarem em um novo apply
         lRecNo := Self.RecNo;
 
@@ -323,7 +318,7 @@ begin
         end;
       end
       else
-        raise ELRDataFlashDataSetConexaoResult.Create('Erro aplicando alterações no banco de dados. ' + FComandoEnviar.LastError);
+        raise ERpDataFlashDataSetConexaoResult.Create('Erro aplicando alterações no banco de dados. ' + FComandoEnviar.LastError);
     end;
     FreeAndNil(lChange);
     FreeAndNil(lDelta);
@@ -334,7 +329,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashDataSet.DoBeforeOpen;
+procedure TRpDataFlashDataSet.DoBeforeOpen;
 begin
   if FLockData then
     Exit;
@@ -369,12 +364,12 @@ begin
     else
     begin
       FPrepared := False;
-      raise ELRDataFlashDataSetConexaoResult.Create('Erro abrindo dataset. ' + FComandoEnviar.LastError);
+      raise ERpDataFlashDataSetConexaoResult.Create('Erro abrindo dataset. ' + FComandoEnviar.LastError);
     end;
   end;
 end;
 
-procedure TLRDataFlashDataSet.DoBeforeRefresh;
+procedure TRpDataFlashDataSet.DoBeforeRefresh;
 begin
   inherited;
 
@@ -383,7 +378,7 @@ begin
     CheckBrowseMode;
 
     if Self.ChangeCount > 0 then
-      raise ELRDataFlashDataSetConexaoResult.Create('Deve aplicar as atualizações antes de atualizar os dados.')
+      raise ERpDataFlashDataSetConexaoResult.Create('Deve aplicar as atualizações antes de atualizar os dados.')
     else
     begin
       if Active then
@@ -400,13 +395,13 @@ begin
     end;
   end
   else
-    raise ELRDataFlashDataSetConexaoResult.Create('O dataset não está aberto.');
+    raise ERpDataFlashDataSetConexaoResult.Create('O dataset não está aberto.');
 
   // verificar um meio mais "elegante" de evitar o AfterRefresh do TCustomClintDataSet
   SysUtils.Abort;
 end;
 
-procedure TLRDataFlashDataSet.DoCommit(const pRetaining: Boolean);
+procedure TRpDataFlashDataSet.DoCommit(const pRetaining: Boolean);
 begin
   if pRetaining then
     PreparaComando(opdsCommitRetaining)
@@ -416,10 +411,10 @@ begin
   FConexaoCliente.Comunicar(FComandoEnviar);
 
   if not FComandoEnviar.ReturnStatus then
-    raise ELRDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
+    raise ERpDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
 end;
 
-//function TLRDataFlashDataSet.GetAppServer: IAppServer;
+//function TRpDataFlashDataSet.GetAppServer: IAppServer;
 //begin
 //  try
 //    Result := inherited GetAppServer;
@@ -428,7 +423,7 @@ end;
 //  end;
 //end;
 
-function TLRDataFlashDataSet.GetDefaultFormatter: IFormaterMaskValues;
+function TRpDataFlashDataSet.GetDefaultFormatter: IFormaterMaskValues;
 begin
   if Assigned(FFormatter) then
     Result := FFormatter
@@ -436,18 +431,18 @@ begin
     Result := TFormatValuesDefault.Create;
 end;
 
-function TLRDataFlashDataSet.GetParams: TRpDataSetParams;
+function TRpDataFlashDataSet.GetParams: TRpDataSetParams;
 begin
   FParams.AutoCreateParam := FAutoCreateParams;
   Result := FParams;
 end;
 
-function TLRDataFlashDataSet.GetProviderClass: string;
+function TRpDataFlashDataSet.GetProviderClass: string;
 begin
   Result := Trim(FProviderClass);
 end;
 
-function TLRDataFlashDataSet.GetSQL(const pOperacao: TRpDataFlashDataSetOperations): string;
+function TRpDataFlashDataSet.GetSQL(const pOperacao: TRpDataFlashDataSetOperations): string;
 var
   lTemProvider: Boolean;
 begin
@@ -460,7 +455,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashDataSet.InternalInitFieldDefs;
+procedure TRpDataFlashDataSet.InternalInitFieldDefs;
 var
   lCds : TCustomClientDataSet;
   lOldState: Boolean;
@@ -508,7 +503,7 @@ begin
         end;
       end
       else
-        raise ELRDataFlashDataSetConexaoResult.Create('Erro abrindo dataset. ' + FComandoEnviar.LastError);
+        raise ERpDataFlashDataSetConexaoResult.Create('Erro abrindo dataset. ' + FComandoEnviar.LastError);
     end;
 
     FPrepared := False;
@@ -518,7 +513,7 @@ begin
     inherited;
 end;
 
-procedure TLRDataFlashDataSet.Open(const AWhereCondition : string);
+procedure TRpDataFlashDataSet.Open(const AWhereCondition : string);
 begin
   FOpenWhere := AWhereCondition;
   if not FInfoQuery then
@@ -526,53 +521,27 @@ begin
 //  FOpenWhere := '';  //nao limpa a var para nao perder o efeito no refresh
 end;
 
-procedure TLRDataFlashDataSet.OpenCursor(InfoQuery: Boolean);
+procedure TRpDataFlashDataSet.OpenCursor(InfoQuery: Boolean);
 begin
   FInfoQuery := InfoQuery;
   if FInfoQuery then
     InternalInitFieldDefs
   else
     inherited;
-(*
-[203A0720]{dbrtl100.bpl}   DB.DatabaseError (Line 2478, "DB.pas" + 2) + $35
-[203481CF]{dsnap100.bpl}   DBClient.TCustomClientDataSet.GetAppServer (Line 1684, "DBClient.pas" + 22) + $1D
-[2034F135]{dsnap100.bpl}   DBClient.TCustomClientDataSet.DoGetRecords (Line 4598, "DBClient.pas" + 4) + $37
-[2034676B]{dsnap100.bpl}   DBClient.TCustomClientDataSet.OpenCursor (Line 1147, "DBClient.pas" + 25) + $3F
-[1870E54C]{LRDataFlashcomm.bpl} ULRDataFlashdataset.TLRDataFlashDataSet.OpenCursor + $0
-[203AF789]{dbrtl100.bpl}   DB.TDataSet.InitFieldDefs (Line 9355, "DB.pas" + 4) + $9
-[203AF7A1]{dbrtl100.bpl}   DB.TDataSet.InitFieldDefs (Line 9356, "DB.pas" + 5) + $13
-[203A11F3]{dbrtl100.bpl}   DB.TDefCollection.UpdateDefs (Line 2811, "DB.pas" + 5) + $5
-[203A1E64]{dbrtl100.bpl}   DB.TFieldDefs.Update (Line 3167, "DB.pas" + 0) + $8
-[225F6845]{dcldb100.bpl}   DSDesign.TFieldsEditor.DoAddFields (Line 813, "DSDesign.pas" + 5) + $C
-[225F6862]{dcldb100.bpl}   DSDesign.TFieldsEditor.DoAddFields (Line 815, "DSDesign.pas" + 7) + $B
-[225F67D5]{dcldb100.bpl}   DSDesign.TFieldsEditor.AddFields (Line 798, "DSDesign.pas" + 1) + $2
-[225F7996]{dcldb100.bpl}   DSDesign.TFieldsEditor.AddAllFields (Line 1340, "DSDesign.pas" + 0) + $2
-[201305E7]{vcl100.bpl  }   Menus.TMenuItem.Click (Line 2283, "Menus.pas" + 14) + $8
-[20131B0F]{vcl100.bpl  }   Menus.TMenu.DispatchCommand (Line 3008, "Menus.pas" + 5) + $2
-[20132C6E]{vcl100.bpl  }   Menus.TPopupList.WndProc (Line 3798, "Menus.pas" + 4) + $E
-[20132BBD]{vcl100.bpl  }   Menus.TPopupList.MainWndProc (Line 3779, "Menus.pas" + 2) + $5
-[20040E4C]{rtl100.bpl  }   Classes.StdWndProc (Line 11583, "common\Classes.pas" + 8) + $0
-(000039E3){IDEFixPack.dll} [076D49E3]
-[201625F0]{vcl100.bpl  }   Forms.TApplication.ProcessMessage (Line 8105, "Forms.pas" + 23) + $1
-[2016262A]{vcl100.bpl  }   Forms.TApplication.HandleMessage (Line 8124, "Forms.pas" + 1) + $4
-[2016291F]{vcl100.bpl  }   Forms.TApplication.Run (Line 8223, "Forms.pas" + 20) + $3
-(00003312){IDEFixPack.dll} [076D4312]
-[0042297A]{bds.exe     }   bds.bds (Line 195, "" + 7) + $7
-*)
 end;
 
-function TLRDataFlashDataSet.PreparaComando(const pOperacao: TRpDataFlashDataSetOperations): Boolean;
+function TRpDataFlashDataSet.PreparaComando(const pOperacao: TRpDataFlashDataSetOperations): Boolean;
 begin
   // vai no servidor buscar o XML Data
   if ProviderClass <> EmptyStr then
-    FComandoEnviar.SetComando(ProviderClass)
+    FComandoEnviar.SetCommand(ProviderClass)
   else
   begin
     if FProviderCustom.CustomCommand = EmptyStr then
-      raise ELRDataFlashDataSetNoCommand.Create('Nenhum comando foi informado para a comunicação com o servidor.');
+      raise ERpDataFlashDataSetNoCommand.Create('Nenhum comando foi informado para a comunicação com o servidor.');
     // deve conter uma classe genérica, mas cada banco trata de uma forma a conexão
     // logo a classe generica deve ser implementada no servidor
-    FComandoEnviar.SetComando( FProviderCustom.CustomCommand );
+    FComandoEnviar.SetCommand( FProviderCustom.CustomCommand );
 //    FComandoEnviar.Parametro['CustomParams'].AsBase64 := ProviderCustom.GetAsString;
   end;
   FComandoEnviar.Param['Operacao'].AsInteger := Ord(pOperacao);
@@ -584,7 +553,7 @@ begin
   Result := True;
 end;
 
-procedure TLRDataFlashDataSet.PrepararComandoEnvio;
+procedure TRpDataFlashDataSet.PrepararComandoEnvio;
 begin
   FComandoEnviar := TRpDataFlashSendCommand.Create;
 
@@ -604,7 +573,7 @@ begin
   FComandoEnviar.Params.AddResult('ApplyErrCount', 0, tvpInteger);
 end;
 
-function TLRDataFlashDataSet.PreparaSelect(const pSQLBase: string;
+function TRpDataFlashDataSet.PreparaSelect(const pSQLBase: string;
   pFormatterMask: IFormaterMaskValues): string;
 var
   lSqlTratado: string;
@@ -667,7 +636,7 @@ begin
   Result := lSqlTratado;
 end;
 
-function TLRDataFlashDataSet.PreparaSQL(const pSQLBase : string; const pFields : TFields;
+function TRpDataFlashDataSet.PreparaSQL(const pSQLBase : string; const pFields : TFields;
   pFormatterMask : IFormaterMaskValues) : string;
 var
   i: Integer;
@@ -710,7 +679,7 @@ begin
   Result := Trim(Result);
 end;
 
-procedure TLRDataFlashDataSet.Prepare;
+procedure TRpDataFlashDataSet.Prepare;
 begin
   if FProviderClass <> EmptyStr then
   begin
@@ -720,18 +689,18 @@ begin
     if FComandoEnviar.ReturnStatus then
       FInternalProvider.SetFromString( FComandoEnviar.ResultParam['XMLData'].AsBase64 )
     else
-      raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
+      raise ERpDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
   end;
 
   FPrepared := True;
 end;
 
-procedure TLRDataFlashDataSet.Rollback;
+procedure TRpDataFlashDataSet.Rollback;
 begin
   DoRollback(False);
 end;
 
-procedure TLRDataFlashDataSet.DoRollback(const pRetaining: Boolean);
+procedure TRpDataFlashDataSet.DoRollback(const pRetaining: Boolean);
 begin
   if pRetaining then
     PreparaComando(opdsRollbackRetaining)
@@ -741,41 +710,41 @@ begin
   FConexaoCliente.Comunicar(FComandoEnviar);
 
   if not FComandoEnviar.ReturnStatus then
-    raise ELRDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
+    raise ERpDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
 end;
 
-procedure TLRDataFlashDataSet.FetchParams;
+procedure TRpDataFlashDataSet.FetchParams;
 begin
 // DUMMY -> don't make any action
 end;
 
-procedure TLRDataFlashDataSet.RollbackRetaining;
+procedure TRpDataFlashDataSet.RollbackRetaining;
 begin
   DoRollback(True);
 end;
 
-procedure TLRDataFlashDataSet.SetParams(const Value: TRpDataSetParams);
+procedure TRpDataFlashDataSet.SetParams(const Value: TRpDataSetParams);
 begin
 //  FParams := Value;
   FParams.Assign(Value);
 end;
 
-procedure TLRDataFlashDataSet.StartTransaction;
+procedure TRpDataFlashDataSet.StartTransaction;
 begin
   if PreparaComando(opdsStartTrans) then
   begin
     FConexaoCliente.Comunicar(FComandoEnviar);
     if not FComandoEnviar.ReturnStatus then
-      raise ELRDataFlashDataSetConexaoResult.Create('Erro iniciando transação. ' + FComandoEnviar.LastError);
+      raise ERpDataFlashDataSetConexaoResult.Create('Erro iniciando transação. ' + FComandoEnviar.LastError);
   end;
 end;
 
-function TLRDataFlashDataSet.ValidServer: Boolean;
+function TRpDataFlashDataSet.ValidServer: Boolean;
 begin
   if not Assigned(FConexaoCliente) then
   begin
     FPrepared := False;
-    raise ELRDataFlashDataSetNoClient.Create('A conexão cliente não foi informada.');
+    raise ERpDataFlashDataSetNoClient.Create('A conexão cliente não foi informada.');
   end
   else
   begin
@@ -786,7 +755,7 @@ begin
       if not FConexaoCliente.Conectado then
       begin
         FPrepared := False;
-        raise ELRDataFlashDataSetNoConnection.Create('Não foi possível estabelecer uma conexão com o servidor ('
+        raise ERpDataFlashDataSetNoConnection.Create('Não foi possível estabelecer uma conexão com o servidor ('
         + FConexaoCliente.Servidor + ':' + IntToStr(FConexaoCliente.Porta) + ').');
       end;
     end;
@@ -827,19 +796,19 @@ begin
   Result := 'hh:nn:ss';
 end;
 
-{ TLRDataFlashDataSetFormater }
+{ TRpDataFlashDataSetFormatter }
 
-function TLRDataFlashDataSetFormatter.BoolFalseValue: string;
+function TRpDataFlashDataSetFormatter.BoolFalseValue: string;
 begin
   Result := FBoolFalse;
 end;
 
-function TLRDataFlashDataSetFormatter.BoolTrueValue: string;
+function TRpDataFlashDataSetFormatter.BoolTrueValue: string;
 begin
   Result := FBoolTrue;
 end;
 
-constructor TLRDataFlashDataSetFormatter.Create(AOwner: TComponent);
+constructor TRpDataFlashDataSetFormatter.Create(AOwner: TComponent);
 begin
   inherited;
   FDateMask     := 'dd.mm.yyyy';
@@ -850,22 +819,22 @@ begin
   FQuoteChr     := '''';
 end;
 
-function TLRDataFlashDataSetFormatter.DateFormat: string;
+function TRpDataFlashDataSetFormatter.DateFormat: string;
 begin
   Result := FDateMask;
 end;
 
-function TLRDataFlashDataSetFormatter.DateTimeFormat: string;
+function TRpDataFlashDataSetFormatter.DateTimeFormat: string;
 begin
   Result := FDateTimeMask;
 end;
 
-function TLRDataFlashDataSetFormatter.QuoteChar: Char;
+function TRpDataFlashDataSetFormatter.QuoteChar: Char;
 begin
   Result := FQuoteChr;
 end;
 
-function TLRDataFlashDataSetFormatter.TimeFormat: string;
+function TRpDataFlashDataSetFormatter.TimeFormat: string;
 begin
   Result := FTimeMask;
 end;

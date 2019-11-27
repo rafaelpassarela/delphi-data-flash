@@ -431,10 +431,7 @@ begin
         Result := True;
       except
         on E: Exception do
-        begin
-          Result := False;
           raise Exception.Create(R_NO_INTERNET_QUERY + ' ' + E.Message);
-        end;
       end;
     finally
       FreeAndNil(lHTTP);

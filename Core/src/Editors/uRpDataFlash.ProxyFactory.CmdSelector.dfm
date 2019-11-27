@@ -51,8 +51,6 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       0000000109630068006B0020004900740065006D003300300000000000000000
       00000001000000FFFFFFFFFFFFFFFF00000000000000000109630068006B0020
       004900740065006D003400}
-    ExplicitTop = 262
-    ExplicitHeight = 177
   end
   object PanelControle: TPanel
     Left = 0
@@ -101,7 +99,6 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
     Height = 48
     Align = alTop
     TabOrder = 2
-    ExplicitTop = 214
     object ButtonMarcar: TButton
       AlignWithMargins = True
       Left = 108
@@ -158,8 +155,6 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 3
-    ExplicitTop = 262
-    ExplicitHeight = 177
   end
   object PanelConfig: TPanel
     Left = 0
@@ -275,7 +270,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
     Left = 232
     Top = 292
     Bitmap = {
-      494C010105000900180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000900240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

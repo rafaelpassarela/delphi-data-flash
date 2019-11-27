@@ -12,10 +12,10 @@ uses
     {$IFDEF ANDROID}
 
     {$ELSE}
-      System.Contnrs, Dialogs,
+      System.Contnrs,
     {$ENDIF} // ANDROID
   {$ELSE}
-  Contnrs,
+  Contnrs, Dialogs,
   {$ENDIF} // XE3UP
   TypInfo, uRpFields, uRpJSONBase, uRpAlgorithms, DB, StrUtils, uRpResourceString;
 
@@ -26,10 +26,10 @@ type
 
   EBaseSerializationTypeUnknown = Exception;
 
-  TCustomSerializableObject = class;
-  TCustomSerializableObjectClass = class of TCustomSerializableObject;
-  TCustomSerializableList = class;
-  TCustomSerializableListClass = class of TCustomSerializableList;
+  TBaseSerializableObject = class;
+  TBaseSerializableObjectClass = class of TBaseSerializableObject;
+  TBaseSerializableList = class;
+  TBaseSerializableListClass = class of TBaseSerializableList;
 
   ISerializableBase = interface
     ['{FC07098F-E2E1-47F7-A2FD-D72028DB71C3}']
@@ -95,7 +95,7 @@ type
     function DoExecute(const ADataComponent : TComponent) : Boolean;
   end;
 
-  TCustomSerializableObject = class(TInterfacedPersistent, ISerializableBase)
+  TBaseSerializableObject = class(TInterfacedPersistent, ISerializableBase)
   private
     // XML
     FXMLFile : IXMLDocument;
@@ -117,7 +117,7 @@ type
     procedure InternalSaveJSON(const AFieldName : string; const AValue : Variant);
     procedure InternalSaveNodeProxy(const AFieldName : string; const AValue : Variant;
       const AAttributeValue : string = '');
-    procedure CheckPropertyDependency(const AClassParent : TCustomSerializableObjectClass);
+    procedure CheckPropertyDependency(const AClassParent : TBaseSerializableObjectClass);
     procedure InitializeJson;
   protected
     function GetFormatType: TSerializationFormat;
@@ -146,8 +146,8 @@ type
     procedure FromNode(const AFieldName : string; ASetTypeInfo : PTypeInfo; out ASetVar); overload;
     procedure FromNode(const AFieldName : string; out AEnumOrdValue : Cardinal; ATypeInfo : PTypeInfo); overload;
     // other objects and types with serialization support
-    procedure FromNode(const AFieldName : string; const AItem : TCustomSerializableObject); overload;
-    procedure FromNode(const AFieldName : string; const AList : TCustomSerializableList); overload;
+    procedure FromNode(const AFieldName : string; const AItem : TBaseSerializableObject); overload;
+    procedure FromNode(const AFieldName : string; const AList : TBaseSerializableList); overload;
 
     procedure FromNode(const AFieldName : string; out AItem : ISerializableBase); overload;
     procedure FromNode(const ANode: IXMLNode;     out AItem : ISerializableBase); overload;
@@ -162,7 +162,7 @@ type
     procedure ToNode(const AFieldName : string; const AItem : ISerializableBase); overload;
     procedure ToNode(const AFieldName : string; ASetTypeInfo : PTypeInfo; const ASetValue); overload;
     procedure ToNode(const AFieldName : string; const AEnumValue : Cardinal; ASetTypeInfo : PTypeInfo); overload;
-    procedure ToNode(const AFieldName : string; const AList : TCustomSerializableList); overload;
+    procedure ToNode(const AFieldName : string; const AList : TBaseSerializableList); overload;
     procedure ToNode(const AFieldName : string; const AItem : ISerializableBase; const AGuid : TGuid); overload;
     procedure ToNode(const AFieldName : string; const AList : TInterfaceList; const AGuid : TGuid); overload;
 
@@ -218,21 +218,21 @@ type
     property ProxyMode : Boolean read GetProxyMode write SetProxyMode;
     property LastError : string read FLastError;
 
-    class function CreateFromNode(const ANode : IXMLNode; const AOwner : TCustomSerializableObject) : TCustomSerializableObject;
-    class function CreateFromJson(const AJSonObject : IJSONObject; const AOwner : TCustomSerializableObject) : TCustomSerializableObject;
-    class function CreateFromXML(const AXMLString : string; const AOwner : TCustomSerializableObject) : TCustomSerializableObject;
+    class function CreateFromNode(const ANode : IXMLNode; const AOwner : TBaseSerializableObject) : TBaseSerializableObject;
+    class function CreateFromJson(const AJSonObject : IJSONObject; const AOwner : TBaseSerializableObject) : TBaseSerializableObject;
+    class function CreateFromXML(const AXMLString : string; const AOwner : TBaseSerializableObject) : TBaseSerializableObject;
   end;
 
-  TCustomSerializableList = class(TCustomSerializableObject)
+  TBaseSerializableList = class(TBaseSerializableObject)
   private
-    FItens : TObjectList{$IFDEF XE3UP}<TCustomSerializableObject>{$ENDIF};
+    FItens : TObjectList{$IFDEF XE3UP}<TBaseSerializableObject>{$ENDIF};
     procedure InitList;
     function GetOwnsObjects: Boolean;
     procedure SetOwnsObjects(const Value: Boolean);
     function GetItemClassName: string;
   protected
-    function GetItem(AIndex: Integer): TCustomSerializableObject;
-    function GetItemClass : TCustomSerializableObjectClass; virtual; abstract;
+    function GetItem(AIndex: Integer): TBaseSerializableObject;
+    function GetItemClass : TBaseSerializableObjectClass; virtual; abstract;
 
     procedure LoadFromXmlString(const AXmlValue : string); override;
     procedure LoadFromJSONString(const AJSONString : string); override;
@@ -246,10 +246,10 @@ type
       const AOwnsObjects: Boolean = True); reintroduce; virtual;
     destructor Destroy; override;
 
-    function Add(const ACustomFileObject : TCustomSerializableObject) : Integer;
-    function Insert(const ACustomFileObject : TCustomSerializableObject; const AIndex : Integer = -1) : Integer;
+    function Add(const ACustomFileObject : TBaseSerializableObject) : Integer;
+    function Insert(const ACustomFileObject : TBaseSerializableObject; const AIndex : Integer = -1) : Integer;
     function Delete(const AIndex : Integer) : Boolean;
-    function Remove(const ACustomFileObject : TCustomSerializableObject) : Integer;
+    function Remove(const ACustomFileObject : TBaseSerializableObject) : Integer;
     function Count : Integer;
 
     procedure LoadFromNode(const ANode : IXMLNode); overload;
@@ -258,12 +258,12 @@ type
     procedure Reset; override;
     procedure FromOther(const AOther: ISerializableBase); override;
 
-    property Items[AIndex : Integer] : TCustomSerializableObject read GetItem; default;
+    property Items[AIndex : Integer] : TBaseSerializableObject read GetItem; default;
     property OwnsObjects : Boolean read GetOwnsObjects write SetOwnsObjects;
     property ItemClassName : string read GetItemClassName;
   end;
 
-  TCustomSerializableObjectEx = class(TCustomSerializableObject, ISerializableBaseHelper)
+  TCustomSerializableObjectEx = class(TBaseSerializableObject, ISerializableBaseHelper)
   protected
     function DoDelete(const ADataComponent: TComponent): Boolean; virtual;
     function DoSave(const ADataComponent: TComponent): Boolean; virtual;
@@ -273,10 +273,10 @@ type
 
   TSerializationClassRegisterItem = class
   private
-    FSerializationClass: TCustomSerializableObjectClass;
+    FSerializationClass: TBaseSerializableObjectClass;
     FSerializationClassName: string;
   public
-    property SerializationClass : TCustomSerializableObjectClass read FSerializationClass write FSerializationClass;
+    property SerializationClass : TBaseSerializableObjectClass read FSerializationClass write FSerializationClass;
     property SerializationClassName : string read FSerializationClassName write FSerializationClassName;
   end;
 
@@ -285,22 +285,22 @@ type
     function GetItem(const Index : Integer) : TSerializationClassRegisterItem;
   public
     class var InternalClassRegister: TSerializationClassRegister;
-    procedure Registrate(const AClass : TCustomSerializableObjectClass);
-    function GetClass(const AClassName : string) : TCustomSerializableObjectClass; overload;
-    function GetClass(const AIndex : Integer) : TCustomSerializableObjectClass; overload;
+    procedure Registrate(const AClass : TBaseSerializableObjectClass);
+    function GetClass(const AClassName : string) : TBaseSerializableObjectClass; overload;
+    function GetClass(const AIndex : Integer) : TBaseSerializableObjectClass; overload;
     property Items[const Index: Integer]: TSerializationClassRegisterItem read GetItem; default;
   end;
 
   SerializationClassRegistrer = class
   public
     class procedure FreeRegister;
-    class procedure Registrate(const AClass : TCustomSerializableObjectClass);
-    class function GetClass(const AClassName : string) : TCustomSerializableObjectClass; overload;
-    class function GetClass(const AIndex : Integer) : TCustomSerializableObjectClass; overload;
+    class procedure Registrate(const AClass : TBaseSerializableObjectClass);
+    class function GetClass(const AClassName : string) : TBaseSerializableObjectClass; overload;
+    class function GetClass(const AIndex : Integer) : TBaseSerializableObjectClass; overload;
     class function Count : Integer;
   end;
 
-  TSerializationBaseController = class(TCustomSerializableObject)
+  TSerializationBaseController = class(TBaseSerializableObject)
   protected
     procedure DoSaveToNode; override;
     procedure DoLoadFromNode(const ANode : IXMLNode); override;
@@ -337,7 +337,7 @@ implementation
 
 { TCustomSerializableObject }
 
-procedure TCustomSerializableObject.Assign(const AOther: ISerializableBase);
+procedure TBaseSerializableObject.Assign(const AOther: ISerializableBase);
 var
   lNode: IXMLNode;
 begin
@@ -351,7 +351,7 @@ begin
   LoadFromNode(lNode);
 end;
 
-constructor TCustomSerializableObject.Create(AOwner: TObject; const ANodeName: string);
+constructor TBaseSerializableObject.Create(AOwner: TObject; const ANodeName: string);
 begin
   FFormatType := C_DEFAULT_FORMAT;
   FIncludeClassName := True;
@@ -369,10 +369,10 @@ begin
   Initialize;
 end;
 
-class function TCustomSerializableObject.CreateFromJson(const AJSonObject: IJSONObject;
-  const AOwner: TCustomSerializableObject): TCustomSerializableObject;
+class function TBaseSerializableObject.CreateFromJson(const AJSonObject: IJSONObject;
+  const AOwner: TBaseSerializableObject): TBaseSerializableObject;
 var
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
   lClassName: string;
   lPair: TJSONPair;
 begin
@@ -381,8 +381,8 @@ begin
     lClassName := StringReplace(lPair.FieldValue, '"', '', [rfReplaceAll])
   else
   begin
-    if Assigned(AOwner) and (AOwner is TCustomSerializableList) then
-      lClassName := TCustomSerializableList(AOwner).GetItemClass.ClassName;
+    if Assigned(AOwner) and (AOwner is TBaseSerializableList) then
+      lClassName := TBaseSerializableList(AOwner).GetItemClass.ClassName;
   end;
 
   if lClassName = '' then
@@ -392,44 +392,44 @@ begin
   if lObjClass = nil then
     raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
-  if not lObjClass.InheritsFrom(TCustomSerializableObject) then
+  if not lObjClass.InheritsFrom(TBaseSerializableObject) then
     raise Exception.CreateFmt(R_CLASS_NAME_INVALID, [lClassName]);
 
   Result := lObjClass.Create(AOwner);
   Result.LoadFromJSONString( AJSonObject.ToString );
 end;
 
-class function TCustomSerializableObject.CreateFromNode(const ANode: IXMLNode;
-  const AOwner: TCustomSerializableObject): TCustomSerializableObject;
+class function TBaseSerializableObject.CreateFromNode(const ANode: IXMLNode;
+  const AOwner: TBaseSerializableObject): TBaseSerializableObject;
 var
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
   lClassName: string;
 begin
   if (ANode.Attributes['ClassName'] <> Null) and (ANode.Attributes['ClassName'] <> Unassigned) then
     lClassName := ANode.Attributes['ClassName'];
 
-  if (lClassName = EmptyStr) and (Assigned(AOwner)) and (AOwner is TCustomSerializableList) then
-    lClassName := TCustomSerializableList(AOwner).GetItemClass.ClassName;
+  if (lClassName = EmptyStr) and (Assigned(AOwner)) and (AOwner is TBaseSerializableList) then
+    lClassName := TBaseSerializableList(AOwner).GetItemClass.ClassName;
 
   lObjClass := SerializationClassRegistrer.GetClass(lClassName);
   if lObjClass = nil then
     raise Exception.CreateFmt(R_CLASS_NAME_NOT_REGISTERED, [lClassName]);
 
-  if not lObjClass.InheritsFrom(TCustomSerializableObject) then
+  if not lObjClass.InheritsFrom(TBaseSerializableObject) then
     raise Exception.CreateFmt(R_CLASS_NAME_INVALID, [lClassName]);
 
   Result := lObjClass.Create(AOwner, ANode.NodeName);
   Result.LoadFromNode(ANode);
 end;
 
-class function TCustomSerializableObject.CreateFromXML(const AXMLString : string;
-  const AOwner: TCustomSerializableObject): TCustomSerializableObject;
+class function TBaseSerializableObject.CreateFromXML(const AXMLString : string;
+  const AOwner: TBaseSerializableObject): TBaseSerializableObject;
 var
   lClassName: string;
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
 begin
-  if Assigned(AOwner) and (AOwner is TCustomSerializableList) then
-    lClassName := TCustomSerializableList(AOwner).GetItemClassName
+  if Assigned(AOwner) and (AOwner is TBaseSerializableList) then
+    lClassName := TBaseSerializableList(AOwner).GetItemClassName
   else
     lClassName := Self.ClassName;
 
@@ -442,7 +442,7 @@ begin
   Result.LoadFromXmlString(AXmlString);
 end;
 
-destructor TCustomSerializableObject.Destroy;
+destructor TBaseSerializableObject.Destroy;
 begin
   Finalize;
   if FJSonObject <> nil then
@@ -450,7 +450,7 @@ begin
   inherited;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: Boolean);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Boolean);
 var
   lField : TRpFieldsBase;
 begin
@@ -459,7 +459,7 @@ begin
   FreeAndNil(lField);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: Integer);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Integer);
 var
   lField : TRpFieldsBase;
 begin
@@ -468,7 +468,7 @@ begin
   FreeAndNil(lField);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: Word);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Word);
 var
   lField : TRpFieldsBase;
 begin
@@ -477,7 +477,7 @@ begin
   FreeAndNil( lField );
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: Char);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Char);
 var
   lField : TRpFieldsBase;
 begin
@@ -489,7 +489,7 @@ begin
   FreeAndNil(lField);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: Double);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Double);
 var
   lField : TRpFieldsBase;
 begin
@@ -498,12 +498,12 @@ begin
   FreeAndNil( lField );
 end;
 
-procedure TCustomSerializableObject.Finalize;
+procedure TBaseSerializableObject.Finalize;
 begin
 // dummy
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName : string; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const AFieldName : string; out AItem: ISerializableBase);
 var
   lNode: IXMLNode;
   lPair: TJSONPair;
@@ -536,7 +536,7 @@ begin
     end;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; const AItem: TCustomSerializableObject);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; const AItem: TBaseSerializableObject);
 var
   lNode: IXMLNode;
   lNodeName: string;
@@ -581,9 +581,9 @@ begin
       raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_UNKNOWN_OBJECT_TYPE, [AItem.ClassName]);
 end;
 
-procedure TCustomSerializableObject.FromNode(const ANode: IXMLNode; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const ANode: IXMLNode; out AItem: ISerializableBase);
 var
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
   lNodeClass: IXMLNode;
 begin
   lNodeClass := ANode.AttributeNodes.FindNode('ClassName');
@@ -598,7 +598,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string;
+procedure TBaseSerializableObject.FromNode(const AFieldName: string;
   out AValue: String; const ABase64: Boolean);
 var
   lField : TRpFieldsBase;
@@ -612,7 +612,7 @@ begin
   FreeAndNil(lField);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName : string; const AList: TCustomSerializableList);
+procedure TBaseSerializableObject.FromNode(const AFieldName : string; const AList: TBaseSerializableList);
 var
   lNode: IXMLNode;
   lPair: TJSONPair;
@@ -651,9 +651,9 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AJSon: IJSONObject; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const AJSon: IJSONObject; out AItem: ISerializableBase);
 var
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
   lPair: TJSONPair;
   lNameClass: string;
 begin
@@ -674,7 +674,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; const AFieldClass: TStrings);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; const AFieldClass: TStrings);
 var
   lAux : string;
   lTmp: TStringList;
@@ -711,9 +711,9 @@ begin
   end;
 end;
 
-function TCustomSerializableObject.FromNodeAsInterface(const ANode: IXMLNode): ISerializableBase;
+function TBaseSerializableObject.FromNodeAsInterface(const ANode: IXMLNode): ISerializableBase;
 var
-  lObjClass: TCustomSerializableObjectClass;
+  lObjClass: TBaseSerializableObjectClass;
   lNodeClass: IXMLNode;
 begin
   lNodeClass := ANode.AttributeNodes.FindNode('ClassName');
@@ -728,7 +728,7 @@ begin
   end;
 end;
 
-function TCustomSerializableObject.FromNodeAsInterface(const AFieldName: string): ISerializableBase;
+function TBaseSerializableObject.FromNodeAsInterface(const AFieldName: string): ISerializableBase;
 var
   lNode: IXMLNode;
 begin
@@ -737,7 +737,7 @@ begin
     Result := FromNodeAsInterface(lNode);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: TTime);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: TTime);
 var
   lField : TRpFieldsBase;
 begin
@@ -746,7 +746,7 @@ begin
   FreeAndNil( lField );
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName : string; out AEnumOrdValue : Cardinal; ATypeInfo : PTypeInfo);
+procedure TBaseSerializableObject.FromNode(const AFieldName : string; out AEnumOrdValue : Cardinal; ATypeInfo : PTypeInfo);
 var
   lStr : string;
 begin
@@ -757,7 +757,7 @@ begin
     AEnumOrdValue := TRpStrings.StrToEnumOrd(ATypeInfo, lStr);
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; out AValue: TDateTime);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: TDateTime);
 var
   lField : TRpFieldsBase;
 begin
@@ -771,52 +771,52 @@ begin
   FreeAndNil( lField );
 end;
 
-function TCustomSerializableObject.GetXMLFile: IXMLDocument;
+function TBaseSerializableObject.GetXMLFile: IXMLDocument;
 begin
   Result := FXMLFile;
 end;
 
-function TCustomSerializableObject.GetClassName: string;
+function TBaseSerializableObject.GetClassName: string;
 begin
   Result := Self.ClassName;
 end;
 
-function TCustomSerializableObject.GetFileName: string;
+function TBaseSerializableObject.GetFileName: string;
 begin
   Result := FFileName;
 end;
 
-function TCustomSerializableObject.GetFormatType: TSerializationFormat;
+function TBaseSerializableObject.GetFormatType: TSerializationFormat;
 begin
   Result := FFormatType;
 end;
 
-function TCustomSerializableObject.GetIncludeClassName: Boolean;
+function TBaseSerializableObject.GetIncludeClassName: Boolean;
 begin
   Result := FIncludeClassName;
 end;
 
-function TCustomSerializableObject.GetJSonObject: IJSONObject;
+function TBaseSerializableObject.GetJSonObject: IJSONObject;
 begin
   Result := FJSonObject;
 end;
 
-function TCustomSerializableObject.GetXMLNode: IXMLNode;
+function TBaseSerializableObject.GetXMLNode: IXMLNode;
 begin
   Result := FXMLNode;
 end;
 
-function TCustomSerializableObject.GetNodeName: string;
+function TBaseSerializableObject.GetNodeName: string;
 begin
   Result := FNodeName;
 end;
 
-function TCustomSerializableObject.GetParent: TObject;
+function TBaseSerializableObject.GetParent: TObject;
 begin
   Result := FParent;
 end;
 
-function TCustomSerializableObject.GetParentFileName: string;
+function TBaseSerializableObject.GetParentFileName: string;
 var
   lParent: TObject;
   lIntf: ISerializableBase;
@@ -826,10 +826,10 @@ begin
   Result := '';
   while (Result = '') and (lParent <> nil) do
   begin
-    if lParent.InheritsFrom(TCustomSerializableObject) then
+    if lParent.InheritsFrom(TBaseSerializableObject) then
     begin
-      Result := TCustomSerializableObject(lParent).FFileName;
-      lParent := TCustomSerializableObject(lParent).Parent;
+      Result := TBaseSerializableObject(lParent).FFileName;
+      lParent := TBaseSerializableObject(lParent).Parent;
     end
     else
       if Supports(lParent, ISerializableBase, lIntf) then
@@ -851,23 +851,23 @@ begin
   end;
 end;
 
-function TCustomSerializableObject.GetProxyMode: Boolean;
+function TBaseSerializableObject.GetProxyMode: Boolean;
 begin
   Result := FProxyMode;
 end;
 
-function TCustomSerializableObject.GetRaiseExceptions: Boolean;
+function TBaseSerializableObject.GetRaiseExceptions: Boolean;
 begin
   Result := False;
 end;
 
-function TCustomSerializableObject.GetXMLDoc(const AIncludeParent: Boolean): IXMLDocument;
+function TBaseSerializableObject.GetXMLDoc(const AIncludeParent: Boolean): IXMLDocument;
 begin
   SaveToNode('', AIncludeParent);
   Result := FXMLFile;
 end;
 
-procedure TCustomSerializableObject.Initialize;
+procedure TBaseSerializableObject.Initialize;
 begin
   try
     Reset;
@@ -879,7 +879,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.InitializeJson;
+procedure TBaseSerializableObject.InitializeJson;
 begin
   if FJSonObject <> nil then
     FJSonObject := nil;
@@ -890,7 +890,7 @@ begin
     FJSonObject.AddPair('ClassName', Self.ClassName);
 end;
 
-function TCustomSerializableObject.InternalGetField(const AFieldName: string): TRpFieldsBase;
+function TBaseSerializableObject.InternalGetField(const AFieldName: string): TRpFieldsBase;
 begin
   if FFormatType = sfXML then
     Result := TXMLFieldNode.Create(FXMLNode, AFieldName)
@@ -898,7 +898,7 @@ begin
     Result := TJSONFieldNode.Create(FJSonObject, AFieldName);
 end;
 
-procedure TCustomSerializableObject.InternalSaveJSON(const AFieldName: string; const AValue: Variant);
+procedure TBaseSerializableObject.InternalSaveJSON(const AFieldName: string; const AValue: Variant);
 var
   lValType: TFieldType;
 
@@ -958,7 +958,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.InternalSaveNodeProxy(const AFieldName: string;
+procedure TBaseSerializableObject.InternalSaveNodeProxy(const AFieldName: string;
   const AValue: Variant;const AAttributeValue : string);
 var
   lNode: IXMLNode;
@@ -990,7 +990,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.LoadFromFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
+procedure TBaseSerializableObject.LoadFromFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
 var
   lRootNode: IXMLNode;
   lFormat : TSerializationFormat;
@@ -1049,7 +1049,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.LoadFromJSONString(const AJSONString: string);
+procedure TBaseSerializableObject.LoadFromJSONString(const AJSONString: string);
 begin
   FFormatType := sfJSON;
 
@@ -1061,7 +1061,7 @@ begin
   DoLoadFromNode(nil);
 end;
 
-procedure TCustomSerializableObject.LoadFromNode(const ANode: IXMLNode);
+procedure TBaseSerializableObject.LoadFromNode(const ANode: IXMLNode);
 var
   lIsNil : Boolean;
 begin
@@ -1085,7 +1085,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.LoadFromString(const AString: string; const AFormat: TSerializationFormat);
+procedure TBaseSerializableObject.LoadFromString(const AString: string; const AFormat: TSerializationFormat);
 var
   lFormato : TSerializationFormat;
   lChar: string;
@@ -1113,7 +1113,7 @@ begin
     LoadFromJSONString(lStr);
 end;
 
-procedure TCustomSerializableObject.LoadFromXmlString(const AXmlString: string);
+procedure TBaseSerializableObject.LoadFromXmlString(const AXmlString: string);
 var
   lNodeRoot: IXMLNode;
   lStream: TStringStream;
@@ -1130,7 +1130,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.Save;
+procedure TBaseSerializableObject.Save;
 var
   lFile: TStringList;
 begin
@@ -1155,14 +1155,14 @@ begin
   end;
 end;
 
-function TCustomSerializableObject.SaveFileToXmlString: string;
+function TBaseSerializableObject.SaveFileToXmlString: string;
 begin
   FFormatType := sfXML;
   DoSaveToNode;
   Result := FXMLFile.XML.Text;
 end;
 
-procedure TCustomSerializableObject.SaveToFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
+procedure TBaseSerializableObject.SaveToFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
 var
   lExt : string;
 begin
@@ -1182,7 +1182,7 @@ begin
   Save;
 end;
 
-function TCustomSerializableObject.SaveToJSONString: string;
+function TBaseSerializableObject.SaveToJSONString: string;
 begin
   FFormatType := sfJSON;
 
@@ -1207,7 +1207,7 @@ end;
 //  DoSaveToNode;
 //end;
 
-procedure TCustomSerializableObject.SaveToNode(const ANodeName: string; const ASaveParent: Boolean);
+procedure TBaseSerializableObject.SaveToNode(const ANodeName: string; const ASaveParent: Boolean);
 var
   lNode: IXMLNode;
   lCreateNewFile: Boolean;
@@ -1219,20 +1219,20 @@ begin
   if (FParent <> nil) and ASaveParent then
   begin
     // Inheritance test
-    if FParent.InheritsFrom(TCustomSerializableObject) then
+    if FParent.InheritsFrom(TBaseSerializableObject) then
     begin
-      FXMLFile := TCustomSerializableObject(FParent).GetXMLFile;
-      FFormatType := TCustomSerializableObject(FParent).FormatType;
-      FIncludeClassName := TCustomSerializableObject(FParent).IncludeClassName;
-      lNode := TCustomSerializableObject(FParent).GetXMLNode;
+      FXMLFile := TBaseSerializableObject(FParent).GetXMLFile;
+      FFormatType := TBaseSerializableObject(FParent).FormatType;
+      FIncludeClassName := TBaseSerializableObject(FParent).IncludeClassName;
+      lNode := TBaseSerializableObject(FParent).GetXMLNode;
     end
     else
-      if FParent.InheritsFrom(TCustomSerializableList) then
+      if FParent.InheritsFrom(TBaseSerializableList) then
       begin
-        FXMLFile := TCustomSerializableList(FParent).GetXMLFile;
-        FFormatType := TCustomSerializableList(FParent).FormatType;
-        FIncludeClassName := TCustomSerializableList(FParent).IncludeClassName;
-        lNode := TCustomSerializableList(FParent).GetXMLNode;
+        FXMLFile := TBaseSerializableList(FParent).GetXMLFile;
+        FFormatType := TBaseSerializableList(FParent).FormatType;
+        FIncludeClassName := TBaseSerializableList(FParent).IncludeClassName;
+        lNode := TBaseSerializableList(FParent).GetXMLNode;
       end
       else
         // Interface test
@@ -1291,7 +1291,7 @@ begin
   DoSaveToNode;
 end;
 
-function TCustomSerializableObject.SaveToXmlString: string;
+function TBaseSerializableObject.SaveToXmlString: string;
 var
   lFile: IXMLDocument;
   lNode: IXMLNode;
@@ -1313,14 +1313,14 @@ begin
 
   if FProxyMode then
   begin
-    CheckPropertyDependency(TCustomSerializableObjectClass(Self.ClassType));
+    CheckPropertyDependency(TBaseSerializableObjectClass(Self.ClassType));
 
     FXMLNode.Attributes['ParentClass'] := Self.ClassParent.ClassName;
 
-    if Self is TCustomSerializableList then
+    if Self is TBaseSerializableList then
     begin
       FXMLNode.Attributes['isList'] := 'true';
-      FXMLNode.Attributes['itemClass'] := TCustomSerializableList(Self).ItemClassName;
+      FXMLNode.Attributes['itemClass'] := TBaseSerializableList(Self).ItemClassName;
     end;
   end;
 
@@ -1330,42 +1330,42 @@ begin
     Insert(' encoding="' + C_XML_ENCODING + '"', Result, Pos('"1.0"', Result) + 5);
 end;
 
-procedure TCustomSerializableObject.SetFileName(const Value: string);
+procedure TBaseSerializableObject.SetFileName(const Value: string);
 begin
   FFileName := Value;
 end;
 
-procedure TCustomSerializableObject.SetFormatType(const Value: TSerializationFormat);
+procedure TBaseSerializableObject.SetFormatType(const Value: TSerializationFormat);
 begin
   FFormatType := Value;
 end;
 
-procedure TCustomSerializableObject.SetIncludeClassName(const AValue: Boolean);
+procedure TBaseSerializableObject.SetIncludeClassName(const AValue: Boolean);
 begin
   FIncludeClassName := AValue;
 end;
 
-procedure TCustomSerializableObject.SetLastError(const AError: string);
+procedure TBaseSerializableObject.SetLastError(const AError: string);
 begin
   FLastError := AError;
 end;
 
-procedure TCustomSerializableObject.SetNodeName(const Value: string);
+procedure TBaseSerializableObject.SetNodeName(const Value: string);
 begin
   FNodeName := TRpStrings.RemoveAccent( Value );
 end;
 
-procedure TCustomSerializableObject.SetParent(const Value: TObject);
+procedure TBaseSerializableObject.SetParent(const Value: TObject);
 begin
   FParent := Value;
 end;
 
-procedure TCustomSerializableObject.SetProxyMode(const AValue: Boolean);
+procedure TBaseSerializableObject.SetProxyMode(const AValue: Boolean);
 begin
   FProxyMode := AValue;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName: string; const AFieldClass: TStrings);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AFieldClass: TStrings);
 var
   lAux : string;
   i: Integer;
@@ -1391,7 +1391,7 @@ begin
     FJSonObject.AddPair(AFieldName, TJSONStrinNoQuote.Create( lAux ));
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName, AValue: string;
+procedure TBaseSerializableObject.ToNode(const AFieldName, AValue: string;
   const ABase64: Boolean);
 begin
   if FProxyMode then
@@ -1404,7 +1404,7 @@ begin
       ToNode(AFieldName, AValue);
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName : string; const AList: TCustomSerializableList);
+procedure TBaseSerializableObject.ToNode(const AFieldName : string; const AList: TBaseSerializableList);
 var
   lItensPair : TJSONPair;
 begin
@@ -1431,7 +1431,7 @@ begin
     end;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName: string; ASetTypeInfo: PTypeInfo; const ASetValue);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; ASetTypeInfo: PTypeInfo; const ASetValue);
 var
   lStr : string;
   lItensInfo: PTypeInfo;
@@ -1461,7 +1461,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName : string; const AEnumValue : Cardinal; ASetTypeInfo : PTypeInfo);
+procedure TBaseSerializableObject.ToNode(const AFieldName : string; const AEnumValue : Cardinal; ASetTypeInfo : PTypeInfo);
 var
   lStr : string;
   lValues: string;
@@ -1500,7 +1500,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName : string; const AItem: ISerializableBase);
+procedure TBaseSerializableObject.ToNode(const AFieldName : string; const AItem: ISerializableBase);
 begin
   AItem.NodeName := AFieldName;
 
@@ -1521,7 +1521,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName: string; const AValue: Variant);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AValue: Variant);
 var
   lClear: Boolean;
 begin
@@ -1559,7 +1559,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.FromNode(const AFieldName: string; ASetTypeInfo: PTypeInfo; out ASetVar);
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; ASetTypeInfo: PTypeInfo; out ASetVar);
 var
   lStr : string;
 begin
@@ -1604,7 +1604,7 @@ end;
 
 { TCustomSerializableList }
 
-function TCustomSerializableList.Add(const ACustomFileObject: TCustomSerializableObject) : Integer;
+function TBaseSerializableList.Add(const ACustomFileObject: TBaseSerializableObject) : Integer;
 begin
   InitList;
 
@@ -1612,7 +1612,7 @@ begin
   ACustomFileObject.Parent := Self;
 end;
 
-procedure TCustomSerializableList.Clear;
+procedure TBaseSerializableList.Clear;
 var
   i: Integer;
 begin
@@ -1626,13 +1626,13 @@ begin
   FXMLNode := nil;
 end;
 
-function TCustomSerializableList.Count: Integer;
+function TBaseSerializableList.Count: Integer;
 begin
   InitList;
   Result := FItens.Count;
 end;
 
-constructor TCustomSerializableList.Create(AOwner: TObject; const ANodeName: string;
+constructor TBaseSerializableList.Create(AOwner: TObject; const ANodeName: string;
   const AOwnsObjects: Boolean);
 begin
   inherited Create(AOwner, ANodeName);
@@ -1642,7 +1642,7 @@ begin
   InitializeJson;
 end;
 
-function TCustomSerializableList.Delete(const AIndex: Integer): Boolean;
+function TBaseSerializableList.Delete(const AIndex: Integer): Boolean;
 begin
   InitList;
   if (AIndex >= 0) and (AIndex <= (FItens.Count - 1) ) then
@@ -1654,7 +1654,7 @@ begin
     Result := False;
 end;
 
-destructor TCustomSerializableList.Destroy;
+destructor TBaseSerializableList.Destroy;
 begin
   if FJSonObject <> nil then
     FJSonObject := nil;
@@ -1662,12 +1662,12 @@ begin
   inherited;
 end;
 
-procedure TCustomSerializableList.DoLoadFromNode(const ANode: IXMLNode);
+procedure TBaseSerializableList.DoLoadFromNode(const ANode: IXMLNode);
 begin
 // dummy
 end;
 
-procedure TCustomSerializableList.DoSaveToNode;
+procedure TBaseSerializableList.DoSaveToNode;
 var
   i: Integer;
   lJsonList: TJSONArray;
@@ -1683,16 +1683,16 @@ begin
     {$IFDEF XE3UP}
     FItens[i].SaveToNode;
     {$ELSE}
-    TCustomSerializableObject(FItens[i]).SaveToNode;
+    TBaseSerializableObject(FItens[i]).SaveToNode;
     {$ENDIF}
 
     if FFormatType = sfJSON then
     begin
-      lStr := TCustomSerializableObject(Items[i]).FJSonObject.ToString;
+      lStr := TBaseSerializableObject(Items[i]).FJSonObject.ToString;
       {$IFDEF XE8UP}
-      lJsonList.AddElement( TCustomSerializableObject(Items[i]).FJSonObject.Clone as TJSONValue);
+      lJsonList.AddElement( TBaseSerializableObject(Items[i]).FJSonObject.Clone as TJSONValue);
       {$ELSE}
-      lJsonList.AddElement( TCustomSerializableObject(Items[i]).FJSonObject.Clone as TJSONObject );
+      lJsonList.AddElement( TBaseSerializableObject(Items[i]).FJSonObject.Clone as TJSONObject );
       {$ENDIF}
     end;
   end;
@@ -1704,7 +1704,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableList.Finalize;
+procedure TBaseSerializableList.Finalize;
 begin
   Clear;
   if Assigned(FItens) then
@@ -1716,23 +1716,23 @@ begin
   inherited;
 end;
 
-procedure TCustomSerializableList.FromOther(const AOther: ISerializableBase);
+procedure TBaseSerializableList.FromOther(const AOther: ISerializableBase);
 var
-  lItem: TCustomSerializableObject;
+  lItem: TBaseSerializableObject;
   i: Integer;
 begin
-  if (AOther <> nil) and (AOther is TCustomSerializableList) and (TCustomSerializableList(AOther).Count > 0) then
+  if (AOther <> nil) and (AOther is TBaseSerializableList) and (TBaseSerializableList(AOther).Count > 0) then
   begin
-    for i := 0 to TCustomSerializableList(AOther).Count - 1 do
+    for i := 0 to TBaseSerializableList(AOther).Count - 1 do
     begin
-      lItem := TCustomSerializableList(AOther).GetItemClass.Create(Self);
-      lItem.FromOther( TCustomSerializableList(AOther).Items[i] );
+      lItem := TBaseSerializableList(AOther).GetItemClass.Create(Self);
+      lItem.FromOther( TBaseSerializableList(AOther).Items[i] );
       Self.Add(lItem);
     end;
   end;
 end;
 
-function TCustomSerializableList.GetItem(AIndex: Integer): TCustomSerializableObject;
+function TBaseSerializableList.GetItem(AIndex: Integer): TBaseSerializableObject;
 begin
   InitList;
   Result := nil;
@@ -1741,34 +1741,34 @@ begin
     {$IFDEF XE3UP}
     Result := FItens[AIndex];
     {$ELSE}
-    Result := TCustomSerializableObject(FItens[AIndex]);
+    Result := TBaseSerializableObject(FItens[AIndex]);
     {$ENDIF}
   end;
 end;
 
-function TCustomSerializableList.GetItemClassName: string;
+function TBaseSerializableList.GetItemClassName: string;
 begin
   Result := GetItemClass.ClassName;
 end;
 
-function TCustomSerializableList.GetOwnsObjects: Boolean;
+function TBaseSerializableList.GetOwnsObjects: Boolean;
 begin
   InitList;
   Result := FItens.OwnsObjects;
 end;
 
-procedure TCustomSerializableList.Initialize;
+procedure TBaseSerializableList.Initialize;
 begin
   inherited;
 end;
 
-procedure TCustomSerializableList.InitList;
+procedure TBaseSerializableList.InitList;
 begin
   if not Assigned(FItens) then
-    FItens := TObjectList{$IFDEF XE3UP}<TCustomSerializableObject>{$ENDIF}.Create;
+    FItens := TObjectList{$IFDEF XE3UP}<TBaseSerializableObject>{$ENDIF}.Create;
 end;
 
-function TCustomSerializableList.Insert(const ACustomFileObject: TCustomSerializableObject;
+function TBaseSerializableList.Insert(const ACustomFileObject: TBaseSerializableObject;
   const AIndex: Integer) : Integer;
 begin
   InitList;
@@ -1777,10 +1777,10 @@ begin
   Result := FItens.IndexOf(ACustomFileObject);
 end;
 
-procedure TCustomSerializableList.LoadFromJSONString(const AJSONString: string);
+procedure TBaseSerializableList.LoadFromJSONString(const AJSONString: string);
 var
   i: Integer;
-  lObject: TCustomSerializableObject;
+  lObject: TBaseSerializableObject;
   lPair: TJSONPair;
   lJsonList: TJSONArray;
   lTempStr: string;
@@ -1820,17 +1820,17 @@ begin
       lJsonList := lPair.JsonValue as TJSONArray;
       for i := 0 to lJsonList.Size - 1 do
       begin
-        lObject := TCustomSerializableObject.CreateFromJson(lJsonList.Get(i) as TJSONObject, Self);
+        lObject := TBaseSerializableObject.CreateFromJson(lJsonList.Get(i) as TJSONObject, Self);
         Add(lObject);
       end;
     end;
   end;
 end;
 
-procedure TCustomSerializableList.LoadFromNode(const ANode: IXMLNode);
+procedure TBaseSerializableList.LoadFromNode(const ANode: IXMLNode);
 var
   I: Integer;
-  lObject: TCustomSerializableObject;
+  lObject: TBaseSerializableObject;
 begin
   Clear;
 
@@ -1839,13 +1839,13 @@ begin
   begin
     for I := 0 to FXMLNode.ChildNodes.Count - 1 do
     begin
-      lObject := TCustomSerializableObject.CreateFromNode(FXMLNode.ChildNodes[I], Self);
+      lObject := TBaseSerializableObject.CreateFromNode(FXMLNode.ChildNodes[I], Self);
       Add(lObject);
     end;
   end;
 end;
 
-procedure TCustomSerializableList.LoadFromXmlString(const AXmlValue: string);
+procedure TBaseSerializableList.LoadFromXmlString(const AXmlValue: string);
 var
   lXmlDoc : IXMLDocument;
   lXmlNode : IXMLNode;
@@ -1867,18 +1867,18 @@ begin
   end;
 end;
 
-function TCustomSerializableList.Remove(const ACustomFileObject: TCustomSerializableObject): Integer;
+function TBaseSerializableList.Remove(const ACustomFileObject: TBaseSerializableObject): Integer;
 begin
   InitList;
   Result := FItens.Remove(ACustomFileObject);
 end;
 
-procedure TCustomSerializableList.Reset;
+procedure TBaseSerializableList.Reset;
 begin
   Self.Clear;
 end;
 
-procedure TCustomSerializableList.SetOwnsObjects(const Value: Boolean);
+procedure TBaseSerializableList.SetOwnsObjects(const Value: Boolean);
 begin
   InitList;
   FItens.OwnsObjects := Value;
@@ -1886,7 +1886,7 @@ end;
 
 { TSerializationClassRegister }
 
-function TSerializationClassRegister.GetClass(const AClassName: string): TCustomSerializableObjectClass;
+function TSerializationClassRegister.GetClass(const AClassName: string): TBaseSerializableObjectClass;
 var
   I: Integer;
 begin
@@ -1894,14 +1894,14 @@ begin
   for I := 0 to Count - 1 do
     if Items[I].SerializationClassName = AClassName then
     begin
-      Result := TCustomSerializableObjectClass(Items[I].SerializationClass);
+      Result := TBaseSerializableObjectClass(Items[I].SerializationClass);
       Exit;
     end;
 end;
 
-function TSerializationClassRegister.GetClass(const AIndex: Integer): TCustomSerializableObjectClass;
+function TSerializationClassRegister.GetClass(const AIndex: Integer): TBaseSerializableObjectClass;
 begin
-  Result := TCustomSerializableObjectClass(Items[AIndex].SerializationClass);
+  Result := TBaseSerializableObjectClass(Items[AIndex].SerializationClass);
 end;
 
 function TSerializationClassRegister.GetItem(const Index: Integer): TSerializationClassRegisterItem;
@@ -1909,7 +1909,7 @@ begin
   Result := TSerializationClassRegisterItem(Self.Get(Index));
 end;
 
-procedure TSerializationClassRegister.Registrate(const AClass: TCustomSerializableObjectClass);
+procedure TSerializationClassRegister.Registrate(const AClass: TBaseSerializableObjectClass);
 var
   lItem : TSerializationClassRegisterItem;
 begin
@@ -1938,7 +1938,7 @@ begin
     FreeAndNil(TSerializationClassRegister.InternalClassRegister);
 end;
 
-class function SerializationClassRegistrer.GetClass(const AClassName: string): TCustomSerializableObjectClass;
+class function SerializationClassRegistrer.GetClass(const AClassName: string): TBaseSerializableObjectClass;
 begin
   if TSerializationClassRegister.InternalClassRegister = nil then
     TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
@@ -1947,7 +1947,7 @@ begin
 end;
 
 class function SerializationClassRegistrer.GetClass(
-  const AIndex: Integer): TCustomSerializableObjectClass;
+  const AIndex: Integer): TBaseSerializableObjectClass;
 begin
   if TSerializationClassRegister.InternalClassRegister = nil then
     TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
@@ -1955,7 +1955,7 @@ begin
   Result := TSerializationClassRegister.InternalClassRegister.GetClass(AIndex);
 end;
 
-class procedure SerializationClassRegistrer.Registrate(const AClass: TCustomSerializableObjectClass);
+class procedure SerializationClassRegistrer.Registrate(const AClass: TBaseSerializableObjectClass);
 begin
   if TSerializationClassRegister.InternalClassRegister = nil then
     TSerializationClassRegister.InternalClassRegister := TSerializationClassRegister.Create;
@@ -2146,7 +2146,7 @@ procedure TSerializationBaseController.Reset;
 begin
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName: string; const AItem: ISerializableBase; const AGuid: TGuid);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AItem: ISerializableBase; const AGuid: TGuid);
 begin
   if AItem <> nil then
   begin
@@ -2161,7 +2161,7 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.ToNode(const AFieldName: string; const AList: TInterfaceList; const AGuid: TGuid);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AList: TInterfaceList; const AGuid: TGuid);
 var
   I: Integer;
 begin
@@ -2172,19 +2172,19 @@ begin
   end;
 end;
 
-procedure TCustomSerializableObject.CheckPropertyDependency(
-  const AClassParent: TCustomSerializableObjectClass);
+procedure TBaseSerializableObject.CheckPropertyDependency(
+  const AClassParent: TBaseSerializableObjectClass);
 var
-  lParent : TCustomSerializableObject;
+  lParent : TBaseSerializableObject;
   lNode, lNodeParent: IXMLNode;
   i: Integer;
 begin
-  if (AClassParent <> TCustomSerializableObject) and (AClassParent <> TCustomSerializableList) then
+  if (AClassParent <> TBaseSerializableObject) and (AClassParent <> TBaseSerializableList) then
   begin
     lParent := AClassParent.Create(nil);
     try
       lParent.ProxyMode := True;
-      CheckPropertyDependency(TCustomSerializableObjectClass(lParent.ClassParent));
+      CheckPropertyDependency(TBaseSerializableObjectClass(lParent.ClassParent));
 
       lParent.SaveToNode(lParent.ClassName, False);
       for i := 0 to lParent.XMLNode.ChildNodes.Count - 1 do

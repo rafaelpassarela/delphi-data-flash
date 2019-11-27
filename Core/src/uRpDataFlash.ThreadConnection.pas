@@ -9,9 +9,9 @@ uses
   Classes, Windows;
 
 type
-  TThreadConexao = class(TThread)
+  TRpDataFlashThreadConnection = class(TThread)
   private
-    FConexao: TComponent; //TLRDataFlashConexaoCliente;
+    FConexao: TComponent; //TRpDataFlashConexaoCliente;
     FConectando: Boolean;
     FExecutou : Boolean;
     function GetTerminated: Boolean;
@@ -22,7 +22,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    property Conexao : TComponent {TLRDataFlashConexaoCliente} read FConexao write FConexao;
+    property Conexao : TComponent {TRpDataFlashConexaoCliente} read FConexao write FConexao;
     property Conectando : Boolean read FConectando;
     property IsTerminated: Boolean read GetTerminated;
   end;
@@ -32,21 +32,21 @@ implementation
 uses
   uRpDataFlash.Components;
 
-{ TThreadConexao }
+{ TRpDataFlashThreadConnection }
 
-constructor TThreadConexao.Create;
+constructor TRpDataFlashThreadConnection.Create;
 begin
   inherited Create(True);
 //  FreeOnTerminate := True;
 end;
 
-//procedure TThreadConexao.DoTerminate;
+//procedure TRpDataFlashThreadConnection.DoTerminate;
 //begin
 //  inherited;
 //  FConexao.FThreadConexao := nil;
 //end;
 
-destructor TThreadConexao.Destroy;
+destructor TRpDataFlashThreadConnection.Destroy;
 begin
 {$WARN SYMBOL_DEPRECATED OFF}
   if not FExecutou then
@@ -55,13 +55,13 @@ begin
 {$WARN SYMBOL_DEPRECATED ON}
 end;
 
-procedure TThreadConexao.DoTerminate;
+procedure TRpDataFlashThreadConnection.DoTerminate;
 begin
   inherited;
   //  FConexao.FThreadConexao := nil;
 end;
 
-procedure TThreadConexao.Execute;
+procedure TRpDataFlashThreadConnection.Execute;
 var
   lConectado: Boolean;
 begin
@@ -72,14 +72,14 @@ begin
     FExecutou := True;
 
     repeat
-      lConectado := TLRDataFlashThreadInternalAdapter(Conexao).DoInternalConectar;
+      lConectado := TRpDataFlashThreadInternalAdapter(Conexao).DoInternalConectar;
 
       if not lConectado then
       begin
-        if TLRDataFlashThreadInternalAdapter(Conexao).TimeOutConexao <= 0 then
+        if TRpDataFlashThreadInternalAdapter(Conexao).TimeOutConexao <= 0 then
           Sleep(1000)
         else
-          Sleep(TLRDataFlashThreadInternalAdapter(Conexao).TimeOutConexao)
+          Sleep(TRpDataFlashThreadInternalAdapter(Conexao).TimeOutConexao)
       end;
     until lConectado or Terminated;
 
@@ -89,7 +89,7 @@ begin
     FExecutou := True;
 end;
 
-function TThreadConexao.GetTerminated: Boolean;
+function TRpDataFlashThreadConnection.GetTerminated: Boolean;
 begin
   Result := Self.Terminated;
 end;

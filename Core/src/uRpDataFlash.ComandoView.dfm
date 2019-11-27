@@ -55,10 +55,8 @@ object frmComandoView: TfrmComandoView
       Top = 7
       Width = 75
       Height = 25
-      DoubleBuffered = True
       Kind = bkOK
       NumGlyphs = 2
-      ParentDoubleBuffered = False
       TabOrder = 0
     end
   end

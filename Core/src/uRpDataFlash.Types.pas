@@ -28,7 +28,8 @@ const
     C_CMD_BEGIN,
     C_CMD_START,
     C_CMD_END,
-    C_CMD_MORE);
+    C_CMD_MORE
+  );
 
   C_WITHOUT_GROUP = 'UNNAMED';
   C_WHERE_DATASET = 'internal_OpenWhere';
@@ -92,7 +93,7 @@ type
   TRpDataFlashOnStatus = procedure(Sender : TObject; const AStatus: TRpDataFlashStatusType;
     const AProcTotal, AProcCurrent : Integer; const AStatusStr : string) of object;
   TRpDataFlashOnObjectRequest = procedure(const AAction : TRpDataFlashHelperAction;
-    const AObject : TCustomSerializableObject; out AContinue : Boolean) of object;
+    const AObject : TBaseSerializableObject; out AContinue : Boolean) of object;
   TRpDataFlashBusyCallback = procedure (const AStart : Boolean) of object;
 //  TRpDataFlashInternalCommandExecution = function : Boolean of object;
 //  TRpDataFlashExternalCommandExecution = function : string of object;
@@ -115,8 +116,11 @@ type
 //  ERpDataFlashDivergentMessage = class(ERpDataFlashException);
 //  ERpDataFlashNotAllowed = class(ERpDataFlashException);
 //  ERpDataFlashExecution = class(ERpDataFlashException);
-
 //  ERpDataFlashExceptionClass = class of ERpDataFlashException;
+  ERpDataFlashDataSetNoClient = class(Exception);
+  ERpDataFlashDataSetNoConnection = class(Exception);
+  ERpDataFlashDataSetConexaoResult = class(Exception);
+  ERpDataFlashDataSetNoCommand = class(Exception);
 
   TRpDataFlashClientInfo = packed record
     DisplayName: string;

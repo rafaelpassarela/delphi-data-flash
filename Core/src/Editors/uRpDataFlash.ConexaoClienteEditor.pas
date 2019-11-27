@@ -1,13 +1,13 @@
-unit uLRDF.ConexaoClienteEditor;
+unit uRpDataFlash.ConexaoClienteEditor;
 
 interface
 
 uses
-  DesignEditors, DBClient, Classes, fLRDF.ProxyFactory.CmdSelector, Controls,
-  IniFiles, StrUtils, uLRDF.Types;
+  DesignEditors, DBClient, Classes, uRpDataFlash.ProxyFactory.CmdSelector, Controls,
+  IniFiles, StrUtils, uRpDataFlash.Types;
 
 type
-  TLRDataFlashConexaoClienteEditor = class(TComponentEditor)
+  TRpDataFlashConexaoClienteEditor = class(TComponentEditor)
   private
     FCdsComandos : TClientDataSet;
     FListaSelecionados : TStrings;
@@ -34,18 +34,18 @@ type
 implementation
 
 uses
-  Dialogs, 
-  SysUtils, 
-  Windows, 
-  ShellAPI, 
-  uLRDF.Comando,
-  uLRDF.ProxyGenerator, 
-  uLRDF.Component, 
-  uLRDF.ComponentRegister;
+  Dialogs,
+  SysUtils,
+  Windows,
+  ShellAPI,
+  uRpDataFlash.Command,
+  uRpDataFlash.ProxyGenerator,
+  uRpDataFlash.Components,
+  uRpDataFlash.ComponentRegister;
 
-{ TLRDataFlashConexaoClienteEditor }
+{ TRpDataFlashConexaoClienteEditor }
 
-procedure TLRDataFlashConexaoClienteEditor.ExecuteVerb(Index: Integer);
+procedure TRpDataFlashConexaoClienteEditor.ExecuteVerb(Index: Integer);
 begin
   inherited;
   case Index of
@@ -53,10 +53,10 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConexaoClienteEditor.GerarProxy;
+procedure TRpDataFlashConexaoClienteEditor.GerarProxy;
 var
   lClassesProxy: string;
-  lCmdListaClasses: TLRDataFlashComandoList;
+  lCmdListaClasses: TRpDataFlashComandoList;
   lArquivoProxy : TStringList;
   lArquivo: string;
   lNomeArquivo: string;
@@ -66,7 +66,7 @@ var
   lNomeUnitClasse: string;
 begin
   FListaSelecionados := TStringList.Create;
-  lCmdListaClasses := TLRDataFlashComandoList.Create;
+  lCmdListaClasses := TRpDataFlashComandoList.Create;
 
   lSaveDlg := TSaveDialog.Create(nil);
   lSaveDlg.Filter := 'Delphi Source File|*.pas';
@@ -74,29 +74,29 @@ begin
   try
     FCdsComandos := TClientDataSet.Create(nil);
     // chama o comando solicitando a lista de comandos disponiveis no servidor
-    lCmdListaClasses.Parametro['TipoBusca'].AsInteger := Ord(trpFactoryList);
-    (Component as TLRDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
+    lCmdListaClasses.Param['TipoBusca'].AsInteger := Ord(trpFactoryList);
+    (Component as TRpDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
 
-    FCdsComandos.XMLData := lCmdListaClasses.Retorno['RetornoProxy'].AsBase64;
+    FCdsComandos.XMLData := lCmdListaClasses.ResultParam['RetornoProxy'].AsBase64;
 
     // prepara a janela pasa selecao dos comandos
-    lConfigFileName := StringReplace(TLRDataFlashProjectInfo.GetCurrentProject.FileName, '.dproj', '.tcpconf', [rfIgnoreCase]);
+    lConfigFileName := StringReplace(TRpDataFlashProjectInfo.GetCurrentProject.FileName, '.dproj', '.tcpconf', [rfIgnoreCase]);
     if ShowFormSelecao(lConfigFileName) and (FListaSelecionados.Count > 0) then
     begin
-      lCmdListaClasses.Parametro['TipoBusca'].AsInteger := Ord(trpFactory);
+      lCmdListaClasses.Param['TipoBusca'].AsInteger := Ord(trpFactory);
 
       FListaSelecionados.Insert(0, 'CONFIG=' + FFileControlConfigUnit + '|' + FFileControlClass);
       FListaSelecionados.Insert(1, 'TRANSP=' + IfThen(FUsarClasseTransporte, 'T', 'F'));
 
-      lCmdListaClasses.Parametro['InfoString'].AsBase64 := FListaSelecionados.Text;
+      lCmdListaClasses.Param['InfoString'].AsBase64 := FListaSelecionados.Text;
 
-      if Component is TLRDataFlashConexaoREST then
-        (Component as TLRDataFlashConexaoREST).Comunicar(lCmdListaClasses)
+      if Component is TRpDataFlashConexaoREST then
+        (Component as TRpDataFlashConexaoREST).Comunicar(lCmdListaClasses)
       else
-        (Component as TLRDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
+        (Component as TRpDataFlashConexaoCliente).Comunicar(lCmdListaClasses);
 
-      lClassesProxy := lCmdListaClasses.Retorno['RetornoProxy'].AsBase64;
-      lNomeArquivo := lCmdListaClasses.Retorno['NomeArquivoProxy'].AsString;
+      lClassesProxy := lCmdListaClasses.ResultParam['RetornoProxy'].AsBase64;
+      lNomeArquivo := lCmdListaClasses.ResultParam['NomeArquivoProxy'].AsString;
 
       lArquivoProxy := TStringList.Create;
       try
@@ -136,8 +136,8 @@ begin
             end;
 
             // verifica se o proxy existe no projeto
-            if (TLRDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lArquivo) = nil) then
-              TLRDataFlashProjectInfo.GetCurrentProject.AddFile(lArquivo, True);
+            if (TRpDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lArquivo) = nil) then
+              TRpDataFlashProjectInfo.GetCurrentProject.AddFile(lArquivo, True);
 
             ShellExecute(HInstance, 'open', PChar(lArquivo), nil, nil, SW_SHOWNORMAL);
 
@@ -145,19 +145,19 @@ begin
             begin
               lArquivo := StringReplace(lArquivo, '.pas', 'Class.pas', [rfIgnoreCase]);
               lArquivoProxy.Text := StringReplace(
-                lCmdListaClasses.Retorno['RetornoClass'].AsBase64,
+                lCmdListaClasses.ResultParam['RetornoClass'].AsBase64,
                 C_TMP_UNIT_CLASS, lNomeArquivo, [rfIgnoreCase]);
               lArquivoProxy.SaveToFile(lArquivo);
 
               // verifica se o proxy existe no projeto
-              if (TLRDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lArquivo) = nil) then
-                TLRDataFlashProjectInfo.GetCurrentProject.AddFile(lArquivo, True);
+              if (TRpDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lArquivo) = nil) then
+                TRpDataFlashProjectInfo.GetCurrentProject.AddFile(lArquivo, True);
               ShellExecute(HInstance, 'open', PChar(lArquivo), nil, nil, SW_SHOWNORMAL);
             end;
 
             // verifica se o arquivo de configuracao existe no projeto
-            if (TLRDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lConfigFileName) = nil) then
-              TLRDataFlashProjectInfo.GetCurrentProject.AddFile(lConfigFileName, False);
+            if (TRpDataFlashProjectInfo.GetCurrentProject.FindModuleInfo(lConfigFileName) = nil) then
+              TRpDataFlashProjectInfo.GetCurrentProject.AddFile(lConfigFileName, False);
           end;
         end;
       finally
@@ -165,8 +165,8 @@ begin
       end;
     end;
   finally
-    if not (Component is TLRDataFlashConexaoREST) then
-      (Component as TLRDataFlashConexaoCliente).Desconectar;
+    if not (Component is TRpDataFlashConexaoREST) then
+      (Component as TRpDataFlashConexaoCliente).Desconectar;
 
     lCmdListaClasses.Free;
     FreeAndNil(FListaSelecionados);
@@ -175,7 +175,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteEditor.GetVerb(Index: Integer): string;
+function TRpDataFlashConexaoClienteEditor.GetVerb(Index: Integer): string;
 begin
   case Index of
     0 : Result := 'Gerar Classes Proxy';
@@ -184,12 +184,12 @@ begin
   end;
 end;
 
-function TLRDataFlashConexaoClienteEditor.GetVerbCount: Integer;
+function TRpDataFlashConexaoClienteEditor.GetVerbCount: Integer;
 begin
   Result := 1;
 end;
 
-function TLRDataFlashConexaoClienteEditor.ShowFormSelecao(const AConfigFileName : string): Boolean;
+function TRpDataFlashConexaoClienteEditor.ShowFormSelecao(const AConfigFileName : string): Boolean;
 var
   lFormProxyConfig : TFormLRDataFlashProxyGenerator;
 begin

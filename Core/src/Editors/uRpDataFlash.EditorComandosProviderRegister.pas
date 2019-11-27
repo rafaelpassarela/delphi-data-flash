@@ -1,4 +1,4 @@
-unit uLRDF.EditorComandosProvider;
+unit uRpDataFlash.EditorComandosProviderRegister;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   DesignEditors;
 
 type
-  TLRDataFlashEditorComandosProvider = class(TComponentEditor)
+  TRpDataFlashEditorComandosProvider = class(TComponentEditor)
   private
     procedure EditarProvider;
   public
@@ -18,17 +18,17 @@ type
 implementation
 
 uses
-  SysUtils, 
-  uLRDF.DataSetProvider;
+  SysUtils,
+  uRpDataFlash.DataSetProvider;
 
-{ TLRDataFlashEditorComandosProvider }
+{ TRpDataFlashEditorComandosProvider }
 
-procedure TLRDataFlashEditorComandosProvider.EditarProvider;
+procedure TRpDataFlashEditorComandosProvider.EditarProvider;
 begin
-  (Component as TLRDataFlashDataSetProvider).EditarProvider;
+  (Component as TRpDataFlashDataSetProvider).EditarProvider;
 end;
 
-procedure TLRDataFlashEditorComandosProvider.ExecuteVerb(Index: Integer);
+procedure TRpDataFlashEditorComandosProvider.ExecuteVerb(Index: Integer);
 begin
   inherited;
   case Index of
@@ -36,7 +36,7 @@ begin
   end;
 end;
 
-function TLRDataFlashEditorComandosProvider.GetVerb(Index: Integer): string;
+function TRpDataFlashEditorComandosProvider.GetVerb(Index: Integer): string;
 begin
   case Index of
     0 : Result := 'Editar Provider';
@@ -45,7 +45,7 @@ begin
   end;
 end;
 
-function TLRDataFlashEditorComandosProvider.GetVerbCount: Integer;
+function TRpDataFlashEditorComandosProvider.GetVerbCount: Integer;
 begin
   Result := 1;
 end;

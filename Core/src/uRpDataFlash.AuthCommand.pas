@@ -7,7 +7,7 @@ interface
 uses uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, SysUtils;
 
 type
-  TLRDataFlashComandoAutenticar = class(TRpDataFlashCommand)
+  TRpDataFlashComandoAutenticar = class(TRpDataFlashCommand)
   protected
     function DoExecute : Boolean; override;
     procedure DoRegisterParams; override;
@@ -21,16 +21,16 @@ type
 
 implementation
 
-{ TLRDataFlashComandoAutenticar }
+{ TRpDataFlashComandoAutenticar }
 
-class function TLRDataFlashComandoAutenticar.Autenticar(ATcpClient: TRpDataFlashCustomClientConnection;
+class function TRpDataFlashComandoAutenticar.Autenticar(ATcpClient: TRpDataFlashCustomClientConnection;
   const AUsername, APassword : string; out AResultMSG: string): Boolean;
 const
   C_ERRO_AUTENTICACAO = 'Erro enviando pedido de autenticação. ';
 var
-  lCmd : TLRDataFlashComandoAutenticar;
+  lCmd : TRpDataFlashComandoAutenticar;
 begin
-  lCmd := TLRDataFlashComandoAutenticar.Create;
+  lCmd := TRpDataFlashComandoAutenticar.Create;
   try
     try
       lCmd.Param['Username'].AsString := AUsername;
@@ -57,7 +57,7 @@ begin
   end;
 end;
 
-function TLRDataFlashComandoAutenticar.DoExecute: Boolean;
+function TRpDataFlashComandoAutenticar.DoExecute: Boolean;
 var
   lAutenticado: Boolean;
   lMens: string;
@@ -99,7 +99,7 @@ begin
   ResultParam['ResultMSG'].AsString := lMens;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoExecuteBridgeSuccessfully(var AContinue: Boolean);
+procedure TRpDataFlashComandoAutenticar.DoExecuteBridgeSuccessfully(var AContinue: Boolean);
 begin
   inherited;
   AContinue := True;
@@ -109,14 +109,14 @@ begin
   FConnectionItem.Authenticated := ResultParam['Authenticated'].AsBoolean;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoExecuteBridgeError(var AContinue: Boolean);
+procedure TRpDataFlashComandoAutenticar.DoExecuteBridgeError(var AContinue: Boolean);
 begin
   inherited;
   FConnectionItem.Authenticated := False;
   AContinue := False;
 end;
 
-procedure TLRDataFlashComandoAutenticar.DoRegisterParams;
+procedure TRpDataFlashComandoAutenticar.DoRegisterParams;
 begin
   inherited;
   NewParam('Username', tvpString);
@@ -127,12 +127,12 @@ begin
   NewResult('ResultMSG', tvpString);
 end;
 
-function TLRDataFlashComandoAutenticar.GetProcessType: TRpDataFlashProcessType;
+function TRpDataFlashComandoAutenticar.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := prtRemoteOnly;
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoAutenticar, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrar(TRpDataFlashComandoAutenticar, C_GROUP_INTERNAL);
 
 end.

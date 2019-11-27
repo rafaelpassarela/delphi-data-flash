@@ -13,7 +13,7 @@ type
     procedure DoRegisterParams; override;
     function GetProcessType : TRpDataFlashProcessType; override;
   public
-    class function Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string) : Boolean;
+    class function Ping(ATcpClient : TRpDataFlashConexaoCliente; out AResultMSG : string) : Boolean;
   end;
 
 implementation
@@ -21,7 +21,7 @@ implementation
 uses
   SysUtils;
 
-{ TLRDataFlashComandoPing }
+{ TRpDataFlashPingCommand }
 
 function TRpDataFlashPingCommand.DoExecute: Boolean;
 begin
@@ -41,7 +41,7 @@ begin
   Result := prtLocal;
 end;
 
-class function TRpDataFlashPingCommand.Ping(ATcpClient : TLRDataFlashConexaoCliente; out AResultMSG : string): Boolean;
+class function TRpDataFlashPingCommand.Ping(ATcpClient : TRpDataFlashConexaoCliente; out AResultMSG : string): Boolean;
 var
   lCmd : TRpDataFlashPingCommand;
 begin

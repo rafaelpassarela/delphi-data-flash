@@ -305,9 +305,9 @@ var
   lHexStr: string;
 begin
   if Pos('$', AValue) = 0 then
-		lHexStr := '$' + AValue
+    lHexStr := '$' + AValue
   else
-		lHexStr := AValue;
+    lHexStr := AValue;
   Result := StrToIntDef(lHexStr, 0);
 end;
 
@@ -338,31 +338,33 @@ end;
 
 class function TMyEncryption.HexToString(const AValue: string): string;
 const
-	HEX_STR = '0123456789ABCDEF';
+  HEX_STR = '0123456789ABCDEF';
 var
-	I: Integer;
-	lBase, cStr: string;
+  I: Integer;
+  lBase, cStr: string;
   lValue: string;
 begin
-	cStr := '';
-	lValue := UpperCase(AValue);
+  cStr := '';
+  lValue := UpperCase(AValue);
 
-	// Limpa string
-	for I := 1 to Length(lValue) do begin
-		lBase := Copy(lValue, I, 1);
-		if Pos(lBase , HEX_STR) > 0 then
-			cStr := cStr + lBase;
-	end;
+  // Limpa string
+  for I := 1 to Length(lValue) do
+  begin
+    lBase := Copy(lValue, I, 1);
+    if Pos(lBase, HEX_STR) > 0 then
+      cStr := cStr + lBase;
+  end;
 
-	if (Length(cStr) mod 4) = 1 then
-		cStr := '0'+cStr;
+  if (Length(cStr) mod 4) = 1 then
+    cStr := '0' + cStr;
 
-	I := 1;
-	Result := '';
-	while I < Length(cStr) do begin
-		Result := Result + Chr(Hex2Dec(copy(cStr,I,4)));
-		I := I + 4;
-	end;
+  I := 1;
+  Result := '';
+  while I < Length(cStr) do
+  begin
+    Result := Result + Chr(Hex2Dec(copy(cStr, I, 4)));
+    I := I + 4;
+  end;
 end;
 
 class function TMyEncryption.StringToHex(const AValue: string): string;

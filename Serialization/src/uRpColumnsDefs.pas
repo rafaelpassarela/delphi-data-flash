@@ -6,11 +6,11 @@ interface
 
 uses
   {$IFDEF XE3UP}
-  Xml.XMLIntf,
+  Xml.XMLIntf, System.SysUtils, System.Classes,
   {$ELSE}
-  XMLIntf,
+  XMLIntf, SysUtils, Classes,
   {$ENDIF}
-  uRpSerialization, Classes, uRpSystem, SysUtils, uRpStringFunctions;
+  uRpSerialization, uRpSystem, uRpStringFunctions;
 
 type
   TRpColumnOrder = (coNormal, coAscending, coDescending);

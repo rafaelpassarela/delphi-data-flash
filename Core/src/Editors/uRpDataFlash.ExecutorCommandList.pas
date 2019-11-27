@@ -1,17 +1,18 @@
-unit uLRDF.ExecutorComandoList;
+unit uRpDataFlash.ExecutorCommandList;
 
 interface
 
 uses
-  DesignEditors, Classes, DesignIntf, uLRDF.Comando, Dialogs, SysUtils,
-  uLRDF.ExecutorComandos, uLRDF.Component, uLRDF.Types, uLRDF.ComandController;
+  DesignEditors, Classes, DesignIntf, uRpDataFlash.Command, Dialogs, SysUtils,
+  uRpDataFlash.CommandExecutor, uRpDataFlash.Components, uRpDataFlash.Types,
+  uRpDataFlash.CommandController;
 
 type
-  TLRDataFlashExecutorComandoList = class(TPropertyEditor)
+  TRpDataFlashExecutorComandoList = class(TPropertyEditor)
   protected
     procedure CarregaParametros; virtual;
     function CanAddProxyName(const AProxyName : string) : Boolean; virtual;
-    function GetConexaoCliente : TLRDataFlashConexaoCliente; virtual;
+    function GetConexaoCliente : TRpDataFlashConexaoCliente; virtual;
   public
     constructor Create(const ADesigner: IDesigner; APropCount: Integer); override;
     destructor Destroy; override;
@@ -25,35 +26,35 @@ type
 implementation
 
 uses
-  uLRDF.ProxyGenerator,
-  uLRDF.ComandoGetCommandList,
-  uRpFileHelper;
+  uRpDataFlash.ProxyGenerator,
+  uRpDataFlash.GetCommandList,
+  uRpSerialization;
 
-{ TLRDataFlashExecutorComandoList }
+{ TRpDataFlashExecutorComandoList }
 
-function TLRDataFlashExecutorComandoList.CanAddProxyName(
+function TRpDataFlashExecutorComandoList.CanAddProxyName(
   const AProxyName: string): Boolean;
 begin
   Result := True;
 end;
 
-procedure TLRDataFlashExecutorComandoList.CarregaParametros;
+procedure TRpDataFlashExecutorComandoList.CarregaParametros;
 var
-  lCmdList: TLRDataFlashComandoList;
+  lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TLRDataFlashConexaoCliente;
-  lInfo: TLRDFInfoComando;
+  lClient: TRpDataFlashConexaoCliente;
+  lInfo: TRpDataFlashInfoCommand;
   i: Integer;
 
-  procedure AdicionarParametro(const AParamXML : TLRDFParametrosInfoComando);
+  procedure AdicionarParametro(const AParamXML : TRpDataFlashParamInfoComando);
   var
-    lParam: TLRDataFlashParametroValueItem;
+    lParam: TRpDataFlashParametroValueItem;
   begin
-    if AParamXML.Tipo in [tpEntrada, tpEntradaSemRecaregar] then   // tpSaida, tpInterno,
-      lParam := (GetComponent(0) as TLRDataFlashExecutorComando).Parametros.Add as TLRDataFlashParametroValueItem
+    if AParamXML.Tipo in [tpInput, tpInputNoReload] then   // tpSaida, tpInterno,
+      lParam := (GetComponent(0) as TRpDataFlashCommandExecutor).Params.Add as TRpDataFlashParametroValueItem
     else
-      if AParamXML.Tipo = tpSaida then
-        lParam := (GetComponent(0) as TLRDataFlashExecutorComando).Retornos.Add as TLRDataFlashParametroValueItem
+      if AParamXML.Tipo = tpOutput then
+        lParam := (GetComponent(0) as TRpDataFlashCommandExecutor).ResultParams.Add as TRpDataFlashParametroValueItem
       else
         lParam := nil;
 
@@ -65,40 +66,40 @@ var
   end;
 
 begin
-  FileClassRegistrer.Registrar(TLRDFParametrosInfoComando);
+  SerializationClassRegistrer.Registrate(TRpDataFlashParamInfoComando);
 
   inherited;
   lInfo := nil;
   lLista := TStringList.Create;
-  lClient := TLRDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashConexaoCliente.Create(nil);
 
-  lCmdList := TLRDataFlashComandoList.Create;
+  lCmdList := TRpDataFlashComandoList.Create;
 
-  with (GetComponent(0) as TLRDataFlashExecutorComando) do
+  with (GetComponent(0) as TRpDataFlashCommandExecutor) do
   try
-    lCmdList.Parametro['TipoBusca'].AsInteger := Ord(trpCommandInfo);
-    lCmdList.Parametro['InfoString'].AsBase64 := Comando;
+    lCmdList.Param['TipoBusca'].AsInteger := Ord(trpCommandInfo);
+    lCmdList.Param['InfoString'].AsBase64 := Command;
 
     if Assigned(ConexaoCliente) then
     begin
       try
         lClient.ClonarDe( ConexaoCliente );
         lClient.Comunicar(lCmdList);
-        if not lCmdList.StatusRetorno then
+        if not lCmdList.ReturnStatus then
           ShowMessage('Não foi possível comunica com o servidor. ' + lCmdList.LastError)
         else
         begin
-          lLista.Text := lCmdList.Retorno['RetornoProxy'].AsBase64;
+          lLista.Text := lCmdList.ResultParam['RetornoProxy'].AsBase64;
           if Trim(lLista.Text) <> EmptyStr then
           begin
-            lInfo := TLRDFInfoComando.Create(nil);
+            lInfo := TRpDataFlashInfoCommand.Create(nil);
             lInfo.LoadFromString( lLista.Text );
 
             for i := 0 to lInfo.ListaParametros.Count - 1 do
               AdicionarParametro( lInfo.ListaParametros[i] );
           end
           else
-            ShowMessage('Comando "' + Comando + '" não foi encontrado no servidor.');
+            ShowMessage('Comando "' + Command + '" não foi encontrado no servidor.');
         end;
       except
         on E: Exception do
@@ -120,58 +121,58 @@ begin
   end;
 end;
 
-constructor TLRDataFlashExecutorComandoList.Create(const ADesigner: IDesigner;
+constructor TRpDataFlashExecutorComandoList.Create(const ADesigner: IDesigner;
   APropCount: Integer);
 begin
   inherited Create(ADesigner, APropCount);
 end;
 
-destructor TLRDataFlashExecutorComandoList.Destroy;
+destructor TRpDataFlashExecutorComandoList.Destroy;
 begin
   inherited Destroy;
 end;
 
-function TLRDataFlashExecutorComandoList.GetAttributes: TPropertyAttributes;
+function TRpDataFlashExecutorComandoList.GetAttributes: TPropertyAttributes;
 begin
   Result := [paValueList, paSortList];
 end;
 
-function TLRDataFlashExecutorComandoList.GetConexaoCliente: TLRDataFlashConexaoCliente;
+function TRpDataFlashExecutorComandoList.GetConexaoCliente: TRpDataFlashConexaoCliente;
 begin
-  Result := (GetComponent(0) as TLRDataFlashExecutorComando).ConexaoCliente;
+  Result := (GetComponent(0) as TRpDataFlashCommandExecutor).ConexaoCliente;
 end;
 
-function TLRDataFlashExecutorComandoList.GetValue: string;
+function TRpDataFlashExecutorComandoList.GetValue: string;
 begin
-  Result := (GetComponent(0) as TLRDataFlashExecutorComando).Comando;
+  Result := (GetComponent(0) as TRpDataFlashCommandExecutor).Command;
 end;
 
-procedure TLRDataFlashExecutorComandoList.GetValues(Proc: TGetStrProc);
+procedure TRpDataFlashExecutorComandoList.GetValues(Proc: TGetStrProc);
 var
   i: Integer;
-  lCmdList: TLRDataFlashComandoList;
+  lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TLRDataFlashConexaoCliente;
-  lConexCliente: TLRDataFlashConexaoCliente;
+  lClient: TRpDataFlashConexaoCliente;
+  lConexCliente: TRpDataFlashConexaoCliente;
 begin
   inherited;
   // obtem lista de comandos registrados
   lLista := TStringList.Create;
-  lClient := TLRDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashConexaoCliente.Create(nil);
 
-  lCmdList := TLRDataFlashComandoList.Create;
+  lCmdList := TRpDataFlashComandoList.Create;
 
   try
-    lCmdList.Parametro['TipoBusca'].AsInteger := Ord(trpCommandList);
+    lCmdList.Param['TipoBusca'].AsInteger := Ord(trpCommandList);
     lConexCliente := GetConexaoCliente;
     if Assigned(lConexCliente) then
     begin
       try
         lClient.ClonarDe(lConexCliente);
         lClient.Comunicar(lCmdList);
-        lCmdList.StatusRetorno;
+        lCmdList.ReturnStatus;
 
-        lLista.Text := lCmdList.Retorno['RetornoProxy'].AsBase64;
+        lLista.Text := lCmdList.ResultParam['RetornoProxy'].AsBase64;
         for i := 0 to lLista.Count - 1 do
           if CanAddProxyName(lLista[i]) then
             Proc( lLista[i] );
@@ -192,19 +193,19 @@ begin
   end;
 end;
 
-procedure TLRDataFlashExecutorComandoList.SetValue(const Value: string);
+procedure TRpDataFlashExecutorComandoList.SetValue(const Value: string);
 begin
   inherited;
 
-  with (GetComponent(0) as TLRDataFlashExecutorComando) do
+  with (GetComponent(0) as TRpDataFlashCommandExecutor) do
   begin
-    if Comando <> Value then
+    if Command <> Value then
     begin
       // configura o novo valor para o componente
-      Comando := Value;
+      Command := Value;
       // limpa os parametros atuais
-      Parametros.Clear;
-      Retornos.Clear;
+      Params.Clear;
+      ResultParams.Clear;
 
       if Value <> EmptyStr then
         CarregaParametros;

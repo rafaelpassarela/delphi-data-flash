@@ -9,7 +9,7 @@ uses
   uRpSerialization, SysUtils, Classes, Windows;
 
 type
-  TLRDataFlashComandoHelper = class(TRpDataFlashCommand)
+  TRpDataFlashComandoHelper = class(TRpDataFlashCommand)
   protected
     procedure DoRegisterParams; override;
     function DoExecute : Boolean; override;
@@ -17,13 +17,13 @@ type
 
 implementation
 
-{ TSPITCPComandoHelperBase }
+{ TRpDataFlashComandoHelper }
 
-function TLRDataFlashComandoHelper.DoExecute: Boolean;
+function TRpDataFlashComandoHelper.DoExecute: Boolean;
 var
   lContinuar: Boolean;
-  lClass: TCustomSerializableObjectClass;
-  lObjeto: TCustomSerializableObject;
+  lClass: TBaseSerializableObjectClass;
+  lObjeto: TBaseSerializableObject;
   lClassName: string;
   lOperacao: TRpDataFlashHelperAction;
   lIntf : ISerializableBaseHelper;
@@ -77,12 +77,12 @@ begin
         lObjeto := nil;
 
       if lObjeto <> nil then
-        OutputDebugString('O objeto não foi liberado corretamente em TLRDataFlashComandoHelper.DoExecutar.');
+        OutputDebugString('O objeto não foi liberado corretamente em TRpDataFlashComandoHelper.DoExecutar.');
     end;
   end;
 end;
 
-procedure TLRDataFlashComandoHelper.DoRegisterParams;
+procedure TRpDataFlashComandoHelper.DoRegisterParams;
 begin
   inherited;
   NewParam('Object', tvpBase64, True);
@@ -91,6 +91,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TLRDataFlashComandoHelper, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrar(TRpDataFlashComandoHelper, C_GROUP_INTERNAL);
 
 end.
