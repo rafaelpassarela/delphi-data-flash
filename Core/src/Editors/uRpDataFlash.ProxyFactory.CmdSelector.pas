@@ -1,4 +1,4 @@
-unit fLRDF.ProxyFactory.CmdSelector;
+unit uRpDataFlash.ProxyFactory.CmdSelector;
 
 interface
 
@@ -13,7 +13,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, ImgList, StdCtrls, ExtCtrls, DB, IniFiles;
+  Dialogs, ComCtrls, ImgList, StdCtrls, ExtCtrls, DB, IniFiles, System.ImageList;
 
 type
   TInfoStorage = class

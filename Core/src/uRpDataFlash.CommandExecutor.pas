@@ -14,26 +14,26 @@ uses
   uRpDataFlash.CommandController;
 
 type
-  TLRDFErrorExecucao = procedure(const AErrorMessage : string; var ARaiseException : Boolean) of object;
-  TLRDFExecCmdBeforeExecute = procedure (Sender : TObject; var AContinue : Boolean) of object;
-  TLRDFExecCmdAfterExecute = procedure (Sender : TObject; const AExecOk : Boolean; const AResultMessage : string) of object;
+  TRpDataFlashErrorExecucao = procedure(const AErrorMessage : string; var ARaiseException : Boolean) of object;
+  TRpDataFlashExecCmdBeforeExecute = procedure (Sender : TObject; var AContinue : Boolean) of object;
+  TRpDataFlashExecCmdAfterExecute = procedure (Sender : TObject; const AExecOk : Boolean; const AResultMessage : string) of object;
 
-  TLRDataFlashExecutorComando = class(TComponent)
+  TRpDataFlashCommandExecutor = class(TComponent)
   private
-    FConexaoCliente: TLRDataFlashConexaoCliente;
+    FConexaoCliente: TRpDataFlashConexaoCliente;
     FVerificarConexao: Boolean;
     FComando: string;
     FLastError: string;
-    FOnError: TLRDFErrorExecucao;
+    FOnError: TRpDataFlashErrorExecucao;
     FLastStatusProcessamento : TRpDataFlashProcessingStatus;
-    FParametros: TLRDataFlashParametrosValueCollection;
-    FRetornos: TLRDataFlashRetornosValueCollection;
-    FOnAfterExecute: TLRDFExecCmdAfterExecute;
-    FOnBeforeExecute: TLRDFExecCmdBeforeExecute;
+    FParams: TRpDataFlashParametrosValueCollection;
+    FResultParam: TRpDataFlashRetornosValueCollection;
+    FOnAfterExecute: TRpDataFlashExecCmdAfterExecute;
+    FOnBeforeExecute: TRpDataFlashExecCmdBeforeExecute;
 
     function DoInternalExecute : Boolean;
-    function GetComando: string;
-    procedure SetComando(const Value: string);
+    function GetCommand: string;
+    procedure SetCommand(const Value: string);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -42,22 +42,22 @@ type
     function LastError : string;
     function LastStatusProcessamento : TRpDataFlashProcessingStatus;
   published
-    property ConexaoCliente : TLRDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
+    property ConexaoCliente : TRpDataFlashConexaoCliente read FConexaoCliente write FConexaoCliente;
     property VerificarConexao : Boolean read FVerificarConexao write FVerificarConexao default True;
-    property Comando : string read GetComando write SetComando;
-    property Params : TLRDataFlashParametrosValueCollection read FParametros write FParametros;
-    property Retornos : TLRDataFlashRetornosValueCollection read FRetornos write FRetornos;
+    property Command : string read GetCommand write SetCommand;
+    property Params : TRpDataFlashParametrosValueCollection read FParams write FParams;
+    property ResultParams : TRpDataFlashRetornosValueCollection read FResultParam write FResultParam;
 
-    property OnError : TLRDFErrorExecucao read FOnError write FOnError;
-    property OnAfterExecute : TLRDFExecCmdAfterExecute read FOnAfterExecute write FOnAfterExecute;
-    property OnBeforeExecute : TLRDFExecCmdBeforeExecute read FOnBeforeExecute write FOnBeforeExecute;
+    property OnError : TRpDataFlashErrorExecucao read FOnError write FOnError;
+    property OnAfterExecute : TRpDataFlashExecCmdAfterExecute read FOnAfterExecute write FOnAfterExecute;
+    property OnBeforeExecute : TRpDataFlashExecCmdBeforeExecute read FOnBeforeExecute write FOnBeforeExecute;
   end;
 
 implementation
 
-{ TLRDataFlashExecutorComando }
+{ TRpDataFlashExecutorComando }
 
-constructor TLRDataFlashExecutorComando.Create(AOwner: TComponent);
+constructor TRpDataFlashCommandExecutor.Create(AOwner: TComponent);
 begin
   inherited;
 
@@ -65,26 +65,26 @@ begin
   FComando := '';
   FLastStatusProcessamento := psNone;
 
-  FParametros := TLRDataFlashParametrosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
-  FRetornos := TLRDataFlashRetornosValueCollection.Create(Self, TLRDataFlashParametroValueItem);
+  FParams := TRpDataFlashParametrosValueCollection.Create(Self, TRpDataFlashParametroValueItem);
+  FResultParam := TRpDataFlashRetornosValueCollection.Create(Self, TRpDataFlashParametroValueItem);
 end;
 
-destructor TLRDataFlashExecutorComando.Destroy;
+destructor TRpDataFlashCommandExecutor.Destroy;
 begin
-  FreeAndNil(FParametros);
-  FreeAndNil(FRetornos);
+  FreeAndNil(FParams);
+  FreeAndNil(FResultParam);
   inherited;
 end;
 
-function TLRDataFlashExecutorComando.DoInternalExecute: Boolean;
+function TRpDataFlashCommandExecutor.DoInternalExecute: Boolean;
 var
   i: Integer;
   lCmd : TRpDataFlashSendCommand;
-  lParam: TLRDataFlashParametroValueItem;
+  lParam: TRpDataFlashParametroValueItem;
 begin
   lCmd := TRpDataFlashSendCommand.Create;
   try
-    lCmd.SetComando( FComando );
+    lCmd.SetCommand( FComando );
 
     // copia os parametros do componente para o do comando
     for i := 0 to Params.Count - 1 do
@@ -105,9 +105,9 @@ begin
     FLastStatusProcessamento := lCmd.ProcessingStatus;
 
     // copia os parametros do comando para o componente
-    for i := 0 to Retornos.Count - 1 do
+    for i := 0 to ResultParams.Count - 1 do
     begin
-      lParam := Retornos.ByIndex(i);
+      lParam := ResultParams.ByIndex(i);
       case lParam.TipoValor of
         tvpInteger:  lParam.Valor := lCmd.ResultParam[lParam.Nome].AsInteger;
         tvpString:   lParam.Valor := lCmd.ResultParam[lParam.Nome].AsString;
@@ -124,7 +124,7 @@ begin
   end;
 end;
 
-function TLRDataFlashExecutorComando.Execute: Boolean;
+function TRpDataFlashCommandExecutor.Execute: Boolean;
 var
   lRaise: Boolean;
   lContinue: Boolean;
@@ -165,12 +165,12 @@ begin
   end;
 end;
 
-function TLRDataFlashExecutorComando.GetComando: string;
+function TRpDataFlashCommandExecutor.GetCommand: string;
 begin
   Result := FComando;
 end;
 
-procedure TLRDataFlashExecutorComando.SetComando(const Value: string);
+procedure TRpDataFlashCommandExecutor.SetCommand(const Value: string);
 begin
   if FComando <> Value then
   begin
@@ -178,12 +178,12 @@ begin
   end;
 end;
 
-function TLRDataFlashExecutorComando.LastError: string;
+function TRpDataFlashCommandExecutor.LastError: string;
 begin
   Result := FLastError;
 end;
 
-function TLRDataFlashExecutorComando.LastStatusProcessamento: TRpDataFlashProcessingStatus;
+function TRpDataFlashCommandExecutor.LastStatusProcessamento: TRpDataFlashProcessingStatus;
 begin
   Result := FLastStatusProcessamento;
 end;

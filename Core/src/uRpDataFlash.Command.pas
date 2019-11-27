@@ -150,7 +150,7 @@ type
     function GetAsDateTime: TDateTime;
     function GetAsJSONString: string;
     function GetAsBinaryFile: TRpFileProxy;
-    function GetAsObject : TCustomSerializableObject;
+    function GetAsObject : TBaseSerializableObject;
     procedure SetAsString(const Value: string);
     procedure SetAsFloat(const Value: Double);
     procedure SetAsBoolean(const Value: Boolean);
@@ -185,7 +185,7 @@ type
     property AsDateTime : TDateTime read GetAsDateTime write SetAsDateTime;
     property AsJSONString : string read GetAsJSONString write SetAsJSONString;
     property AsBinaryFile: TRpFileProxy read GetAsBinaryFile;
-    property AsObject : TCustomSerializableObject read GetAsObject;
+    property AsObject : TBaseSerializableObject read GetAsObject;
 
     procedure LoadFromFile(const AArquivo : string);
     procedure SaveToFile(const AArquivo : string);
@@ -350,9 +350,9 @@ type
     procedure DoExecuteBridgeSuccessfully(var AContinue : Boolean); virtual;
     procedure DoExecuteBeforeBridgeConnection(var AContinue : Boolean); virtual;
     procedure NewParam(const AName : string; const AParamType : TRpDataFlashParamValueType; const ARecarregar : Boolean = True); overload;
-    procedure NewParam(const AName : string; const ABaseClass : TCustomSerializableObjectClass; const ARecarregar : Boolean = True); overload;
+    procedure NewParam(const AName : string; const ABaseClass : TBaseSerializableObjectClass; const ARecarregar : Boolean = True); overload;
     procedure NewResult(const AName : string; const AParamType : TRpDataFlashParamValueType); overload;
-    procedure NewResult(const AName : string; const ABaseClass : TCustomSerializableObjectClass; const ARecarregar : Boolean = True); overload;
+    procedure NewResult(const AName : string; const ABaseClass : TBaseSerializableObjectClass; const ARecarregar : Boolean = True); overload;
     procedure NewInternalParam(const AName : string; const AParamType : TRpDataFlashParamValueType); overload;
     procedure SetLifeCycle(const ALifeCycle: TRpDataFlashLifeCycle);
   public
@@ -415,8 +415,8 @@ type
     function DoExecute : Boolean; override;
   public
     function GetCommand: string; override;
-    procedure SetComando(const ACommand : string); overload;
-    procedure SetComando(const ACommand : TRpDataFlashCommandClass); overload;
+    procedure SetCommand(const ACommand : string); overload;
+    procedure SetCommand(const ACommand : TRpDataFlashCommandClass); overload;
   end;
 
   TRpDataFlashBrowserCommand = class(TRpDataFlashCommand)
@@ -548,7 +548,7 @@ type
     property ApplyMaxErrors : Cardinal read FApplyMaxErrors write FApplyMaxErrors;
     property InfoQuery : Boolean read FInfoQuery;
   end;
-       aaaaa
+
   TTcpClassRegisterItem = class
   private
     FClass : TRpDataFlashAbstractClass;
@@ -589,12 +589,12 @@ type
     class procedure Registrados(out ARegistrados : TTcpClassRegister; const ASomentePublicos : Boolean = False);
     class function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
     class function GetClass(const AClassName : string; out ALifeCycle : TRpDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
-//    class procedure Instanciar(const AClass : TLRDataFlashAbstractClass; const ANomeInstancia : string);
+//    class procedure Instanciar(const AClass : TRpDataFlashAbstractClass; const ANomeInstancia : string);
   end;
 
 implementation
 
-{ TLRDataFlashParametroComando }
+{ TRpDataFlashCommandParameter }
 
 procedure TRpDataFlashCommandParameter.Assign(const Source: TRpDataFlashCommandParameter);
 begin
@@ -697,9 +697,9 @@ begin
     Result := '{}';
 end;
 
-function TRpDataFlashCommandParameter.GetAsObject: TCustomSerializableObject;
+function TRpDataFlashCommandParameter.GetAsObject: TBaseSerializableObject;
 var
-  lClasseBase: TCustomSerializableObjectClass;
+  lClasseBase: TBaseSerializableObjectClass;
 begin
   Result := nil;
   lClasseBase := SerializationClassRegistrer.GetClass(FBaseClass);
@@ -845,7 +845,7 @@ begin
   FValue := Value;
 end;
 
-{ TLRDataFlashParametrosComando }
+{ TRpDataFlashCommandParameterList }
 
 procedure TRpDataFlashCommandParameterList.AddParam(const AName: string;
   const AValue: Variant; const AParamType: TRpDataFlashParamValueType);
@@ -1231,7 +1231,7 @@ begin
   end;
 end;
 
-{ TLRDataFlashComando }
+{ TRpDataFlashCommand }
 
 procedure TRpDataFlashCommand.Load(const ACommand: string);
 begin
@@ -1743,14 +1743,14 @@ begin
   Result := FParamList.ResultParam[C_PARAM_INT_STATUS_RET].AsBoolean;
 end;
 
-{ TLRDataFlashComandoEnvio }
+{ TRpDataFlashSendCommand }
 
 function TRpDataFlashSendCommand.DoExecute: Boolean;
 begin
   Result := True;
 end;
 
-procedure TRpDataFlashSendCommand.SetComando(const ACommand: string);
+procedure TRpDataFlashSendCommand.SetCommand(const ACommand: string);
 begin
   FCommand := ACommand;
   if Trim(FParamList.Command) = EmptyStr then
@@ -1764,13 +1764,13 @@ begin
   Result := FCommand;
 end;
 
-procedure TRpDataFlashSendCommand.SetComando(const ACommand: TRpDataFlashCommandClass);
+procedure TRpDataFlashSendCommand.SetCommand(const ACommand: TRpDataFlashCommandClass);
 begin
-  SetComando(ACommand.ClassName);
+  SetCommand(ACommand.ClassName);
 end;
 
 procedure TRpDataFlashCommand.NewParam(const AName: string;
-  const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
+  const ABaseClass: TBaseSerializableObjectClass; const ARecarregar: Boolean);
 begin
   if not ARecarregar then
     FParamList.AddNew(AName, tpInputNoReload, ABaseClass.ClassName)
@@ -1785,7 +1785,7 @@ begin
 end;
 
 procedure TRpDataFlashCommand.NewResult(const AName: string;
-  const ABaseClass: TCustomSerializableObjectClass; const ARecarregar: Boolean);
+  const ABaseClass: TBaseSerializableObjectClass; const ARecarregar: Boolean);
 begin
   FParamList.AddNew(AName, tpOutput, ABaseClass.ClassName);
 end;
@@ -1908,7 +1908,7 @@ begin
   Add(lItem);
 end;
 
-{ TLRDataFlashValorParametroInteger }
+{ TRpDataFlashParamValueInteger }
 
 constructor TRpDataFlashParamValueInteger.Create;
 begin
@@ -1930,7 +1930,7 @@ begin
   FValue := Value;
 end;
 
-{ TLRDataFlashValorParametroString }
+{ TRpDataFlashParamValueString }
 
 constructor TRpDataFlashParamValueString.Create;
 begin
@@ -1948,7 +1948,7 @@ begin
   FValue := Value;
 end;
 
-{ TLRDataFlashValorParametroBoolean }
+{ TRpDataFlashParamValueBoolean }
 
 constructor TRpDataFlashParamValueBoolean.Create;
 begin
@@ -1992,7 +1992,7 @@ begin
     Result := C_WITHOUT_GROUP;
 end;
 
-{ TLRDataFlashCustomDataSetProvider }
+{ TRpDataFlashDataSetProviderCommand }
 
 function TRpDataFlashDataSetProviderCommand.ApplyUpdates: Boolean;
 var
@@ -2004,7 +2004,7 @@ begin
   lStatements := TStringList.Create;
   lStatements.Text := Param['SQLInstruct'].AsBase64;
   lTotal := StrToIntDef(Trim(lStatements[0]), 0);
-  Result := False;
+//  Result := False;
   try
     if lTotal > 0 then
     begin
@@ -2034,7 +2034,7 @@ begin
   FProviderClass := EmptyStr;
   FInfoQuery := False;
 //  FParams := TDataSetParams.Create;
-//  FSQLs := TLRDataFlashCustomProvider.Create;
+//  FSQLs := TRpDataFlashCustomProvider.Create;
 end;
 
 destructor TRpDataFlashDataSetProviderCommand.Destroy;
@@ -2114,7 +2114,7 @@ begin
   NewResult('ApplyErrCount', tvpInteger);
 end;
 
-{ TSPITCPComandoTexto }
+{ TRpDataFlashTextCommand }
 
 function TRpDataFlashTextCommand.DoExecute: Boolean;
 begin
@@ -2363,7 +2363,7 @@ begin
   FFileName := AValue;
 end;
 
-{ TLRDataFlashComandoBrowser }
+{ TRpDataFlashBrowserCommand }
 
 function TRpDataFlashBrowserCommand.DoGetSerializedParams: string;
 var

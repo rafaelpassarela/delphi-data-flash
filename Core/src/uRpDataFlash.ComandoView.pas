@@ -1,4 +1,4 @@
-unit fLRDF.ComandoView;
+unit uRpDataFlash.ComandoView;
 
 interface
 
@@ -16,18 +16,18 @@ type
     pnlSelecao: TPanel;
     BitBtn1: TBitBtn;
   public
-    procedure CarregarComando(const AComandos : TLRDataFlashComandList;
-      out AComando : TLRDataFlashComandItem);
+    procedure CarregarComando(const AComandos : TRpDataFlashComandList;
+      out AComando : TRpDataFlashComandItem);
   end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TfrmComandoView.CarregarComando(const AComandos : TLRDataFlashComandList;
-  out AComando : TLRDataFlashComandItem);
+procedure TfrmComandoView.CarregarComando(const AComandos : TRpDataFlashComandList;
+  out AComando : TRpDataFlashComandItem);
 begin
-  AComando := AComandos.Novo as TLRDataFlashComandItem;
+  AComando := AComandos.Novo as TRpDataFlashComandItem;
   AComando.Nome := ctrlNomeComando.Text;
 end;
 

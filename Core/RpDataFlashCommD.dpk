@@ -5,29 +5,30 @@ package RpDataFlashCommD;
 
 {$R *.res}
 {$R 'RpDataFlashCommIcons.dcr'}
-{$R 'RpDataFlashCommIcons.dcr'}
-{$R 'RpDataFlashCommIcons.dcr'}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO ON}
+{$DEBUGINFO OFF}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION ON}
+{$OPTIMIZATION OFF}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES OFF}
+{$STACKFRAMES ON}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'DataFlash - Designtime Communication Package - Rafael Passarela'}
 {$DESIGNONLY}
 {$IMPLICITBUILD OFF}
@@ -37,13 +38,13 @@ requires
   RpDataFlashCommR;
 
 contains
-  uLRDF.ComponentRegister in 'src\Editors\uLRDF.ComponentRegister.pas',
-  uLRDF.ConexaoClienteEditor in 'src\Editors\uLRDF.ConexaoClienteEditor.pas',
-  uLRDF.ComandControllerEditor in 'src\Editors\uLRDF.ComandControllerEditor.pas',
-  uLRDF.DataSetProviderList in 'src\Editors\uLRDF.DataSetProviderList.pas',
-  uLRDF.EditorComandosProvider in 'src\Editors\uLRDF.EditorComandosProvider.pas' {frmEditorComandosProvider},
-  fLRDF.EditorComandosSemAutenticacao in 'src\Editors\fLRDF.EditorComandosSemAutenticacao.pas' {FormComandosSemAutenticacao},
-  uLRDF.ExecutorComandoList in 'src\Editors\uLRDF.ExecutorComandoList.pas',
-  fLRDF.ProxyFactory.CmdSelector in 'src\Editors\fLRDF.ProxyFactory.CmdSelector.pas' {FormLRDataFlashProxyGenerator};
+  uRpDataFlash.ComponentRegister in 'src\Editors\uRpDataFlash.ComponentRegister.pas',
+  uRpDataFlash.ConexaoClienteEditor in 'src\Editors\uRpDataFlash.ConexaoClienteEditor.pas',
+  uRpDataFlash.CommandControllerEditor in 'src\Editors\uRpDataFlash.CommandControllerEditor.pas',
+  uRpDataFlash.DataSetProviderList in 'src\Editors\uRpDataFlash.DataSetProviderList.pas',
+  uRpDataFlash.EditorComandosSemAutenticacao in 'src\Editors\uRpDataFlash.EditorComandosSemAutenticacao.pas' {FormComandosSemAutenticacao},
+  uRpDataFlash.ExecutorCommandList in 'src\Editors\uRpDataFlash.ExecutorCommandList.pas',
+  uRpDataFlash.ProxyFactory.CmdSelector in 'src\Editors\uRpDataFlash.ProxyFactory.CmdSelector.pas' {FormLRDataFlashProxyGenerator},
+  uRpDataFlash.EditorComandosProviderRegister in 'src\Editors\uRpDataFlash.EditorComandosProviderRegister.pas';
 
 end.

@@ -9,15 +9,15 @@ uses
   uRpDataFlash.Types, uRpDataFlash.Utils;
 
 type
-  TLRDataFlashCustomDataSetProvider = class;
-//  TLRDataFlashMasterDataSetProvider = class;
+  TRpDataFlashCustomDataSetProvider = class;
+//  TRpDataFlashMasterDataSetProvider = class;
 
-  TLRDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
+  TRpDataFlashOnProviderSendCallback = function (const AComando: IRpDataFlashCommandInterfaced; var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean of object;
 
-  TLRDataFlashDataSetCommandProvider = class(TRpDataFlashDataSetProviderCommand)
+  TRpDataFlashDataSetCommandProvider = class(TRpDataFlashDataSetProviderCommand)
   protected
-    FProvider: TLRDataFlashCustomDataSetProvider;
-    // from TLRDataFlashComando
+    FProvider: TRpDataFlashCustomDataSetProvider;
+    // from TRpDataFlashComando
     function GetCommand: string; override;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; override;
     function GetProcessType : TRpDataFlashProcessType; override;
@@ -39,10 +39,10 @@ type
 //    function DoExecutar : Boolean; override; final;
 //    procedure DoRegistrarParametros; override; final;
   public
-    constructor Create(const AItem : TLRDataFlashCustomDataSetProvider); reintroduce;
+    constructor Create(const AItem : TRpDataFlashCustomDataSetProvider); reintroduce;
   end;
 
-  TLRDataFlashCustomDataSetProvider = class(TComponent)
+  TRpDataFlashCustomDataSetProvider = class(TComponent)
   private
     FGrupo: string;
     FServer: TRpDataFlashServerConnection;
@@ -51,14 +51,14 @@ type
     FDeleteSQL: TStrings;
     FSelectSQL: TStrings;
     FTipoProcessamento: TRpDataFlashProcessType;
-    FOnSendCallback: TLRDataFlashOnProviderSendCallback;
-//    FOnCommit: TLRDataFlashOnTransactionEvent;
-//    FOnRollback: TLRDataFlashOnTransactionEvent;
-//    FOnStartTransaction: TLRDataFlashOnStartTransactionEvent;
-//    FMasterProvider: TLRDataFlashMasterDataSetProvider;
+    FOnSendCallback: TRpDataFlashOnProviderSendCallback;
+//    FOnCommit: TRpDataFlashOnTransactionEvent;
+//    FOnRollback: TRpDataFlashOnTransactionEvent;
+//    FOnStartTransaction: TRpDataFlashOnStartTransactionEvent;
+//    FMasterProvider: TRpDataFlashMasterDataSetProvider;
     FLifeCycle: TRpDataFlashLifeCycle;
-    FOnBeforeDataSetSelectSQL: TLRDataFlashOnSelect;
-    FOnBeforeDataSetExecuteSQL: TLRDataFlashOnExecSQL;
+    FOnBeforeDataSetSelectSQL: TRpDataFlashOnSelect;
+    FOnBeforeDataSetExecuteSQL: TRpDataFlashOnExecSQL;
     FDescricao: string;
     procedure SetGrupo(const Value: string);
     procedure SetServer(const Value: TRpDataFlashServerConnection);
@@ -78,15 +78,15 @@ type
     property DeleteSQL : TStrings read FDeleteSQL write SetDeleteSQL;
     property SelectSQL : TStrings read FSelectSQL write SetSelectSQL;
 
-//    property MasterProvider : TLRDataFlashMasterDataSetProvider read FMasterProvider write FMasterProvider;
+//    property MasterProvider : TRpDataFlashMasterDataSetProvider read FMasterProvider write FMasterProvider;
 
-    property OnSendCallback : TLRDataFlashOnProviderSendCallback read FOnSendCallback write FOnSendCallback;
-    property OnBeforeDataSetExecuteSQL : TLRDataFlashOnExecSQL read FOnBeforeDataSetExecuteSQL write FOnBeforeDataSetExecuteSQL;
-    property OnBeforeDataSetSelectSQL : TLRDataFlashOnSelect read FOnBeforeDataSetSelectSQL write FOnBeforeDataSetSelectSQL;
+    property OnSendCallback : TRpDataFlashOnProviderSendCallback read FOnSendCallback write FOnSendCallback;
+    property OnBeforeDataSetExecuteSQL : TRpDataFlashOnExecSQL read FOnBeforeDataSetExecuteSQL write FOnBeforeDataSetExecuteSQL;
+    property OnBeforeDataSetSelectSQL : TRpDataFlashOnSelect read FOnBeforeDataSetSelectSQL write FOnBeforeDataSetSelectSQL;
 
-//    property OnCommit : TLRDataFlashOnTransactionEvent read FOnCommit write FOnCommit;
-//    property OnRollback : TLRDataFlashOnTransactionEvent read FOnRollback write FOnRollback;
-//    property OnStartTransaction : TLRDataFlashOnStartTransactionEvent read FOnStartTransaction write FOnStartTransaction;
+//    property OnCommit : TRpDataFlashOnTransactionEvent read FOnCommit write FOnCommit;
+//    property OnRollback : TRpDataFlashOnTransactionEvent read FOnRollback write FOnRollback;
+//    property OnStartTransaction : TRpDataFlashOnStartTransactionEvent read FOnStartTransaction write FOnStartTransaction;
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -96,7 +96,7 @@ type
     property Descricao : string read FDescricao write FDescricao;
   end;
 
-{  TLRDataFlashMasterDataSetProvider = class(TLRDataFlashCustomDataSetProvider)
+{  TRpDataFlashMasterDataSetProvider = class(TRpDataFlashCustomDataSetProvider)
   published
     property OnSendCallback;
     property OnExecuteSQL;
@@ -106,7 +106,7 @@ type
     property OnStartTransaction;
   end; }
 
-  TLRDataFlashDataSetProvider = class(TLRDataFlashCustomDataSetProvider)
+  TRpDataFlashDataSetProvider = class(TRpDataFlashCustomDataSetProvider)
   published
     property Grupo;
     property Descricao;
@@ -132,25 +132,25 @@ type
 implementation
 
 uses
-  fLRDF.EditorComandosProvider,
+  uRpDataFlash.EditorComandosProviderView,
   Controls;
 
-{ TLRDataFlashDataSetCommandProvider }
+{ TRpDataFlashDataSetCommandProvider }
 
-constructor TLRDataFlashDataSetCommandProvider.Create(const AItem: TLRDataFlashCustomDataSetProvider);
+constructor TRpDataFlashDataSetCommandProvider.Create(const AItem: TRpDataFlashCustomDataSetProvider);
 begin
   FProvider := AItem;
   inherited Create;
 end;
 
-function TLRDataFlashDataSetCommandProvider.DoCallBack(
+function TRpDataFlashDataSetCommandProvider.DoCallBack(
   var AParamsCallback: TRpDataFlashCommandParameterList): Boolean;
 begin
   Result := Assigned(FProvider.OnSendCallback)
         and FProvider.OnSendCallback(Self, AParamsCallback);
 end;
 
-function TLRDataFlashDataSetCommandProvider.DoCommit(const pRetaining: Boolean): Boolean;
+function TRpDataFlashDataSetCommandProvider.DoCommit(const pRetaining: Boolean): Boolean;
 begin
   Result := True;
   if (GetServer <> nil) and Assigned(GetServer.OnBeforeDataSetCommitTransaction) then
@@ -160,7 +160,7 @@ begin
     Result := Executor.Commit(pRetaining);
 end;
 
-function TLRDataFlashDataSetCommandProvider.DoRollback(const pRetaining: Boolean): Boolean;
+function TRpDataFlashDataSetCommandProvider.DoRollback(const pRetaining: Boolean): Boolean;
 begin
   Result := True;
   if (GetServer <> nil) and Assigned(GetServer.OnBeforeDataSetRollbackTransaction) then
@@ -170,7 +170,7 @@ begin
     Result := Executor.Rollback(pRetaining);
 end;
 
-function TLRDataFlashDataSetCommandProvider.DoStartTransaction: Boolean;
+function TRpDataFlashDataSetCommandProvider.DoStartTransaction: Boolean;
 begin
   Result := True;
   if (GetServer <> nil) and Assigned(GetServer.OnBeforeDataSetStartTransaction) then
@@ -180,7 +180,7 @@ begin
     Result := Executor.StartTransaction;
 end;
 
-function TLRDataFlashDataSetCommandProvider.ExecSQL(const pSQL: string): Boolean;
+function TRpDataFlashDataSetCommandProvider.ExecSQL(const pSQL: string): Boolean;
 var
   lAuxSQL: string;
 begin
@@ -194,42 +194,42 @@ begin
     Executor.ExecuteSQL(lAuxSQL);
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetCommand: string;
+function TRpDataFlashDataSetCommandProvider.GetCommand: string;
 begin
   Result := FProvider.Name;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetDeleteSQL: string;
+function TRpDataFlashDataSetCommandProvider.GetDeleteSQL: string;
 begin
   Result := FProvider.DeleteSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetInsertSQL: string;
+function TRpDataFlashDataSetCommandProvider.GetInsertSQL: string;
 begin
   Result := FProvider.InsertSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetLifeCycle: TRpDataFlashLifeCycle;
+function TRpDataFlashDataSetCommandProvider.GetLifeCycle: TRpDataFlashLifeCycle;
 begin
   Result := FProvider.LifeCycle;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetSelectSQL: string;
+function TRpDataFlashDataSetCommandProvider.GetSelectSQL: string;
 begin
   Result := FProvider.SelectSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetProcessType: TRpDataFlashProcessType;
+function TRpDataFlashDataSetCommandProvider.GetProcessType: TRpDataFlashProcessType;
 begin
   Result := FProvider.TipoProcessamento;
 end;
 
-function TLRDataFlashDataSetCommandProvider.GetUpdateSQL: string;
+function TRpDataFlashDataSetCommandProvider.GetUpdateSQL: string;
 begin
   Result := FProvider.UpdateSQL.Text;
 end;
 
-function TLRDataFlashDataSetCommandProvider.Select(const pSelectSQL: string;
+function TRpDataFlashDataSetCommandProvider.Select(const pSelectSQL: string;
   out XMLData: string): Boolean;
 const
   C_NULL_CLAUSE = ' 1 = 2 ';
@@ -273,14 +273,14 @@ begin
     Executor.Select(lAuxSQL, XMLData);
 end;
 
-{ TLRDataFlashDataSetProvider }
+{ TRpDataFlashCustomDataSetProvider }
 
-procedure TLRDataFlashCustomDataSetProvider.SetSelectSQL(const Value: TStrings);
+procedure TRpDataFlashCustomDataSetProvider.SetSelectSQL(const Value: TStrings);
 begin
   FSelectSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetServer(const Value: TRpDataFlashServerConnection);
+procedure TRpDataFlashCustomDataSetProvider.SetServer(const Value: TRpDataFlashServerConnection);
 begin
   if (FServer <> nil) then
     FServer.Providers.Remove(Self);
@@ -291,12 +291,12 @@ begin
     FServer.Providers.Add(Self);
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetUpdateSQL(const Value: TStrings);
+procedure TRpDataFlashCustomDataSetProvider.SetUpdateSQL(const Value: TStrings);
 begin
   FUpdateSQL.Assign( Value );
 end;
 
-constructor TLRDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
+constructor TRpDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
 begin
   inherited;
   FGrupo := C_WITHOUT_GROUP;
@@ -309,7 +309,7 @@ begin
   FSelectSQL := TStringList.Create;
 end;
 
-destructor TLRDataFlashCustomDataSetProvider.Destroy;
+destructor TRpDataFlashCustomDataSetProvider.Destroy;
 begin
   FreeAndNil(FInsertSQL);
   FreeAndNil(FUpdateSQL);
@@ -318,7 +318,7 @@ begin
   inherited;
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.EditarProvider;
+procedure TRpDataFlashCustomDataSetProvider.EditarProvider;
 var
   lView: TfrmEditorComandosProvider;
 begin
@@ -342,7 +342,7 @@ begin
     raise Exception.Create('Não é permitido editar um provider em Runtime !');
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.Notification(AComponent: TComponent;
+procedure TRpDataFlashCustomDataSetProvider.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
@@ -350,19 +350,19 @@ begin
     FServer := nil;
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetDeleteSQL(const Value: TStrings);
+procedure TRpDataFlashCustomDataSetProvider.SetDeleteSQL(const Value: TStrings);
 begin
   FDeleteSQL.Assign( Value );
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
+procedure TRpDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
 begin
   FGrupo := TRpDataFlashValidations.NameValidation( Value );
   if FGrupo = EmptyStr then
     FGrupo := C_WITHOUT_GROUP;
 end;
 
-procedure TLRDataFlashCustomDataSetProvider.SetInsertSQL(const Value: TStrings);
+procedure TRpDataFlashCustomDataSetProvider.SetInsertSQL(const Value: TStrings);
 begin
   FInsertSQL.Assign( Value );
 end;

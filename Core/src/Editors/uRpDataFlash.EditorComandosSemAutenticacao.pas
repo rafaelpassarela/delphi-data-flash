@@ -1,14 +1,14 @@
-unit fLRDF.EditorComandosSemAutenticacao;
+unit uRpDataFlash.EditorComandosSemAutenticacao;
 
 interface
 
 uses
-  DesignEditors, Classes, DesignIntf, uLRDF.Comando, Windows, Messages, SysUtils,
+  DesignEditors, Classes, DesignIntf, uRpDataFlash.Command, Windows, Messages, SysUtils,
   Variants, Graphics, Controls, Forms, Dialogs, Grids, DBGrids, DB, DBClient,
   StdCtrls, Buttons, ExtCtrls, DBCtrls;
 
 type
-  TLRDataFlashEditComandosSemAutenticacao = class(TStringProperty)
+  TRpDataFlashEditComandosSemAutenticacao = class(TStringProperty)
   public
     function GetAttributes : TPropertyAttributes; override;
     procedure Edit; override;
@@ -43,23 +43,23 @@ var
 implementation
 
 uses
-  uLRDF.Component;
+  uRpDataFlash.Components;
 
 {$R *.dfm}
 
-{ TLRDataFlashEditComandosSemAutenticacao }
+{ TRpDataFlashEditComandosSemAutenticacao }
 
-procedure TLRDataFlashEditComandosSemAutenticacao.Edit;
+procedure TRpDataFlashEditComandosSemAutenticacao.Edit;
 begin
-  if GetComponent(0) is TLRDataFlashConexaoServer then
+  if GetComponent(0) is TRpDataFlashServerConnection then
   begin
     FormComandosSemAutenticacao := TFormComandosSemAutenticacao.Create(nil);
     try
-      FormComandosSemAutenticacao.LoadFromString( TLRDataFlashConexaoServer(GetComponent(0)).ComandosSemAutenticacao );
+      FormComandosSemAutenticacao.LoadFromString( TRpDataFlashServerConnection(GetComponent(0)).ComandosSemAutenticacao );
 
       if FormComandosSemAutenticacao.ShowModal = mrOk then
       begin
-        TLRDataFlashConexaoServer(GetComponent(0)).ComandosSemAutenticacao := FormComandosSemAutenticacao.SaveToString;
+        TRpDataFlashServerConnection(GetComponent(0)).ComandosSemAutenticacao := FormComandosSemAutenticacao.SaveToString;
 //        Value := 'Total: ' + IntToStr(FormComandosSemAutenticacao.cdsComandos.RecordCount);
       end;
     finally
@@ -68,12 +68,12 @@ begin
   end;
 end;
 
-function TLRDataFlashEditComandosSemAutenticacao.GetAttributes: TPropertyAttributes;
+function TRpDataFlashEditComandosSemAutenticacao.GetAttributes: TPropertyAttributes;
 begin
   Result := [paDialog, paReadOnly];
 end;
 
-function TLRDataFlashEditComandosSemAutenticacao.GetVisualValue: string;
+function TRpDataFlashEditComandosSemAutenticacao.GetVisualValue: string;
 begin
   inherited GetVisualValue;
   Result := 'Teste de GetVisualValue';

@@ -1,10 +1,10 @@
-unit fLRDF.ComandosControllerView;
+unit uRpDataFlash.ComandosControllerView;
 
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ExtCtrls, ComCtrls, StdCtrls, Buttons, fLRDF.ComandoView,
+  Dialogs, ExtCtrls, ComCtrls, StdCtrls, Buttons, uRpDataFlash.ComandoView,
   uRpDataFlash.CommandController;
 
 type
@@ -18,9 +18,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FComandos: TLRDataFlashComandList;
+    FComandos: TRpDataFlashComandList;
   public
-    property Comandos : TLRDataFlashComandList read FComandos write FComandos;
+    property Comandos : TRpDataFlashComandList read FComandos write FComandos;
     procedure AtualizarListaComandos;
   end;
 
@@ -30,8 +30,8 @@ implementation
 
 procedure TfrmComandosControllerView.AtualizarListaComandos;
 var
-  lIterator: TLRDataFlashComandList.TIteratorComand;
-  lAtual: TLRDataFlashComandItemBase;
+  lIterator: TRpDataFlashComandList.TIteratorComand;
+  lAtual: TRpDataFlashComandItemBase;
 begin
   ctrlComandos.Clear;
   if FComandos <> nil then
@@ -52,7 +52,7 @@ end;
 procedure TfrmComandosControllerView.btnAdicionarClick(Sender: TObject);
 var
   lView: TfrmComandoView;
-  lComando: TLRDataFlashComandItem;
+  lComando: TRpDataFlashComandItem;
 begin
   lView := TfrmComandoView.Create(Self);
   if lView.ShowModal = mrOk then

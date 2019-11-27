@@ -50,8 +50,6 @@ object frmComandosControllerView: TfrmComandosControllerView
       Width = 57
       Height = 25
       Caption = '+'
-      DoubleBuffered = True
-      ParentDoubleBuffered = False
       TabOrder = 0
       OnClick = btnAdicionarClick
     end
@@ -61,8 +59,6 @@ object frmComandosControllerView: TfrmComandosControllerView
       Width = 57
       Height = 25
       Caption = '-'
-      DoubleBuffered = True
-      ParentDoubleBuffered = False
       TabOrder = 1
     end
     object BitBtn1: TBitBtn
@@ -71,8 +67,6 @@ object frmComandosControllerView: TfrmComandosControllerView
       Width = 75
       Height = 25
       Caption = 'BitBtn1'
-      DoubleBuffered = True
-      ParentDoubleBuffered = False
       TabOrder = 2
     end
   end

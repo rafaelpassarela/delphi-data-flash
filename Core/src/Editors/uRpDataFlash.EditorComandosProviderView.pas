@@ -1,4 +1,4 @@
-unit fLRDF.EditorComandosProvider;
+unit uRpDataFlash.EditorComandosProviderView;
 
 interface
 

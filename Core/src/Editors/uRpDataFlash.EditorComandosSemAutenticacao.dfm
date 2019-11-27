@@ -60,8 +60,6 @@ object FormComandosSemAutenticacao: TFormComandosSemAutenticacao
       Height = 25
       Anchors = [akTop, akRight]
       Caption = '&OK'
-      TabOrder = 0
-      OnClick = BitBtnOkClick
       Glyph.Data = {
         DE010000424DDE01000000000000760000002800000024000000120000000100
         0400000000006801000000000000000000001000000000000000000000000000
@@ -80,6 +78,8 @@ object FormComandosSemAutenticacao: TFormComandosSemAutenticacao
         333A333333333333333338330000333333333333333333333333333333333333
         0000}
       NumGlyphs = 2
+      TabOrder = 0
+      OnClick = BitBtnOkClick
     end
     object BitBtnCancelar: TBitBtn
       Left = 416
@@ -89,8 +89,6 @@ object FormComandosSemAutenticacao: TFormComandosSemAutenticacao
       Anchors = [akTop, akRight]
       Cancel = True
       Caption = '&Cancelar'
-      TabOrder = 1
-      OnClick = BitBtnCancelarClick
       Glyph.Data = {
         DE010000424DDE01000000000000760000002800000024000000120000000100
         0400000000006801000000000000000000001000000000000000000000000000
@@ -109,6 +107,8 @@ object FormComandosSemAutenticacao: TFormComandosSemAutenticacao
         3333333333333333333888330000333333333333333333333333333333333333
         0000}
       NumGlyphs = 2
+      TabOrder = 1
+      OnClick = BitBtnCancelarClick
     end
     object DBNavigator1: TDBNavigator
       Left = 8

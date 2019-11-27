@@ -6,12 +6,12 @@ interface
 
 uses
   IdTCPClient, Classes, uRpDataFlash.Types, IdExceptionCore, IdStack, SysUtils,
-  IdHTTP, uRpDataFlash.Utils;
+  IdHTTP, Controls, uRpDataFlash.Utils;
 
 type
-  TLRDataFlashConnectionHelperCustomClass = class of TLRDataFlashConnectionHelperCustom;
+  TRpDataFlashConnectionHelperCustomClass = class of TRpDataFlashConnectionHelperCustom;
 
-  TLRDataFlashConnectionHelperCustom = class
+  TRpDataFlashConnectionHelperCustom = class
   private
     class var _LocalHostIP : string;
   private
@@ -54,7 +54,7 @@ type
     property URL : string read GetURL;
   end;
 
-  TLRDataFlashConnectionHelperTCP = class(TLRDataFlashConnectionHelperCustom)
+  TRpDataFlashConnectionHelperTCP = class(TRpDataFlashConnectionHelperCustom)
   private
     function GetConector: TIdTCPClient; reintroduce;
     procedure ConfigurarConector(const pConectionTimeout : Integer;
@@ -63,7 +63,7 @@ type
     property Conector : TIdTCPClient read GetConector; // write SetConector;
   end;
 
-  TLRDataFlashConnectionHelperREST = class(TLRDataFlashConnectionHelperCustom)
+  TRpDataFlashConnectionHelperREST = class(TRpDataFlashConnectionHelperCustom)
   private
     function GetConector: TIdHTTP; reintroduce;
     procedure ConfigurarConector(const pConectionTimeout : Integer;
@@ -77,11 +77,11 @@ type
 implementation
 
 uses
-  fLRDF.DefinirConexao, Controls, uRpDataFlash.Components;
+  uRpDataFlash.DefinirConexao, uRpDataFlash.Components;
 
-{ TLRDataFlashConnectionHelper }
+{ TRpDataFlashConnectionHelperCustom }
 
-function TLRDataFlashConnectionHelperCustom.Conectar: Boolean;
+function TRpDataFlashConnectionHelperCustom.Conectar: Boolean;
 var
   lAutMessage: string;
 begin
@@ -135,7 +135,7 @@ begin
   end;
 end;
 
-function TLRDataFlashConnectionHelperCustom.ConfiguradorConexao: Boolean;
+function TRpDataFlashConnectionHelperCustom.ConfiguradorConexao: Boolean;
 var
   lConfigurador: TfrmLRDataFlashDefinirConexao;
 begin
@@ -157,57 +157,57 @@ begin
   end;
 end;
 
-constructor TLRDataFlashConnectionHelperCustom.Create(AOwner: TComponent);
+constructor TRpDataFlashConnectionHelperCustom.Create(AOwner: TComponent);
 begin
   FOwner := AOwner;
 end;
 
-procedure TLRDataFlashConnectionHelperCustom.Desconectar;
+procedure TRpDataFlashConnectionHelperCustom.Desconectar;
 begin
   if Assigned(FDoDesconectar) then
     FDoDesconectar; // Desconectar que está no client
 end;
 
-function TLRDataFlashConnectionHelperCustom.GetConector: TIdTCPClientCustom;
+function TRpDataFlashConnectionHelperCustom.GetConector: TIdTCPClientCustom;
 begin
   Result := FConector;
 end;
 
-function TLRDataFlashConnectionHelperCustom.GetIsConectado: Boolean;
+function TRpDataFlashConnectionHelperCustom.GetIsConectado: Boolean;
 begin
   Result := (FConector <> nil)
         and FConector.Connected;
 end;
 
-function TLRDataFlashConnectionHelperCustom.GetServerName(const AConvert: Boolean;
+function TRpDataFlashConnectionHelperCustom.GetServerName(const AConvert: Boolean;
   const AHost: string): string;
 begin
   if AConvert and ((UpperCase(AHost) = 'LOCALHOST') or (AHost = '127.0.0.1')) then
   begin
-    if TLRDataFlashConnectionHelperCustom._LocalHostIP = EmptyStr then
-      TLRDataFlashConnectionHelperCustom._LocalHostIP := TRpDataFlashUtils.GetLocalComputerIp;
-    Result := TLRDataFlashConnectionHelperCustom._LocalHostIP;
+    if TRpDataFlashConnectionHelperCustom._LocalHostIP = EmptyStr then
+      TRpDataFlashConnectionHelperCustom._LocalHostIP := TRpDataFlashUtils.GetLocalComputerIp;
+    Result := TRpDataFlashConnectionHelperCustom._LocalHostIP;
   end else
     Result := AHost;
 end;
 
-function TLRDataFlashConnectionHelperCustom.GetURL: string;
+function TRpDataFlashConnectionHelperCustom.GetURL: string;
 begin
   Result := Format('%s:%d', [FServidor, FPorta]);
 end;
 
-procedure TLRDataFlashConnectionHelperCustom.InternalConectar;
+procedure TRpDataFlashConnectionHelperCustom.InternalConectar;
 begin
   FConector.Connect;
 end;
 
-procedure TLRDataFlashConnectionHelperCustom.LiberarConector;
+procedure TRpDataFlashConnectionHelperCustom.LiberarConector;
 begin
   if FConector <> nil then
     FreeAndNil(FConector);
 end;
 
-procedure TLRDataFlashConnectionHelperCustom.Reconectar(const AException: Exception);
+procedure TRpDataFlashConnectionHelperCustom.Reconectar(const AException: Exception);
 var
   lReconectar: Boolean;
 begin
@@ -226,7 +226,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashConnectionHelperCustom.ReinicializarConector(const pHost : string;
+procedure TRpDataFlashConnectionHelperCustom.ReinicializarConector(const pHost : string;
   const pConfigurarConexao : Boolean; const pPort : Integer; const pConectionTimeout : Integer;
   const pReadTimeout : Integer; const pConvertLocalHost : Boolean);
 begin
@@ -238,9 +238,9 @@ begin
   ConfigurarConector(pConectionTimeout, pReadTimeout);
 end;
 
-{ TLRDataFlashConnectionHelperTCP }
+{ TRpDataFlashConnectionHelperTCP }
 
-procedure TLRDataFlashConnectionHelperTCP.ConfigurarConector(
+procedure TRpDataFlashConnectionHelperTCP.ConfigurarConector(
   const pConectionTimeout, pReadTimeout: Integer);
 begin
   FConector := TIdTCPClient.Create(FOwner);
@@ -250,15 +250,15 @@ begin
   Conector.ReadTimeout := pReadTimeout;
 end;
 
-function TLRDataFlashConnectionHelperTCP.GetConector: TIdTCPClient;
+function TRpDataFlashConnectionHelperTCP.GetConector: TIdTCPClient;
 begin
   Result := TIdTCPClient(FConector);
 //  Result.IOHandler.LargeStream := True;
 end;
 
-{ TLRDataFlashConnectionHelperREST }
+{ TRpDataFlashConnectionHelperREST }
 
-procedure TLRDataFlashConnectionHelperREST.ConfigurarConector(
+procedure TRpDataFlashConnectionHelperREST.ConfigurarConector(
   const pConectionTimeout, pReadTimeout: Integer);
 begin
   FConector := TIdHTTP.Create(FOwner);
@@ -267,22 +267,22 @@ begin
   Conector.Request.ContentType := C_REST_CONTENT_TYPE;
 end;
 
-function TLRDataFlashConnectionHelperREST.GetConector: TIdHTTP;
+function TRpDataFlashConnectionHelperREST.GetConector: TIdHTTP;
 begin
   Result := TIdHTTP(FConector);
 end;
 
-function TLRDataFlashConnectionHelperREST.GetURL: string;
+function TRpDataFlashConnectionHelperREST.GetURL: string;
 begin
   Result := 'http://' + inherited GetURL;
 end;
 
-procedure TLRDataFlashConnectionHelperREST.InternalConectar;
+procedure TRpDataFlashConnectionHelperREST.InternalConectar;
 begin
 //HTTP client don't connect
 end;
 
 initialization
-  TLRDataFlashConnectionHelperCustom._LocalHostIP := EmptyStr;
+  TRpDataFlashConnectionHelperCustom._LocalHostIP := EmptyStr;
 
 end.

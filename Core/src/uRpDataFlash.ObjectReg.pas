@@ -73,7 +73,7 @@ type
     procedure AddEnumOrSet(const AName : string; const AValue : string);
   end;
 
-  TLRDataFlashClassSerialization = class
+  TRpDataFlashClassSerialization = class
   private
     FUnit : TStringList;
     FClassList : TImplementationList;
@@ -82,9 +82,9 @@ type
     procedure AdicionarScopo(const AClassItem : TImplementationPart);
     procedure AdicionarImplementacao(const AClassItem : TImplementationPart);
     procedure VerificarComando(const ACommandClass : TRpDataFlashCommandClass; var AGerados : string);
-    function GetXMLFromObject(const AObject : TCustomSerializableObject) : string;
+    function GetXMLFromObject(const AObject : TBaseSerializableObject) : string;
     function DoLoadFromRegistry(const AGerados : string; const ACheckIntf : Boolean) : Boolean;
-    function IsHelperSupport(const ABaseClass : TCustomSerializableObjectClass) : Boolean;
+    function IsHelperSupport(const ABaseClass : TBaseSerializableObjectClass) : Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -93,7 +93,7 @@ type
     function DecodeXML(const AXML : string) : Boolean; overload;
     function DecodeXML(const ANode : IXMLNode; const AIsCompressed : Boolean) : Boolean; overload;
     // transforma uma classe em XML
-    function DecodeClass(const AClass : TCustomSerializableObjectClass; var AClassesJaGeradas : string;
+    function DecodeClass(const AClass : TBaseSerializableObjectClass; var AClassesJaGeradas : string;
       const AClassName : string) : Boolean;
 
     function GetImplementedUnit(const AUnitName : string) : string;
@@ -110,9 +110,9 @@ type
 
 implementation
 
-{ TSPITCPClassDeSerialization }
+{ TRpDataFlashClassSerialization }
 
-procedure TLRDataFlashClassSerialization.AdicionarImplementacao(
+procedure TRpDataFlashClassSerialization.AdicionarImplementacao(
   const AClassItem: TImplementationPart);
 begin
   if AClassItem.Implement.Count > 0 then
@@ -122,7 +122,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashClassSerialization.AdicionarScopo(const AClassItem: TImplementationPart);
+procedure TRpDataFlashClassSerialization.AdicionarScopo(const AClassItem: TImplementationPart);
 var
   i: Integer;
   lDependencia: TImplementationPart;
@@ -142,7 +142,7 @@ begin
   end;
 end;
 
-constructor TLRDataFlashClassSerialization.Create;
+constructor TRpDataFlashClassSerialization.Create;
 begin
   FClassList := TImplementationList.Create;
 
@@ -154,12 +154,12 @@ begin
   FUnit := TStringList.Create;
 end;
 
-function TLRDataFlashClassSerialization.DecodeClass(const AClass: TCustomSerializableObjectClass;
+function TRpDataFlashClassSerialization.DecodeClass(const AClass: TBaseSerializableObjectClass;
   var AClassesJaGeradas : string; const AClassName : string): Boolean;
 var
   i: Integer;
-  lBase : TCustomSerializableObject;
-  lParentClass: TCustomSerializableObjectClass;
+  lBase : TBaseSerializableObject;
+  lParentClass: TBaseSerializableObjectClass;
   lNode: IXMLNode;
   lInfo: TPropInfo;
 begin
@@ -220,13 +220,13 @@ begin
         end;
       end;
       // para listas, verifica a dependencia dos itens
-      if lBase is TCustomSerializableList then
+      if lBase is TBaseSerializableList then
       begin
-        if Pos(';' + TCustomSerializableList(lBase).ItemClassName + ';', AClassesJaGeradas) = 0 then
+        if Pos(';' + TBaseSerializableList(lBase).ItemClassName + ';', AClassesJaGeradas) = 0 then
         begin
-          AClassesJaGeradas := AClassesJaGeradas + TCustomSerializableList(lBase).ItemClassName + ';';
-          lParentClass := SerializationClassRegistrer.GetClass( TCustomSerializableList(lBase).ItemClassName );
-          DecodeClass( lParentClass, AClassesJaGeradas, TCustomSerializableList(lBase).ItemClassName);
+          AClassesJaGeradas := AClassesJaGeradas + TBaseSerializableList(lBase).ItemClassName + ';';
+          lParentClass := SerializationClassRegistrer.GetClass( TBaseSerializableList(lBase).ItemClassName );
+          DecodeClass( lParentClass, AClassesJaGeradas, TBaseSerializableList(lBase).ItemClassName);
         end;
       end;
     end;
@@ -236,7 +236,7 @@ begin
   end;
 end;
 
-function TLRDataFlashClassSerialization.DecodeXML(const ANode: IXMLNode; const AIsCompressed : Boolean): Boolean;
+function TRpDataFlashClassSerialization.DecodeXML(const ANode: IXMLNode; const AIsCompressed : Boolean): Boolean;
 var
   lValorNode: string;
 begin
@@ -248,7 +248,7 @@ begin
   Result := DecodeXML(lValorNode);
 end;
 
-function TLRDataFlashClassSerialization.DecodeXML(const AXML: string): Boolean;
+function TRpDataFlashClassSerialization.DecodeXML(const AXML: string): Boolean;
 var
   lXML : IXMLDocument;
   lInfo: TImplementationPart;
@@ -316,7 +316,7 @@ begin
   end;
 end;
 
-destructor TLRDataFlashClassSerialization.Destroy;
+destructor TRpDataFlashClassSerialization.Destroy;
 begin
   FreeAndNil(FClassList);
   FreeAndNil(FUnit);
@@ -324,11 +324,11 @@ begin
   inherited;
 end;
 
-function TLRDataFlashClassSerialization.DoLoadFromRegistry(
+function TRpDataFlashClassSerialization.DoLoadFromRegistry(
   const AGerados: string; const ACheckIntf: Boolean): Boolean;
 var
   i: Integer;
-  lClass: TCustomSerializableObjectClass;
+  lClass: TBaseSerializableObjectClass;
   lGerados: string;
 begin
   Result := False;
@@ -358,7 +358,7 @@ begin
   end;
 end;
 
-function TLRDataFlashClassSerialization.GetClassMetadata: string;
+function TRpDataFlashClassSerialization.GetClassMetadata: string;
 begin
   if FXmlMetadata.XML.Count <= 1 then
     Result := EmptyStr
@@ -366,7 +366,7 @@ begin
     Result := FXmlMetadata.XML.Text;
 end;
 
-function TLRDataFlashClassSerialization.GetErrorUnit(
+function TRpDataFlashClassSerialization.GetErrorUnit(
   const AErrorMens: string): string;
 begin
   FUnit.Clear;
@@ -390,7 +390,7 @@ begin
   Result := FUnit.Text;
 end;
 
-function TLRDataFlashClassSerialization.GetImplementedUnit(const AUnitName : string) : string;
+function TRpDataFlashClassSerialization.GetImplementedUnit(const AUnitName : string) : string;
 var
   i: Integer;
 begin
@@ -430,17 +430,17 @@ begin
   end;
 end;
 
-function TLRDataFlashClassSerialization.GetXMLFromObject(
-  const AObject: TCustomSerializableObject): string;
+function TRpDataFlashClassSerialization.GetXMLFromObject(
+  const AObject: TBaseSerializableObject): string;
 begin
   Result := Algorithms.Base64CompressedString(AObject.SaveToXmlString);
 end;
 
-function TLRDataFlashClassSerialization.IsHelperSupport(
-  const ABaseClass: TCustomSerializableObjectClass): Boolean;
+function TRpDataFlashClassSerialization.IsHelperSupport(
+  const ABaseClass: TBaseSerializableObjectClass): Boolean;
 var
   InterfaceEntry: PInterfaceEntry;
-  lBase: TCustomSerializableObject;
+  lBase: TBaseSerializableObject;
 begin
   lBase := nil;
   lBase := ABaseClass.Create(nil);
@@ -452,7 +452,7 @@ begin
   end;
 end;
 
-procedure TLRDataFlashClassSerialization.AddUnitComent;
+procedure TRpDataFlashClassSerialization.AddUnitComent;
 begin
   FUnit.Add('//   Não modifique esta Unit, seu código é gerado automaticamente pelo Cliente de');
   FUnit.Add('// TCP buscando as classes de serviço registradas no servidor.');
@@ -463,7 +463,7 @@ begin
   FUnit.Add('// - Server......: '  + TRpDataFlashUtils.GetLocalComputerName);
 end;
 
-function TLRDataFlashClassSerialization.LoadClassFromMetadata(const AXMLString: string): Boolean;
+function TRpDataFlashClassSerialization.LoadClassFromMetadata(const AXMLString: string): Boolean;
 var
   lXML : IXMLDocument;
   lStream: TStringStream;
@@ -488,7 +488,7 @@ begin
   end;
 end;
 
-function TLRDataFlashClassSerialization.LoadXMLFromProxyCommands(
+function TRpDataFlashClassSerialization.LoadXMLFromProxyCommands(
   const ASelectedList: TStringList): Boolean;
 var
   lRegistro: TTcpClassRegister;
@@ -521,17 +521,17 @@ begin
   end;
 end;
 
-function TLRDataFlashClassSerialization.LoadXMLFromRegistry: Boolean;
+function TRpDataFlashClassSerialization.LoadXMLFromRegistry: Boolean;
 begin
   Result := DoLoadFromRegistry('', False);
 end;
 
-procedure TLRDataFlashClassSerialization.VerificarComando(
+procedure TRpDataFlashClassSerialization.VerificarComando(
   const ACommandClass: TRpDataFlashCommandClass; var AGerados: string);
 var
   lCmd: TRpDataFlashCommand;
   i: Integer;
-  lClass: TCustomSerializableObjectClass;
+  lClass: TBaseSerializableObjectClass;
 begin
   // cria o comando e verifica nos parametros se possui algum tvpBase com classe identificada
   lCmd := ACommandClass.Create;

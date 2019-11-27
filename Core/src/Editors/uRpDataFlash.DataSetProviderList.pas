@@ -1,12 +1,12 @@
-unit uLRDF.DataSetProviderList;
+unit uRpDataFlash.DataSetProviderList;
 
 interface
 
 uses
-  DesignEditors, Classes, DesignIntf, uLRDF.Comando, Dialogs;
+  DesignEditors, Classes, DesignIntf, uRpDataFlash.Command, Dialogs;
 
 type
-  TLRDataFlashDataSetProviderList = class(TPropertyEditor)
+  TRpDataFlashDataSetProviderList = class(TPropertyEditor)
   protected
     function CanAddProxyName(const AProxyName : string) : Boolean; virtual;
   public
@@ -23,64 +23,64 @@ implementation
 
 uses
   SysUtils,
-  uLRDF.DataSet,
-  uLRDF.Component,
-  uLRDF.ProxyGenerator;
+  uRpDataFlash.DataSet,
+  uRpDataFlash.Components,
+  uRpDataFlash.ProxyGenerator;
 
-{ TLRDataFlashDataSetProviderList }
+{ TRpDataFlashDataSetProviderList }
 
-function TLRDataFlashDataSetProviderList.CanAddProxyName(
+function TRpDataFlashDataSetProviderList.CanAddProxyName(
   const AProxyName: string): Boolean;
 begin
   Result := True;
 end;
 
-constructor TLRDataFlashDataSetProviderList.Create(const ADesigner: IDesigner;
+constructor TRpDataFlashDataSetProviderList.Create(const ADesigner: IDesigner;
   APropCount: Integer);
 begin
   inherited Create(ADesigner, APropCount);
 end;
 
-destructor TLRDataFlashDataSetProviderList.Destroy;
+destructor TRpDataFlashDataSetProviderList.Destroy;
 begin
   inherited Destroy;
 end;
 
-function TLRDataFlashDataSetProviderList.GetAttributes: TPropertyAttributes;
+function TRpDataFlashDataSetProviderList.GetAttributes: TPropertyAttributes;
 begin
   Result := [paValueList, paSortList];
 end;
 
-function TLRDataFlashDataSetProviderList.GetValue: string;
+function TRpDataFlashDataSetProviderList.GetValue: string;
 begin
-  Result := (GetComponent(0) as TLRDataFlashDataSet).ProviderClass;
+  Result := (GetComponent(0) as TRpDataFlashDataSet).ProviderClass;
 end;
 
-procedure TLRDataFlashDataSetProviderList.GetValues(Proc: TGetStrProc);
+procedure TRpDataFlashDataSetProviderList.GetValues(Proc: TGetStrProc);
 var
   i: Integer;
-  lCmdList: TLRDataFlashComandoList;
+  lCmdList: TRpDataFlashComandoList;
   lLista: TStringList;
-  lClient: TLRDataFlashConexaoCliente;
+  lClient: TRpDataFlashConexaoCliente;
 begin
   inherited;
   // obtem lista de comandos registrados
   lLista := TStringList.Create;
-  lClient := TLRDataFlashConexaoCliente.Create(nil);
+  lClient := TRpDataFlashConexaoCliente.Create(nil);
 
-  lCmdList := TLRDataFlashComandoList.Create;
+  lCmdList := TRpDataFlashComandoList.Create;
 
-  with (GetComponent(0) as TLRDataFlashDataSet) do
+  with (GetComponent(0) as TRpDataFlashDataSet) do
   try
-    lCmdList.Parametro['TipoBusca'].AsInteger := Ord(trpDataSetList);
+    lCmdList.Param['TipoBusca'].AsInteger := Ord(trpDataSetList);
     if Assigned(ConexaoCliente) then
     begin
       try
         lClient.ClonarDe( ConexaoCliente );
         lClient.Comunicar(lCmdList);
-        lCmdList.StatusRetorno;
+        lCmdList.ReturnStatus;
 
-        lLista.Text := lCmdList.Retorno['RetornoProxy'].AsBase64;
+        lLista.Text := lCmdList.ResultParam['RetornoProxy'].AsBase64;
         for i := 0 to lLista.Count - 1 do
           if CanAddProxyName(lLista[i]) then
             Proc( lLista[i] );
@@ -101,10 +101,10 @@ begin
   end;
 end;
 
-procedure TLRDataFlashDataSetProviderList.SetValue(const Value: string);
+procedure TRpDataFlashDataSetProviderList.SetValue(const Value: string);
 begin
   inherited;
-  (GetComponent(0) as TLRDataFlashDataSet).ProviderClass := Value;
+  (GetComponent(0) as TRpDataFlashDataSet).ProviderClass := Value;
 end;
 
 end.
