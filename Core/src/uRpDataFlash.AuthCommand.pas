@@ -40,7 +40,7 @@ begin
       Result := lCmd.ReturnStatus;
       if Result then
       begin
-        Result := lCmd.ResultParam['Autenticado'].AsBoolean;
+        Result := lCmd.ResultParam['Authenticated'].AsBoolean;
         AResultMSG := lCmd.ResultParam['ResultMSG'].AsString;
       end
       else

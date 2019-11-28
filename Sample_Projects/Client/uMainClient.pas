@@ -7,7 +7,8 @@ uses
   Dialogs, StdCtrls, DB, DBClient, Grids, DBGrids, ExtCtrls, DBCtrls, OleCtrls,
   uRpDataFlash.ProxyGenerator, Gauges, uRpDataFlash.Types, uRpDataFlash.Command,
   uRpDataFlash.DataSet, uRpDataFlash.CommandExecutor, uRpDataFlash.Components,
-  uRpDataFlash.CommandHelper;
+  uRpDataFlash.CommandHelper,
+  uRpDataFlash.GetCommandList, uRpDataFlash.CommandController;
 
 type
   TFormMainClient = class(TForm)
@@ -49,6 +50,7 @@ type
     ButtonSendFile: TButton;
     Gauge1: TGauge;
     LabelStatus: TLabel;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ButtonVerLogClick(Sender: TObject);
@@ -71,6 +73,7 @@ type
     procedure RpDataFlashClientConnectionTesteStatus(Sender: TObject;
       const AStatus: TRpDataFlashStatusType; const AProcTotal,
       AProcCurrent: Integer; const AStatusStr: string);
+    procedure Button1Click(Sender: TObject);
 //    procedure LRDataFlashConexaoClienteTesteStatus(Sender: TObject;
 //      const ASituacao: TLRDataFlashStatusType; const AProcessamentoTotal,
 //      AProcessamentoAtual: Integer);
@@ -135,6 +138,95 @@ begin
 //  else
 //    ShowMessage( ProxyFactory.Arquivos.GetLastError );
 
+end;
+
+procedure TFormMainClient.Button1Click(Sender: TObject);
+var
+  lCmdList: TRpDataFlashComandoList;
+  lLista: TStringList;
+  lClient: TRpDataFlashClientConnection;
+  lInfo: TRpDataFlashInfoCommand;
+  i: Integer;
+
+  function GetComponent(const Idx : Int16) : TRpDataFlashCommandExecutor;
+  begin
+    Result := RpDataFlashCommandExecutorSomar;
+  end;
+
+  procedure AdicionarParametro(const AParamXML : TRpDataFlashParamInfoComando);
+  var
+    lParam: TRpDataFlashParametroValueItem;
+  begin
+    if AParamXML.Tipo in [tpInput, tpInputNoReload] then   // tpSaida, tpInterno,
+      lParam := (GetComponent(0) as TRpDataFlashCommandExecutor).Params.Add as TRpDataFlashParametroValueItem
+    else
+      if AParamXML.Tipo = tpOutput then
+        lParam := (GetComponent(0) as TRpDataFlashCommandExecutor).ResultParams.Add as TRpDataFlashParametroValueItem
+      else
+        lParam := nil;
+
+    if Assigned(lParam) then
+    begin
+      lParam.Name := AParamXML.Nome;
+      lParam.TipoValor := AParamXML.TipoValor;
+    end;
+  end;
+
+begin
+//  SerializationClassRegistrer.Registrate(TRpDataFlashParamInfoComando);
+
+
+//  inherited;
+  lInfo := nil;
+  lLista := TStringList.Create;
+  lClient := TRpDataFlashClientConnection.Create(nil);
+
+  lCmdList := TRpDataFlashComandoList.Create;
+
+  with (GetComponent(0) as TRpDataFlashCommandExecutor) do
+  try
+    lCmdList.Param['TipoBusca'].AsInteger := Ord(trpCommandInfo);
+    lCmdList.Param['InfoString'].AsBase64 := Command;
+
+    if Assigned(ConexaoCliente) then
+    begin
+      try
+        lClient.ClonarDe( ConexaoCliente );
+        lClient.Comunicar(lCmdList);
+        if not lCmdList.ReturnStatus then
+          ShowMessage('Não foi possível comunica com o servidor. ' + lCmdList.LastError)
+        else
+        begin
+          lLista.Text := lCmdList.ResultParam['RetornoProxy'].AsBase64;
+          if Trim(lLista.Text) <> EmptyStr then
+          begin
+            lInfo := TRpDataFlashInfoCommand.Create(nil);
+            lInfo.LoadFromString( lLista.Text );
+
+            for i := 0 to lInfo.ListaParametros.Count - 1 do
+              AdicionarParametro( lInfo.ListaParametros[i] );
+          end
+          else
+            ShowMessage('Comando "' + Command + '" não foi encontrado no servidor.');
+        end;
+      except
+        on E: Exception do
+        begin
+          lClient.Disconnect;
+          ShowMessage('Erro verificando lista de parâmetros. ' + E.Message);
+        end;
+      end;
+    end
+    else
+      ShowMessage('Conexão cliente não está configurada!');
+  finally
+    FreeAndNil( lInfo );
+    FreeAndNil( lCmdList );
+    FreeAndNil( lLista );
+    FreeAndNil( lClient );
+//    if Assigned(TXMLRegister.RegistroBase) and (TXMLRegister.RegistroBase.Count = 1) then
+//      FreeAndNil( TXMLRegister.RegistroBase );
+  end;
 end;
 
 procedure TFormMainClient.ButtonCloseDSClick(Sender: TObject);
@@ -332,6 +424,7 @@ begin
   ButtonSomarExecutor.Enabled := not Value;
   ButtonInverter.Enabled := not Value;
   ButtonGetFile.Enabled := not Value;
+  ButtonSendFile.Enabled := not Value;
 end;
 
 procedure TFormMainClient.WebBrowser1NavigateComplete2(ASender: TObject;

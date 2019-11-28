@@ -67,6 +67,7 @@ var
 
 begin
   SerializationClassRegistrer.Registrate(TRpDataFlashParamInfoComando);
+ShowMessage('registrou');
 
   inherited;
   lInfo := nil;

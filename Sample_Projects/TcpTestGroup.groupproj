@@ -9,13 +9,13 @@
         <Projects Include="Server\Server.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj">
+        <Projects Include="..\Core\RpDataFlashCommR.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj">
+        <Projects Include="..\Core\RpDataFlashCommD.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj">
+        <Projects Include="..\Serialization\RpSerialization.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -44,41 +44,41 @@
     <Target Name="Server:Make">
         <MSBuild Projects="Server\Server.dproj" Targets="Make"/>
     </Target>
-    <Target Name="RpEncryption">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj"/>
-    </Target>
-    <Target Name="RpEncryption:Clean">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="RpEncryption:Make">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Common\RpEncryption.dproj" Targets="Make"/>
-    </Target>
     <Target Name="RpDataFlashCommR">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommR.dproj"/>
     </Target>
     <Target Name="RpDataFlashCommR:Clean">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj" Targets="Clean"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommR.dproj" Targets="Clean"/>
     </Target>
     <Target Name="RpDataFlashCommR:Make">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommR.dproj" Targets="Make"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommR.dproj" Targets="Make"/>
     </Target>
     <Target Name="RpDataFlashCommD">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommD.dproj"/>
     </Target>
     <Target Name="RpDataFlashCommD:Clean">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj" Targets="Clean"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommD.dproj" Targets="Clean"/>
     </Target>
     <Target Name="RpDataFlashCommD:Make">
-        <MSBuild Projects="D:\Temp\delphi-data-flash-master\Core\RpDataFlashCommD.dproj" Targets="Make"/>
+        <MSBuild Projects="..\Core\RpDataFlashCommD.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="RpSerialization">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj"/>
+    </Target>
+    <Target Name="RpSerialization:Clean">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RpSerialization:Make">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Client;Server;RpEncryption;RpDataFlashCommR;RpDataFlashCommD"/>
+        <CallTarget Targets="Client;Server;RpDataFlashCommR;RpDataFlashCommD;RpSerialization"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Client:Clean;Server:Clean;RpEncryption:Clean;RpDataFlashCommR:Clean;RpDataFlashCommD:Clean"/>
+        <CallTarget Targets="Client:Clean;Server:Clean;RpDataFlashCommR:Clean;RpDataFlashCommD:Clean;RpSerialization:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Client:Make;Server:Make;RpEncryption:Make;RpDataFlashCommR:Make;RpDataFlashCommD:Make"/>
+        <CallTarget Targets="Client:Make;Server:Make;RpDataFlashCommR:Make;RpDataFlashCommD:Make;RpSerialization:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

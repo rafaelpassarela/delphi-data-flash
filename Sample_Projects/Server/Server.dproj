@@ -48,7 +48,7 @@
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <SanitizedProjectName>Server</SanitizedProjectName>
-        <DCC_ExeOutput>..\</DCC_ExeOutput>
+        <DCC_ExeOutput>..\..\Bin</DCC_ExeOutput>
         <DCC_UnitSearchPath>..\..\Bin\Dcu;..\..\Core\src;..\..\Core\src\Editors;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Custom_Styles>Windows10|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Windows10.vsf</Custom_Styles>
     </PropertyGroup>
