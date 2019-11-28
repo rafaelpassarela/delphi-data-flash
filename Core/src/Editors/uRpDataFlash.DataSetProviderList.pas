@@ -73,10 +73,10 @@ begin
   with (GetComponent(0) as TRpDataFlashDataSet) do
   try
     lCmdList.Param['TipoBusca'].AsInteger := Ord(trpDataSetList);
-    if Assigned(ConexaoCliente) then
+    if Assigned(ClientConnection) then
     begin
       try
-        lClient.ClonarDe( ConexaoCliente );
+        lClient.ClonarDe( ClientConnection );
         lClient.Comunicar(lCmdList);
         lCmdList.ReturnStatus;
 

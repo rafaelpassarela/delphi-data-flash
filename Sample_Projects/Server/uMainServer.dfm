@@ -22,9 +22,9 @@ object FormMainServer: TFormMainServer
   object LabelNomeServer: TLabel
     Left = 8
     Top = 16
-    Width = 70
+    Width = 62
     Height = 13
-    Caption = 'Nome Servidor'
+    Caption = 'Server Name'
   end
   object LabelPorta: TLabel
     Left = 52
@@ -55,7 +55,7 @@ object FormMainServer: TFormMainServer
     Top = 67
     Width = 100
     Height = 25
-    Caption = 'Conectar'
+    Caption = 'Connect'
     TabOrder = 2
     OnClick = ButtonConectarClick
   end
@@ -64,7 +64,7 @@ object FormMainServer: TFormMainServer
     Top = 67
     Width = 100
     Height = 25
-    Caption = 'Desconectar'
+    Caption = 'Disconnect'
     Enabled = False
     TabOrder = 3
     OnClick = ButtonDesconectarClick
@@ -83,73 +83,71 @@ object FormMainServer: TFormMainServer
     Top = 67
     Width = 52
     Height = 25
-    Caption = 'Ver Log'
+    Caption = 'Log'
     TabOrder = 5
     OnClick = ButtonVerLogClick
   end
-  object LRDataFlashConexaoServerTeste: TLRDataFlashConexaoServer
-    Porta = 0
-    OnNovoLog = LRDataFlashConexaoServerTesteNovoLog
-    OnConexaoCliente = LRDataFlashConexaoServerTesteConexaoCliente
-    OnAutenticarCliente = LRDataFlashConexaoServerTesteAutenticarCliente
-    UtilizarControllers = True
-    ComandosSemAutenticacao = ';Comand 1;Comando 3;'
-    PrefixoBaseComandos = 'TComando'
-    Left = 168
+  object RpDataFlashServerConnectionTeste: TRpDataFlashServerConnection
+    OnNewLog = RpDataFlashServerConnectionTesteNewLog
+    OnClientConnection = RpDataFlashServerConnectionTesteClientConnection
+    OnAuthenticateClient = RpDataFlashServerConnectionTesteAuthenticateClient
+    BaseCommandPrefix = 'TComando'
+    Left = 72
     Top = 112
   end
-  object DFCControllerMatematica: TLRDataFlashComandController
-    Server = LRDataFlashConexaoServerTeste
-    Comandos = <
+  object DFCControllerMath: TRpDataFlashCommandController
+    Server = RpDataFlashServerConnectionTeste
+    Commands = <
       item
-        Nome = 'Somar'
-        Descricao = 'Somar Dois N'#250'meros'
-        Parametros = <
+        Name = 'AddNum'
+        Description = 'Adds two numbers'
+        Params = <
           item
-            Nome = 'A'
-            Tipo = tpEntrada
+            Name = 'A'
+            Tipo = tpInput
             TipoValor = tvpFloat
           end
           item
-            Nome = 'B'
-            Tipo = tpEntrada
+            Name = 'B'
+            Tipo = tpInput
             TipoValor = tvpFloat
           end
           item
-            Nome = 'X'
-            Tipo = tpSaida
+            Name = 'X'
+            Tipo = tpOutput
             TipoValor = tvpFloat
           end>
-        OnExecute = DFCControllerMatematicaComandos0Execute
+        OnExecute = DFCControllerMathCommands0Execute
       end
       item
-        Nome = 'Multiplicar'
-        Descricao = 'Multiplica Dois Numeros'
-        Parametros = <
+        Name = 'Multiply'
+        Description = 'Multiply two numbers'
+        Params = <
           item
-            Nome = 'ValA'
-            Tipo = tpEntrada
+            Name = 'A'
+            Tipo = tpInput
             TipoValor = tvpFloat
           end
           item
-            Nome = 'ValB'
-            Tipo = tpEntrada
+            Name = 'B'
+            Tipo = tpInput
             TipoValor = tvpFloat
           end
           item
-            Nome = 'Total'
-            Tipo = tpSaida
+            Name = 'C'
+            Tipo = tpOutput
             TipoValor = tvpFloat
           end>
+        OnExecute = DFCControllerMathCommands1Execute
       end>
-    Grupo = 'Matematica'
-    Left = 168
-    Top = 144
+    GroupName = 'MathAndText'
+    Left = 136
+    Top = 176
   end
-  object DFPCadastro_Pessoas: TLRDataFlashDataSetProvider
-    Grupo = 'CADASTRO'
-    Descricao = 'DataSet para controle da tabela de Pessoas'
-    Server = LRDataFlashConexaoServerTeste
+  object DFPCadastro_Pessoas: TRpDataFlashDataSetProvider
+    GroupName = 'UNNAMED'
+    Description = 'Persons DataBase Table'
+    Server = RpDataFlashServerConnectionTeste
     InsertSQL.Strings = (
       'insert into PESSOAS (ID, NOME, IDADE, DATA_CADASTRO, SALARIO)'
       'values (:ID, :NOME, :IDADE, :DATA_CADASTRO, :SALARIO)')
@@ -167,79 +165,74 @@ object FormMainServer: TFormMainServer
     SelectSQL.Strings = (
       'select ID, NOME, IDADE, DATA_CADASTRO, SALARIO'
       'from PESSOAS')
-    Left = 168
+    Left = 72
+    Top = 144
+  end
+  object DFCControllerManipulaTexto: TRpDataFlashCommandController
+    Server = RpDataFlashServerConnectionTeste
+    Commands = <
+      item
+        Name = 'TextInverter'
+        Description = 'Invert Text'
+        Params = <
+          item
+            Name = 'Text'
+            Tipo = tpInput
+            TipoValor = tvpString
+          end
+          item
+            Name = 'Inverted'
+            Tipo = tpOutput
+            TipoValor = tvpString
+          end>
+        OnExecute = DFCControllerManipulaTextoCommands0Execute
+      end>
+    GroupName = 'MathAndText'
+    Left = 104
     Top = 176
   end
-  object DFCControllerManipulaTexto: TLRDataFlashComandController
-    Server = LRDataFlashConexaoServerTeste
-    Comandos = <
+  object DFCControllerFiles: TRpDataFlashCommandController
+    Server = RpDataFlashServerConnectionTeste
+    Commands = <
       item
-        Nome = 'Concatenar'
-        Descricao = 'Concatena Duas Strings'
-        Parametros = <
+        Name = 'SendFile'
+        Description = 'Send File to Server'
+        Params = <
           item
-            Nome = 'StrA'
-            Tipo = tpEntrada
+            Name = 'FileName'
+            Tipo = tpInput
             TipoValor = tvpString
           end
           item
-            Nome = 'StrB'
-            Tipo = tpEntrada
-            TipoValor = tvpString
+            Name = 'FileData'
+            Tipo = tpInput
+            TipoValor = tvpBase64
           end
           item
-            Nome = 'StrC'
-            Tipo = tpSaida
+            Name = 'SavePath'
+            Tipo = tpOutput
             TipoValor = tvpString
           end>
-        OnExecute = DFCControllerManipulaTextoComandos0Execute
-      end>
-    Grupo = 'ManipulaTexto'
-    Left = 200
-    Top = 144
-  end
-  object DFCControllerArquivos: TLRDataFlashComandController
-    Server = LRDataFlashConexaoServerTeste
-    Comandos = <
-      item
-        Nome = 'GetFile'
-        Descricao = 'Busca o arquivo informado no par'#226'metro no servidor'
-        Parametros = <
-          item
-            Nome = 'FileName'
-            Tipo = tpEntrada
-            TipoValor = tvpString
-          end
-          item
-            Nome = 'FileData'
-            Tipo = tpSaida
-            TipoValor = tvpFile
-          end>
-        OnExecute = DFCControllerArquivosComandos0Execute
+        OnExecute = DFCControllerFilesCommands0Execute
       end
       item
-        Nome = 'SendFile'
-        Descricao = 'Envia um arquivo para o servidor'
-        Parametros = <
+        Name = 'LoadFile'
+        Description = 'Load a file from Server'
+        Params = <
           item
-            Nome = 'FileData'
-            Tipo = tpEntrada
-            TipoValor = tvpFile
-          end
-          item
-            Nome = 'FileName'
-            Tipo = tpEntrada
+            Name = 'FileName'
+            Tipo = tpInput
             TipoValor = tvpString
           end
           item
-            Nome = 'LocalSalvo'
-            Tipo = tpSaida
-            TipoValor = tvpString
+            Name = 'FileData'
+            Tipo = tpOutput
+            TipoValor = tvpBase64
           end>
-        OnExecute = DFCControllerArquivosComandos1Execute
+        OnExecute = DFCControllerFilesCommands1Execute
       end>
-    Grupo = 'Arquivos'
-    Left = 136
-    Top = 144
+    GroupName = 'FileManager'
+    Left = 72
+    Top = 176
   end
 end

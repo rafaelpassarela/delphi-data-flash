@@ -3,11 +3,11 @@ unit uDataModuleServer;
 interface
 
 uses
-  SysUtils, Classes, uLRDF.Comando, IBDatabase, DB, Forms, Provider,
-  IBCustomDataSet, IBQuery, DBClient, IBSQL, uRpSystem;
+  SysUtils, Classes, uRpDataFlash.Command, DB, Forms, Provider, DBClient,
+  uRpSystem, IBX.IBDatabase, IBX.IBSQL, IBX.IBCustomDataSet, IBX.IBQuery;
 
 type
-  TDataModuleServer = class(TDataModule, IExecutorComandoPacote, IInterface)
+  TDataModuleServer = class(TDataModule, IRpPackageCommandExecutor, IInterface)
     IBDatabaseServico: TIBDatabase;
     IBTransactionServico: TIBTransaction;
     procedure DataModuleCreate(Sender: TObject);
@@ -16,12 +16,13 @@ type
     FRefCount : Integer;
   public
     { Public declarations }
-    // ***** begin - IExecutorComandoPacote ******
-    function GetNome : string;
+    // ***** begin - IRpPackageCommandExecutor ******
+    function GetName : string;
     function GetDataComponent : TComponent;
     function GetClassName : string;
     procedure DisconnectDataComponent;
     function AsObject: TObject;
+    procedure ConfigDataComponent(const AUser: string; const APassword: string);
     // DataSet Events
     function Commit(const ARetaining : Boolean) : Boolean;
     function Rollback(const ARetaining : Boolean) : Boolean;
@@ -31,7 +32,7 @@ type
 
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
-    // ***** end - IExecutorComandoPacote ******
+    // ***** end - IRpPackageCommandExecutor ******
 
   end;
 
@@ -62,6 +63,11 @@ begin
       IBTransactionServico.Commit;
   end;
   Result := True;
+end;
+
+procedure TDataModuleServer.ConfigDataComponent(const AUser, APassword: string);
+begin
+
 end;
 
 procedure TDataModuleServer.DataModuleCreate(Sender: TObject);
@@ -127,7 +133,7 @@ begin
   Result := IBTransactionServico;
 end;
 
-function TDataModuleServer.GetNome: string;
+function TDataModuleServer.GetName: string;
 begin
   Result := 'Servidor_Teste';
 end;

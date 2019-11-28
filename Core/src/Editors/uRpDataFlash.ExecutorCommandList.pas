@@ -60,13 +60,14 @@ var
 
     if Assigned(lParam) then
     begin
-      lParam.Nome := AParamXML.Nome;
+      lParam.Name := AParamXML.Nome;
       lParam.TipoValor := AParamXML.TipoValor;
     end;
   end;
 
 begin
   SerializationClassRegistrer.Registrate(TRpDataFlashParamInfoComando);
+ShowMessage('registrou');
 
   inherited;
   lInfo := nil;

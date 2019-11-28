@@ -96,8 +96,8 @@ end;
 
 procedure TRpDataFlashInfoCommand.Initialize;
 begin
-  inherited;
   FListaParametros := TRpDataFlashParamTransportList.Create(Self);
+  inherited;
 end;
 
 procedure TRpDataFlashInfoCommand.Reset;

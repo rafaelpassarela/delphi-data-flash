@@ -51,7 +51,7 @@ type
   private
     FLockData : Boolean; // quando true, não dispara os eventos DoAfter... e DoBefore...
     FComandoEnviar: TRpDataFlashSendCommand;
-    FConexaoCliente: TRpDataFlashClientConnection;
+    FClientConnection: TRpDataFlashClientConnection;
     FProviderCustom: TRpDataFlashCustomProvider;
     FInternalProvider: TRpDataFlashCustomProvider;
     FProviderClass: string;
@@ -182,7 +182,7 @@ type
     property AfterGetParams;
     property Ranged;
     // custom propertyes
-    property ConexaoCliente : TRpDataFlashClientConnection read FConexaoCliente write FConexaoCliente;
+    property ClientConnection : TRpDataFlashClientConnection read FClientConnection write FClientConnection;
     property ProviderCustom : TRpDataFlashCustomProvider read FProviderCustom write FProviderCustom;
     property ProviderClass : string read GetProviderClass write FProviderClass;
     property AutoCreateParams : Boolean read FAutoCreateParams write FAutoCreateParams default True;
@@ -294,7 +294,7 @@ begin
       // adiciona o total de comandos na primeira linha
       lCommandList.Insert(0, IntToStr(lCommandList.Count));
       FComandoEnviar.Param['SQLInstruct'].AsBase64 := lCommandList.Text;
-      FConexaoCliente.Comunicar(FComandoEnviar);
+      FClientConnection.Comunicar(FComandoEnviar);
       if FComandoEnviar.ReturnStatus then
       begin
         Result := FComandoEnviar.ResultParam['ApplyErrCount'].AsInteger;
@@ -345,7 +345,7 @@ begin
   if PreparaComando(opdsSelect) then
   begin
     FComandoEnviar.Param['SQLInstruct'].AsBase64 := PreparaSelect( GetSQL(opdsSelect), GetDefaultFormatter);
-    FConexaoCliente.Comunicar(FComandoEnviar);
+    FClientConnection.Comunicar(FComandoEnviar);
 
     if FComandoEnviar.ReturnStatus then
     begin
@@ -408,7 +408,7 @@ begin
   else
     PreparaComando(opdsCommit);
 
-  FConexaoCliente.Comunicar(FComandoEnviar);
+  FClientConnection.Comunicar(FComandoEnviar);
 
   if not FComandoEnviar.ReturnStatus then
     raise ERpDataFlashDataSetConexaoResult.Create('Erro finalizando transação. ' + FComandoEnviar.LastError);
@@ -474,7 +474,7 @@ begin
     if PreparaComando(opdsSelect) then
     begin
       FComandoEnviar.Param['SQLInstruct'].AsBase64 := GetSQL(opdsSelect);
-      FConexaoCliente.Comunicar(FComandoEnviar);
+      FClientConnection.Comunicar(FComandoEnviar);
       if FComandoEnviar.ReturnStatus then
       begin
         lCds := nil;
@@ -684,7 +684,7 @@ begin
   if FProviderClass <> EmptyStr then
   begin
     PreparaComando(opdsPrepare);
-    FConexaoCliente.Comunicar(FComandoEnviar);
+    FClientConnection.Comunicar(FComandoEnviar);
 
     if FComandoEnviar.ReturnStatus then
       FInternalProvider.SetFromString( FComandoEnviar.ResultParam['XMLData'].AsBase64 )
@@ -707,7 +707,7 @@ begin
   else
     PreparaComando(opdsRollback);
 
-  FConexaoCliente.Comunicar(FComandoEnviar);
+  FClientConnection.Comunicar(FComandoEnviar);
 
   if not FComandoEnviar.ReturnStatus then
     raise ERpDataFlashDataSetConexaoResult.Create('Erro cancelando transação. ' + FComandoEnviar.LastError);
@@ -733,7 +733,7 @@ procedure TRpDataFlashDataSet.StartTransaction;
 begin
   if PreparaComando(opdsStartTrans) then
   begin
-    FConexaoCliente.Comunicar(FComandoEnviar);
+    FClientConnection.Comunicar(FComandoEnviar);
     if not FComandoEnviar.ReturnStatus then
       raise ERpDataFlashDataSetConexaoResult.Create('Erro iniciando transação. ' + FComandoEnviar.LastError);
   end;
@@ -741,7 +741,7 @@ end;
 
 function TRpDataFlashDataSet.ValidServer: Boolean;
 begin
-  if not Assigned(FConexaoCliente) then
+  if not Assigned(FClientConnection) then
   begin
     FPrepared := False;
     raise ERpDataFlashDataSetNoClient.Create('A conexão cliente não foi informada.');
@@ -749,14 +749,14 @@ begin
   else
   begin
     // se não esta conectado, tenta conectar
-    if not FConexaoCliente.Connected then
+    if not FClientConnection.Connected then
     begin
-      FConexaoCliente.Connect;
-      if not FConexaoCliente.Connected then
+      FClientConnection.Connect;
+      if not FClientConnection.Connected then
       begin
         FPrepared := False;
         raise ERpDataFlashDataSetNoConnection.Create('Não foi possível estabelecer uma conexão com o servidor ('
-        + FConexaoCliente.Server + ':' + IntToStr(FConexaoCliente.Port) + ').');
+        + FClientConnection.Server + ':' + IntToStr(FClientConnection.Port) + ').');
       end;
     end;
   end;

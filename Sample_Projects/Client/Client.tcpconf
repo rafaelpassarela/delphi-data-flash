@@ -1,0 +1,15 @@
+[config]
+proxy.filename=D:\Git\delphi-data-flash\Sample_Projects\Client\uGeneratedProxy.pas
+inft.filename=uICONFIGINTF
+intf.class=CLASSNAME
+transport=0
+[commands]
+HARD_CODE=1
+CodeInverter=1
+MathAndText=1
+AddNum=1
+Multiply=1
+TextInverter=1
+FileManager=1
+SendFile=1
+LoadFile=1

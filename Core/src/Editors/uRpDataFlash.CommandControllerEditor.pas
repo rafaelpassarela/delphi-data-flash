@@ -29,7 +29,7 @@ uses
 
 procedure TRpDataFlashComandControllerEditor.EditarComandos;
 begin
-  (Component as TRpDataFlashComandController).EditarComandos;
+  (Component as TRpDataFlashCommandController).EditarComandos;
 end;
 
 procedure TRpDataFlashComandControllerEditor.ExecuteVerb(Index: Integer);

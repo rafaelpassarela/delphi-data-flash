@@ -115,7 +115,7 @@ type
     function AddGrupo(const pNomeGrupo : string) : TProxyGruposItem;
     function Find(const pNomeGrupo : string) : TProxyGruposItem;
     procedure RegistrarComando(const pRegistroComando : TTcpClassRegisterItem); overload;
-    procedure RegistrarComando(const pRegistroComando : TRpDataFlashComandItem;
+    procedure RegistrarComando(const pRegistroComando : TRpDataFlashCommandItem;
       const pNomeGrupo : string); overload;
     procedure RegistrarComando(const pRegistroComando : TRpDataFlashCustomDataSetProvider); overload;
 
@@ -329,7 +329,7 @@ begin
     if FConfigClass <> '' then
     begin
       lImplement.Add('var');
-      lImplement.Add('  lFileConf : IFileControlConfig;');
+      lImplement.Add('  lFileConf : IRpDataFlashConfig;');
     end;
     lImplement.Add('begin');
     lImplement.Add('  FConnectionType := AConnectionType;');
@@ -345,10 +345,10 @@ begin
     lImplement.Add('  case AConnectionType of');
     lImplement.Add('    ctTcpIp:');
     lImplement.Add('      if Assigned(AClient) then');
-    lImplement.Add('        FClientTCP := AClient as TRpDataFlashConexaoCliente;');
+    lImplement.Add('        FClientTCP := AClient as TRpDataFlashClientConnection;');
     lImplement.Add('    ctREST:');
     lImplement.Add('      if Assigned(AClient) then');
-    lImplement.Add('        FClientREST := AClient as TRpDataFlashConexaoREST;');
+    lImplement.Add('        FClientREST := AClient as TRpDataFlashRESTClient;');
     lImplement.Add('  end;');
     lImplement.Add('  FSharedClientTCP := Assigned(FClientTCP);');
     lImplement.Add('  FSharedClientREST := Assigned(FClientREST);');
@@ -362,24 +362,24 @@ begin
       lImplement.Add('    try');
       lImplement.Add('      if not FSharedClientTCP then');
       lImplement.Add('      begin');
-      lImplement.Add('        FClientTCP := TRpDataFlashConexaoCliente.Create(nil);');
-      lImplement.Add('        FClientTCP.Servidor := lFileConf.ServerName;');
-      lImplement.Add('        FClientTCP.Porta := lFileConf.ServerPort;');
+      lImplement.Add('        FClientTCP := TRpDataFlashClientConnection.Create(nil);');
+      lImplement.Add('        FClientTCP.Server := lFileConf.ServerName;');
+      lImplement.Add('        FClientTCP.Port := lFileConf.ServerPort;');
       lImplement.Add('        FClientTCP.FileTransfer.Port := lFileConf.FTPPort;');
       lImplement.Add('        FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;');
-      lImplement.Add('        FClientTCP.TipoCriptografia := lFileConf.ModoCriptografia;');
-      lImplement.Add('        FClientTCP.TipoComunicacao := lFileConf.ModoComunicacao;');
+      lImplement.Add('        FClientTCP.EncryptionType := lFileConf.EncryptionType;');
+      lImplement.Add('        FClientTCP.CommunicationType := lFileConf.CommunicationType;');
       lImplement.Add('        FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
       lImplement.Add('      end;');
       lImplement.Add('      if not FSharedClientREST then');
       lImplement.Add('      begin');
-      lImplement.Add('        FClientREST := TRpDataFlashConexaoREST.Create(nil);');
-      lImplement.Add('        FClientREST.Servidor := lFileConf.ServerName;');
-      lImplement.Add('        FClientREST.Porta := lFileConf.RestPort;');
+      lImplement.Add('        FClientREST := TRpDataFlashRESTClient.Create(nil);');
+      lImplement.Add('        FClientREST.Server := lFileConf.ServerName;');
+      lImplement.Add('        FClientREST.Port := lFileConf.RestPort;');
       lImplement.Add('        FClientREST.FileTransfer.Port := lFileConf.FTPPort;');
       lImplement.Add('        FClientREST.FileTransfer.Enabled := FClientREST.FileTransfer.Port > 0;');
-      lImplement.Add('        FClientREST.TipoCriptografia := lFileConf.ModoCriptografia;');
-      lImplement.Add('        FClientREST.TipoComunicacao := lFileConf.ModoComunicacao;');
+      lImplement.Add('        FClientREST.EncryptionType := lFileConf.EncryptionType;');
+      lImplement.Add('        FClientREST.CommunicationType := lFileConf.CommunicationType;');
       lImplement.Add('        FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
       lImplement.Add('      end;');
       lImplement.Add('    finally');
@@ -405,8 +405,8 @@ begin
     lImplement.Add('  if Assigned(FClientTCP) and (not FSharedClientTCP) then');
     lImplement.Add('  begin');
     lImplement.Add('    try');
-    lImplement.Add('      if FClientTCP.Conectado then');
-    lImplement.Add('        FClientTCP.Desconectar;');
+    lImplement.Add('      if FClientTCP.Connected then');
+    lImplement.Add('        FClientTCP.Disconnect;');
     lImplement.Add('    finally');
     lImplement.Add('      FreeAndNil(FClientTCP);');
     lImplement.Add('    end;');
@@ -450,26 +450,26 @@ begin
     lImplement.Add('procedure TProxyFactory.Config(const AHost: string; const APorta, APortaFTP: Integer;');
     lImplement.Add('  const AConnectionType : TConnectionType;');
     lImplement.Add('  const ALocalHostToIP : Boolean;');
-    lImplement.Add('  const ATipoCriptografia : TRpDataFlashTipoCriptografia;');
-    lImplement.Add('  const ATipoComunicacao : TRpDataFlashTipoComunicacao);');
+    lImplement.Add('  const ATipoCriptografia : TRpDataFlashEncryptionType;');
+    lImplement.Add('  const ATipoComunicacao : TRpDataFlashCommunicationType);');
     lImplement.Add('begin');
     lImplement.Add('  if AConnectionType = ctTcpIp then');
     lImplement.Add('  begin');
     lImplement.Add('    if FClientTCP <> nil then');
     lImplement.Add('    begin');
     lImplement.Add('      if FSharedClientTCP then');
-    lImplement.Add('        FClientTCP.Desconectar');
+    lImplement.Add('        FClientTCP.Disconnect');
     lImplement.Add('      else');
     lImplement.Add('        FreeAndNil(FClientTCP);');
     lImplement.Add('    end;');
     lImplement.Add('');
     lImplement.Add('    if not FSharedClientTCP then');
-    lImplement.Add('      FClientTCP := TRpDataFlashConexaoCliente.Create(nil);');
+    lImplement.Add('      FClientTCP := TRpDataFlashClientConnection.Create(nil);');
     lImplement.Add('');
-    lImplement.Add('    FClientTCP.Servidor := AHost;');
-    lImplement.Add('    FClientTCP.Porta := APorta;');
-    lImplement.Add('    FClientTCP.TipoCriptografia := ATipoCriptografia;');
-    lImplement.Add('    FClientTCP.TipoComunicacao := ATipoComunicacao;');
+    lImplement.Add('    FClientTCP.Server := AHost;');
+    lImplement.Add('    FClientTCP.Port := APorta;');
+    lImplement.Add('    FClientTCP.EncryptionType := ATipoCriptografia;');
+    lImplement.Add('    FClientTCP.CommunicationType := ATipoComunicacao;');
     lImplement.Add('    FClientTCP.FileTransfer.Port := APortaFTP;');
     lImplement.Add('    FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;');
     lImplement.Add('    FClientTCP.ConvertLocalHostToIP := ALocalHostToIP;');
@@ -479,12 +479,12 @@ begin
     lImplement.Add('      FreeAndNil(FClientREST);');
     lImplement.Add('');
     lImplement.Add('    if not FSharedClientREST then');
-    lImplement.Add('      FClientREST := TRpDataFlashConexaoREST.Create(nil);');
+    lImplement.Add('      FClientREST := TRpDataFlashRESTClient.Create(nil);');
     lImplement.Add('');
-    lImplement.Add('    FClientREST.Servidor := AHost;');
-    lImplement.Add('    FClientREST.Porta := APorta;');
-    lImplement.Add('    FClientREST.TipoCriptografia := ATipoCriptografia;');
-    lImplement.Add('    FClientREST.TipoComunicacao := ATipoComunicacao;');
+    lImplement.Add('    FClientREST.Server := AHost;');
+    lImplement.Add('    FClientREST.Port := APorta;');
+    lImplement.Add('    FClientREST.EncryptionType := ATipoCriptografia;');
+    lImplement.Add('    FClientREST.CommunicationType := ATipoComunicacao;');
     lImplement.Add('    FClientREST.FileTransfer.Port := APortaFTP;');
     lImplement.Add('    FClientREST.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;');
     lImplement.Add('    FClientREST.ConvertLocalHostToIP := ALocalHostToIP;');
@@ -524,28 +524,28 @@ begin
       lImplement.Add(       'end;');
       lImplement.Add('');
     end;
-    lImplement.Add('procedure TProxyFactory.Config(const AConexaoTCP: TRpDataFlashConexaoCliente);');
+    lImplement.Add('procedure TProxyFactory.Config(const AConexaoTCP: TRpDataFlashClientConnection);');
     lImplement.Add('begin');
     lImplement.Add('  ProxyFactory.Config(');
-    lImplement.Add('    AConexaoTCP.Servidor,');
-    lImplement.Add('    AConexaoTCP.Porta,');
+    lImplement.Add('    AConexaoTCP.Server,');
+    lImplement.Add('    AConexaoTCP.Port,');
     lImplement.Add('    AConexaoTCP.FileTransfer.Port,');
     lImplement.Add('    ctTcpIp,');
     lImplement.Add('    AConexaoTCP.ConvertLocalHostToIP,');
-    lImplement.Add('    AConexaoTCP.TipoCriptografia,');
-    lImplement.Add('    AConexaoTCP.TipoComunicacao);');
+    lImplement.Add('    AConexaoTCP.EncryptionType,');
+    lImplement.Add('    AConexaoTCP.CommunicationType);');
     lImplement.Add('end;');
     lImplement.Add(' ');
-    lImplement.Add('procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashConexaoREST);');
+    lImplement.Add('procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashRESTClient);');
     lImplement.Add('begin');
     lImplement.Add('  ProxyFactory.Config(');
-    lImplement.Add('    AConexaoREST.Servidor,');
-    lImplement.Add('    AConexaoREST.Porta,');
+    lImplement.Add('    AConexaoREST.Server,');
+    lImplement.Add('    AConexaoREST.Port,');
     lImplement.Add('    AConexaoREST.FileTransfer.Port,');
     lImplement.Add('    ctREST,');
     lImplement.Add('    AConexaoREST.ConvertLocalHostToIP,');
-    lImplement.Add('    AConexaoREST.TipoCriptografia,');
-    lImplement.Add('    AConexaoREST.TipoComunicacao);');
+    lImplement.Add('    AConexaoREST.EncryptionType,');
+    lImplement.Add('    AConexaoREST.CommunicationType);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure TProxyFactory.BusyCallback(const AStart: Boolean);');
@@ -634,7 +634,7 @@ var
 begin
   lImplement := TStringList.Create;
   try
-    lImplement.Add('function ProxyFactory(ATcpClient : TRpDataFlashConexaoCliente) : TProxyFactory;');
+    lImplement.Add('function ProxyFactory(ATcpClient : TRpDataFlashClientConnection) : TProxyFactory;');
     lImplement.Add('begin');
     lImplement.Add('  if FProxyFactory = nil then');
     lImplement.Add('    FProxyFactory := TProxyFactory.Create(ATcpClient, ctTcpIp);');
@@ -642,26 +642,26 @@ begin
     lImplement.Add('end;');
     lImplement.Add(' ');
 
-    lImplement.Add('function ProxyFactoryRest(ARestClient : TRpDataFlashConexaoREST) : TProxyFactory;');
+    lImplement.Add('function ProxyFactoryRest(ARestClient : TRpDataFlashRESTClient) : TProxyFactory;');
     lImplement.Add('begin');
     lImplement.Add('  if FProxyFactoryRest = nil then');
     lImplement.Add('    FProxyFactoryRest := TProxyFactory.Create(ARestClient, ctREST);');
     lImplement.Add('  Result := FProxyFactoryRest;');
     lImplement.Add('end;');
     lImplement.Add(' ');
-    lImplement.Add('procedure NewProxyFactory(out AProxyFactory : TProxyFactory; const ATcpClient : TRpDataFlashConexaoCliente = nil);');
+    lImplement.Add('procedure NewProxyFactory(out AProxyFactory : TProxyFactory; const ATcpClient : TRpDataFlashClientConnection = nil);');
     lImplement.Add('begin');
     lImplement.Add('  AProxyFactory := TProxyFactory.Create(ATcpClient, ctTcpIp);');
     lImplement.Add('end;');
     lImplement.Add(' ');
-    lImplement.Add('procedure NewProxyFactoryRest(out AProxyFactory : TProxyFactory; const ARestClient : TRpDataFlashConexaoREST = nil);');
+    lImplement.Add('procedure NewProxyFactoryRest(out AProxyFactory : TProxyFactory; const ARestClient : TRpDataFlashRESTClient = nil);');
     lImplement.Add('begin');
     lImplement.Add('  AProxyFactory := TProxyFactory.Create(ARestClient, ctREST);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure RenewProxyFactory;');
     lImplement.Add('var');
-    lImplement.Add('  lClient: TRpDataFlashConexaoCliente;');
+    lImplement.Add('  lClient: TRpDataFlashClientConnection;');
     lImplement.Add('begin');
     lImplement.Add('  if Assigned(FProxyFactory) then');
     lImplement.Add('  begin');
@@ -679,7 +679,7 @@ begin
     lImplement.Add(' ');
     lImplement.Add('procedure RenewProxyFactoryRest;');
     lImplement.Add('var');
-    lImplement.Add('  lClientRest: TRpDataFlashConexaoREST;');
+    lImplement.Add('  lClientRest: TRpDataFlashRESTClient;');
     lImplement.Add('begin');
     lImplement.Add('  if Assigned(FProxyFactoryRest) then');
     lImplement.Add('  begin');
@@ -733,11 +733,11 @@ begin
       lImplement.Add('    function GetServiceLookupFactory : TServiceLookupFactory;');
 
     lImplement.Add('  private');
-    lImplement.Add('    FClientTCP : TRpDataFlashConexaoCliente;');
-    lImplement.Add('    FClientREST : TRpDataFlashConexaoREST;');
+    lImplement.Add('    FClientTCP : TRpDataFlashClientConnection;');
+    lImplement.Add('    FClientREST : TRpDataFlashRESTClient;');
     lImplement.Add('    FSharedClientTCP: Boolean;');
     lImplement.Add('    FSharedClientREST: Boolean;');
-    lImplement.Add('    FSerializationFormat: TRpDataFlashSerializationFormat;');
+    lImplement.Add('    FSerializationFormat: TSerializationFormat;');
     lImplement.Add('    FReconnect: Boolean;');
     lImplement.Add('    FConnectionType: TConnectionType;');
     lImplement.Add('    FBusy : Boolean;');
@@ -750,19 +750,19 @@ begin
     lImplement.Add('    procedure DoCheckBusy;');
     lImplement.Add('    procedure BusyCallback(const AStart : Boolean);');
     lImplement.Add('  public');
-    lImplement.Add('    constructor Create(AClient : TRpDataFlashConexaoClienteCustom; const AConnectionType : TConnectionType);');
+    lImplement.Add('    constructor Create(AClient : TRpDataFlashCustomClientConnection; const AConnectionType : TConnectionType);');
     lImplement.Add('    destructor Destroy; override;');
     lImplement.Add('    procedure Config(const AHost : string; const APorta, APortaFTP : Integer;');
     lImplement.Add('      const AConnectionType : TConnectionType;');
     lImplement.Add('      const ALocalHostToIP : Boolean; ');
-    lImplement.Add('      const ATipoCriptografia : TRpDataFlashTipoCriptografia = tcBase64Compressed;');
-    lImplement.Add('      const ATipoComunicacao : TRpDataFlashTipoComunicacao = tcTexto); overload;');
-    lImplement.Add('    procedure Config(const AConexaoTCP : TRpDataFlashConexaoCliente); overload;');
-    lImplement.Add('    procedure Config(const AConexaoREST : TRpDataFlashConexaoREST); overload;');
+    lImplement.Add('      const ATipoCriptografia : TRpDataFlashEncryptionType = tcBase64Compressed;');
+    lImplement.Add('      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText); overload;');
+    lImplement.Add('    procedure Config(const AConexaoTCP : TRpDataFlashClientConnection); overload;');
+    lImplement.Add('    procedure Config(const AConexaoREST : TRpDataFlashRESTClient); overload;');
     lImplement.Add('    function ServerOnline : Boolean;');
     lImplement.Add('    property Reconnect : Boolean read FReconnect write FReconnect;');
     lImplement.Add('    property ConnectionType : TConnectionType read FConnectionType;');
-    lImplement.Add('    property SerializationFormat : TRpDataFlashSerializationFormat read FSerializationFormat write FSerializationFormat;');
+    lImplement.Add('    property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;');
     lImplement.Add('    property CheckBusy : Boolean read FCheckBusy write FCheckBusy default True;');
     lImplement.Add('    property LazyConection : Boolean read GetLazyConection write SetLazyConection;');
 
@@ -802,11 +802,11 @@ var
 begin
   lList := TStringList.Create;
   try
-    lList.Add('function ProxyFactory(ATcpClient : TRpDataFlashConexaoCliente = nil) : TProxyFactory;');
-    lList.Add('function ProxyFactoryRest(ARestClient : TRpDataFlashConexaoREST = nil) : TProxyFactory;');
+    lList.Add('function ProxyFactory(ATcpClient : TRpDataFlashClientConnection = nil) : TProxyFactory;');
+    lList.Add('function ProxyFactoryRest(ARestClient : TRpDataFlashRESTClient = nil) : TProxyFactory;');
     lList.Add(' ');
-    lList.Add('procedure NewProxyFactory(out AProxyFactory : TProxyFactory; const ATcpClient : TRpDataFlashConexaoCliente = nil);');
-    lList.Add('procedure NewProxyFactoryRest(out AProxyFactory : TProxyFactory; const ARestClient : TRpDataFlashConexaoREST = nil);');
+    lList.Add('procedure NewProxyFactory(out AProxyFactory : TProxyFactory; const ATcpClient : TRpDataFlashClientConnection = nil);');
+    lList.Add('procedure NewProxyFactoryRest(out AProxyFactory : TProxyFactory; const ARestClient : TRpDataFlashRESTClient = nil);');
     lList.Add(' ');
     lList.Add('procedure RenewProxyFactory;');
     lList.Add('procedure RenewProxyFactoryRest;');
@@ -847,8 +847,8 @@ var
   lEnumGrupos: TListEnumerator;
   lEnumComandos: TCollectionEnumerator;
 
-  lController: TRpDataFlashComandController;
-  lItemComando: TRpDataFlashComandItem;
+  lController: TRpDataFlashCommandController;
+  lItemComando: TRpDataFlashCommandItem;
 begin
   // registrar os comandos do Collection
   if GetServer.UseControllers then
@@ -857,15 +857,15 @@ begin
     lEnumGrupos := GetServer.Controllers.GetEnumerator;
     while (lEnumGrupos.MoveNext) do
     begin
-      lController := TRpDataFlashComandController(lEnumGrupos.Current);
-      lEnumComandos := lController.Comandos.GetEnumerator;
+      lController := TRpDataFlashCommandController(lEnumGrupos.Current);
+      lEnumComandos := lController.Commands.GetEnumerator;
       try
         while lEnumComandos.MoveNext do
         begin
-          lItemComando := TRpDataFlashComandItem(lEnumComandos.Current);
-          if FListaSelecionados.GrupoValido(lController.Grupo)
-          and FListaSelecionados.ComandoSelecionado(lController.Grupo, lItemComando.Nome) then
-            FGrupos.RegistrarComando(lItemComando, lController.Grupo);
+          lItemComando := TRpDataFlashCommandItem(lEnumComandos.Current);
+          if FListaSelecionados.GrupoValido(lController.GroupName)
+          and FListaSelecionados.ComandoSelecionado(lController.GroupName, lItemComando.Name) then
+            FGrupos.RegistrarComando(lItemComando, lController.GroupName);
         end;
       finally
         FreeAndNil(lEnumComandos);
@@ -1070,7 +1070,8 @@ begin
     lClassesProxyModelo.Add('interface');
     lClassesProxyModelo.Add('');
     lClassesProxyModelo.Add('uses');
-    lClassesProxyModelo.Add('  SysUtils, uLRDF.Comando, uLRDF.Component, uLRDF.Types, Windows, '
+    lClassesProxyModelo.Add('  SysUtils, uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, ');
+    lClassesProxyModelo.Add('  uRpSerialization, Windows, '
                            + IfThen(FConfigUnit <> EmptyStr, FConfigUnit + ', ') + 'ShellApi' + IfThen(FGerarClasses, ',', ';') );
 
     if FGerarClasses then
@@ -1314,16 +1315,16 @@ var
   lGrupo : TProxyGruposItem;
 begin
   // busca o grupo do comando ou cria um novo
-  lGrupo := AddGrupo( pRegistroComando.Grupo );
+  lGrupo := AddGrupo( pRegistroComando.GroupName );
 
   if Assigned(lGrupo) then
   begin
     // retorna o comando
-    lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Descricao );
+    lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Description );
   end;
 end;
 
-procedure TProxyGruposList.RegistrarComando(const pRegistroComando: TRpDataFlashComandItem;
+procedure TProxyGruposList.RegistrarComando(const pRegistroComando: TRpDataFlashCommandItem;
   const pNomeGrupo : string);
 var
   lGrupo : TProxyGruposItem;
@@ -1335,10 +1336,10 @@ begin
   if Assigned(lGrupo) then
   begin
     // retorna o comando
-    lComando := lGrupo.ListaComandos.AddComando( pRegistroComando.Nome, pRegistroComando.Descricao );
+    lComando := lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Description );
 
     // adiciona os parametros do comando
-    lComando.LoadParams( pRegistroComando.Parametros );
+    lComando.LoadParams( pRegistroComando.Params );
   end;
 end;
 
@@ -1524,9 +1525,9 @@ begin
       lParamList := Self[i].ListaParametros.GetAsString( Self[i].Nome, 0, pNomeGrupo );
       lTexto.Add(lParamList);
       lTexto.Add('var');
-      lTexto.Add('  lParametros : TRpDataFlashParametrosComando;');
+      lTexto.Add('  lParametros : TRpDataFlashCommandParameterList;');
       lTexto.Add('begin');
-      lTexto.Add('  lParametros := TRpDataFlashParametrosComando.Create(nil);');
+      lTexto.Add('  lParametros := TRpDataFlashCommandParameterList.Create(nil);');
       lTexto.Add('  try');
 
       // para o tipo tvpBinaryFile, o arquivo deve ser enviado antes por FTP
@@ -1550,23 +1551,23 @@ begin
             lValorFuncao := ' '' '' ';
 
           if (Self[i].ListaParametros[j].TipoValor = tvpBase) and (Self[i].ListaParametros[j].BaseClass <> EmptyStr) then
-            lTexto.Add(Format('    lParametros.Novo(''%s'', tpEntrada, ''%s'');', [
+            lTexto.Add(Format('    lParametros.AddNew(''%s'', tpInput, ''%s'');', [
               Self[i].ListaParametros[j].Nome,
               Self[i].ListaParametros[j].BaseClass]) )
           else
-            lTexto.Add(Format('    lParametros.Novo(''%s'', %s, tpEntrada, %s);', [
+            lTexto.Add(Format('    lParametros.AddNew(''%s'', %s, tpInput, %s);', [
               Self[i].ListaParametros[j].Nome,
               lValorFuncao,
               Self[i].ListaParametros[j].TipoValorAsString(False) ]) );
 
           case Self[i].ListaParametros[j].TipoValor of
             tvpBase64 :
-              lTexto.Add('    lParametro[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + ';');
+              lTexto.Add('    lParametros.Param[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + ';');
             tvpBase,
             tvpDAO :
-              lTexto.Add('    lParametro[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + '.SaveToXmlString;');
+              lTexto.Add('    lParametros.Param[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + '.SaveToXmlString;');
             tvpFile:
-              lTexto.Add('    lParametro[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + '.Save;');
+              lTexto.Add('    lParametros.Param[''' + Self[i].ListaParametros[j].Nome + '''].AsBase64 := p' + Self[i].ListaParametros[j].Nome + '.Save;');
           end;
         end;
       // comunicar com o servidor
@@ -1590,13 +1591,13 @@ begin
           tvpBase,
           tvpDAO :
             begin
-              lTexto.Add(Format('      %s.LoadFromXmlString(lParametros.Retorno[''%s''].AsBase64);', [
+              lTexto.Add(Format('      %s.LoadFromXmlString(lParametros.ResultParam[''%s''].AsBase64);', [
                 'A' + Self[i].ListaParametros[j].Nome,
                 Self[i].ListaParametros[j].Nome]));
             end;
           tvpFile:
             begin
-              lTexto.Add(Format('      %s.Load(lParametros.Retorno[''%s''].AsBase64);', [
+              lTexto.Add(Format('      %s.Load(lParametros.ResultParam[''%s''].AsBase64);', [
                 'A' + Self[i].ListaParametros[j].Nome,
                 Self[i].ListaParametros[j].Nome]));
             end
@@ -1608,7 +1609,7 @@ begin
                 tvpDateTime : lAsType := 'DateTime';
               end;
 
-              lTexto.Add(Format('      %s := lParametros.Retorno[''%s''].As%s;', [
+              lTexto.Add(Format('      %s := lParametros.ResultParam[''%s''].As%s;', [
                 'A' + Self[i].ListaParametros[j].Nome,
                 Self[i].ListaParametros[j].Nome,
                 lAsType]) );
@@ -1626,7 +1627,7 @@ begin
               lTexto.Add('    if Result then');
               lTexto.Add('    begin');
             end;
-            lTexto.Add(Format('      %s.LoadFromXmlString(lParametros.Retorno[''%s''].AsBase64);', [
+            lTexto.Add(Format('      %s.LoadFromXmlString(lParametros.ResultParam[''%s''].AsBase64);', [
               'p' + Self[i].ListaParametros[j].Nome,
               Self[i].ListaParametros[j].Nome]));
           end;
@@ -1688,7 +1689,7 @@ var
 begin
   lParametro := TProxyParametroComandoItem.Create;
 
-  lParametro.Nome := PParams.Nome;
+  lParametro.Nome := PParams.Name;
   lParametro.TipoParametro := PParams.Tipo;
   lParametro.TipoValor := PParams.TipoValor;
   lParametro.BaseClass := PParams.BaseClass;

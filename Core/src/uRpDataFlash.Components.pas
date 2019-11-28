@@ -18,8 +18,8 @@ type
   TRpDataFlashCustomConnection = class;
   TRpDataFlashCustomClientConnection = class;
   TRpDataFlashServerConnection = class;
-  TRpDataFlashComandController = class;
-  TRpDataFlashComandControllerList = class;
+  TRpDataFlashCommandController = class;
+  TRpDataFlashCommandControllerList = class;
   TRpDataFlashProviderControllerList = class;
 
   TRpDataFlashOnGenericReceipt = function(Sender : TObject; const AMenssage : string; AConnectionItem : TRpDataFlashConnectionItem) : string of object;
@@ -307,7 +307,7 @@ type
     FOnClientDisconnect: TRpDataFlashOnClientConnection;
     FDesconectandoServer : Boolean;
     FBridge: TRpDataFlashCustomClientConnection;
-    FControllers: TRpDataFlashComandControllerList;
+    FControllers: TRpDataFlashCommandControllerList;
     FUtilizarControllers: Boolean;
     FProviders: TRpDataFlashProviderControllerList;
     FOnReceivingText: TRpDataFlashOnGenericReceipt;
@@ -359,7 +359,7 @@ type
     function GetProvidersCount: Integer;
     function GetUseControllers : Boolean;
     procedure SetUseControllers(const Value : Boolean);
-    function GetControllers: TRpDataFlashComandControllerList;
+    function GetControllers: TRpDataFlashCommandControllerList;
     function GetProviders: TRpDataFlashProviderControllerList;
     // ftp
     procedure OnFTPServerAfterUserLogin(ASender: TIdFTPServerContext);
@@ -387,7 +387,7 @@ type
     procedure AfterConstruction; override;
     procedure AddInstance(const AInstance: IRpDataFlashCommandInterfaced);
     function FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;
-    property Controllers : TRpDataFlashComandControllerList read GetControllers;
+    property Controllers : TRpDataFlashCommandControllerList read GetControllers;
     property Providers : TRpDataFlashProviderControllerList read GetProviders;
   published
     property ConfigTCPIP;
@@ -601,20 +601,20 @@ type
     function DoInternalConectar : Boolean;
   end;
 
-  TRpDataFlashComandController = class(TComponent)
+  TRpDataFlashCommandController = class(TComponent)
   private
     FServer: TRpDataFlashServerConnection;
-    FComandos: TRpDataFlashComandList;
+    FComandos: TRpDataFlashCommandList;
     FGrupo: string;
     procedure SetServer(const Value: TRpDataFlashServerConnection);
-    procedure SetGrupo(const Value: string);
-    function GetGrupo: string;
+    procedure SetGroupName(const Value: string);
+    function GetGroupName: string;
 
-    function GetComandos: TRpDataFlashComandList;
-    procedure SetComandos(const Value: TRpDataFlashComandList);
+    function GetCommands: TRpDataFlashCommandList;
+    procedure SetCommands(const Value: TRpDataFlashCommandList);
   protected
-    function GetComandoClass : TRpDataFlashComandListClass; virtual;
-    function GetComandoItemClass : TRpDataFlashComandItemClass; virtual;
+    function GetComandoClass : TRpDataFlashCommandListClass; virtual;
+    function GetComandoItemClass : TRpDataFlashCommandItemClass; virtual;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -623,11 +623,11 @@ type
     procedure EditarComandos;
   published
     property Server   : TRpDataFlashServerConnection read FServer write SetServer;
-    property Comandos : TRpDataFlashComandList read GetComandos write SetComandos;
-    property Grupo : string read GetGrupo write SetGrupo;
+    property Commands : TRpDataFlashCommandList read GetCommands write SetCommands;
+    property GroupName : string read GetGroupName write SetGroupName;
   end;
 
-  TRpDataFlashComandControllerList = class(TComponentList)
+  TRpDataFlashCommandControllerList = class(TComponentList)
   public
     function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
@@ -2095,7 +2095,7 @@ begin
       end;
 end;
 
-function TRpDataFlashServerConnection.GetControllers: TRpDataFlashComandControllerList;
+function TRpDataFlashServerConnection.GetControllers: TRpDataFlashCommandControllerList;
 begin
   Result := FControllers;
 end;
@@ -2135,7 +2135,7 @@ begin
   inherited;
   FInterfaceList := TInterfaceList.Create;
   FServer := GetNomeComputadorLocal;
-  FControllers := TRpDataFlashComandControllerList.Create(False);
+  FControllers := TRpDataFlashCommandControllerList.Create(False);
   FProviders := TRpDataFlashProviderControllerList.Create(False);
   FUtilizarControllers := True;
   FBaseCommandPrefix := 'TComando';
@@ -2195,7 +2195,7 @@ begin
   if (Operation = opRemove) and (AComponent = FBridge) then
     FBridge := nil;
 
-  if (Operation = opRemove) and (AComponent.InheritsFrom(TRpDataFlashComandController)) then
+  if (Operation = opRemove) and (AComponent.InheritsFrom(TRpDataFlashCommandController)) then
     FControllers.Remove(AComponent);
 
   if (Operation = opRemove) and (AComponent.InheritsFrom(TRpDataFlashCustomDataSetProvider)) then
@@ -3255,49 +3255,49 @@ end;
 
 { TRpDataFlashComandController }
 
-constructor TRpDataFlashComandController.Create(AOwner: TComponent);
+constructor TRpDataFlashCommandController.Create(AOwner: TComponent);
 begin
   inherited;
   FComandos := GetComandoClass.Create(Self, GetComandoItemClass);
   FGrupo := C_WITHOUT_GROUP;
 end;
 
-destructor TRpDataFlashComandController.Destroy;
+destructor TRpDataFlashCommandController.Destroy;
 begin
   FreeAndNil(FComandos);
   inherited;
 end;
 
-procedure TRpDataFlashComandController.EditarComandos;
+procedure TRpDataFlashCommandController.EditarComandos;
 var
   lView: TfrmComandosControllerView;
 begin
   lView := TfrmComandosControllerView.Create(nil);
-  lView.Comandos := Self.Comandos;
+  lView.Commands := Self.Commands;
   lView.Show;
 end;
 
-function TRpDataFlashComandController.GetComandoClass: TRpDataFlashComandListClass;
+function TRpDataFlashCommandController.GetComandoClass: TRpDataFlashCommandListClass;
 begin
-  Result := TRpDataFlashComandList;
+  Result := TRpDataFlashCommandList;
 end;
 
-function TRpDataFlashComandController.GetComandoItemClass: TRpDataFlashComandItemClass;
+function TRpDataFlashCommandController.GetComandoItemClass: TRpDataFlashCommandItemClass;
 begin
-  Result := TRpDataFlashComandItem;
+  Result := TRpDataFlashCommandItem;
 end;
 
-function TRpDataFlashComandController.GetComandos: TRpDataFlashComandList;
+function TRpDataFlashCommandController.GetCommands: TRpDataFlashCommandList;
 begin
   Result := FComandos;
 end;
 
-function TRpDataFlashComandController.GetGrupo: string;
+function TRpDataFlashCommandController.GetGroupName: string;
 begin
   Result := FGrupo;
 end;
 
-procedure TRpDataFlashComandController.Notification(AComponent: TComponent;
+procedure TRpDataFlashCommandController.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
@@ -3305,19 +3305,19 @@ begin
     FServer := nil;
 end;
 
-procedure TRpDataFlashComandController.SetComandos(const Value: TRpDataFlashComandList);
+procedure TRpDataFlashCommandController.SetCommands(const Value: TRpDataFlashCommandList);
 begin
   FComandos.Assign(Value);
 end;
 
-procedure TRpDataFlashComandController.SetGrupo(const Value: string);
+procedure TRpDataFlashCommandController.SetGroupName(const Value: string);
 begin
   FGrupo := TRpDataFlashValidations.NameValidation(Value);
   if FGrupo = EmptyStr then
     FGrupo := C_WITHOUT_GROUP;
 end;
 
-procedure TRpDataFlashComandController.SetServer(const Value: TRpDataFlashServerConnection);
+procedure TRpDataFlashCommandController.SetServer(const Value: TRpDataFlashServerConnection);
 begin
   if (FServer <> nil) then
     FServer.Controllers.Remove(Self);
@@ -3431,11 +3431,11 @@ end;
 
 { TRpDataFlashComandControllerList }
 
-function TRpDataFlashComandControllerList.Localizar(const ANome: string;
+function TRpDataFlashCommandControllerList.Localizar(const ANome: string;
   out AObjComando: IRpDataFlashCommandInterfaced): Boolean;
 var
   lEnum: TListEnumerator;
-  lController: TRpDataFlashComandController;
+  lController: TRpDataFlashCommandController;
 begin
   lEnum := GetEnumerator;
   try
@@ -3443,8 +3443,8 @@ begin
     Result := False;
     while (lEnum.MoveNext) and (not Result) do
     begin
-      lController := TRpDataFlashComandController(lEnum.Current);
-      Result := lController.Comandos.Localizar(ANome, AObjComando);
+      lController := TRpDataFlashCommandController(lEnum.Current);
+      Result := lController.Commands.Localizar(ANome, AObjComando);
     end;
   finally
     FreeAndNil(lEnum);

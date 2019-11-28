@@ -16,19 +16,19 @@ type
     pnlSelecao: TPanel;
     BitBtn1: TBitBtn;
   public
-    procedure CarregarComando(const AComandos : TRpDataFlashComandList;
-      out AComando : TRpDataFlashComandItem);
+    procedure CarregarComando(const AComandos : TRpDataFlashCommandList;
+      out AComando : TRpDataFlashCommandItem);
   end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TfrmComandoView.CarregarComando(const AComandos : TRpDataFlashComandList;
-  out AComando : TRpDataFlashComandItem);
+procedure TfrmComandoView.CarregarComando(const AComandos : TRpDataFlashCommandList;
+  out AComando : TRpDataFlashCommandItem);
 begin
-  AComando := AComandos.Novo as TRpDataFlashComandItem;
-  AComando.Nome := ctrlNomeComando.Text;
+  AComando := AComandos.Novo as TRpDataFlashCommandItem;
+  AComando.Name := ctrlNomeComando.Text;
 end;
 
 end.

@@ -181,8 +181,8 @@ function CharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
 
 implementation
 
-uses
-  ComObj;
+//uses
+//  ComObj;
 
 { TRpDataFlashProtocol }
 

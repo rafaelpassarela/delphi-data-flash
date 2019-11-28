@@ -120,7 +120,6 @@ object FormMainClient: TFormMainClient
       'group by ID, NOME, IDADE, DATA_CADASTRO, '
       'SALARIO')
     TabOrder = 5
-    ExplicitHeight = 336
   end
   object ScrollBoxComandos: TScrollBox
     Left = 722
@@ -129,7 +128,6 @@ object FormMainClient: TFormMainClient
     Height = 477
     Align = alRight
     TabOrder = 6
-    ExplicitHeight = 472
     object ButtonSomarProxy: TButton
       AlignWithMargins = True
       Left = 8
@@ -294,6 +292,7 @@ object FormMainClient: TFormMainClient
     Width = 85
     Height = 21
     TabOrder = 15
+    Text = 'TESTE'
   end
   object EditSenha: TEdit
     Left = 175
@@ -301,8 +300,19 @@ object FormMainClient: TFormMainClient
     Width = 85
     Height = 21
     TabOrder = 16
+    Text = '1234'
+  end
+  object Button1: TButton
+    Left = 600
+    Top = 245
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 17
+    OnClick = Button1Click
   end
   object RpDataFlashClientConnectionTeste: TRpDataFlashClientConnection
+    Port = 7200
     Server = 'LOCALHOST'
     UserName = 'TESTE'
     Password = '1234'
@@ -328,8 +338,21 @@ object FormMainClient: TFormMainClient
   end
   object RpDataFlashCommandExecutorSomar: TRpDataFlashCommandExecutor
     ConexaoCliente = RpDataFlashClientConnectionTeste
-    Params = <>
-    ResultParams = <>
+    Command = 'AddNum'
+    Params = <
+      item
+        Name = 'A'
+        TipoValor = tvpFloat
+      end
+      item
+        Name = 'B'
+        TipoValor = tvpFloat
+      end>
+    ResultParams = <
+      item
+        Name = 'X'
+        TipoValor = tvpFloat
+      end>
     Left = 720
     Top = 40
   end
@@ -364,7 +387,7 @@ object FormMainClient: TFormMainClient
       end>
     IndexDefs = <>
     StoreDefs = True
-    ConexaoCliente = RpDataFlashClientConnectionTeste
+    ClientConnection = RpDataFlashClientConnectionTeste
     ProviderClass = 'DFPCadastro_Pessoas'
     Params = <>
     Formatter = RpDataFlashDataSetFormatter1

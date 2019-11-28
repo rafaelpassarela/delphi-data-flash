@@ -18,9 +18,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FComandos: TRpDataFlashComandList;
+    FCommands: TRpDataFlashCommandList;
   public
-    property Comandos : TRpDataFlashComandList read FComandos write FComandos;
+    property Commands : TRpDataFlashCommandList read FCommands write FCommands;
     procedure AtualizarListaComandos;
   end;
 
@@ -30,18 +30,18 @@ implementation
 
 procedure TfrmComandosControllerView.AtualizarListaComandos;
 var
-  lIterator: TRpDataFlashComandList.TIteratorComand;
-  lAtual: TRpDataFlashComandItemBase;
+  lIterator: TRpDataFlashCommandList.TIteratorComand;
+  lAtual: TRpDataFlashCommandItemBase;
 begin
   ctrlComandos.Clear;
-  if FComandos <> nil then
+  if FCommands <> nil then
   begin
-    lIterator := FComandos.Iterator;
+    lIterator := FCommands.Iterator;
     try
       while lIterator.TemProximo do
       begin
         lAtual := lIterator.Proximo;
-        ctrlComandos.AddItem(lAtual.Nome, lAtual);
+        ctrlComandos.AddItem(lAtual.Name, lAtual);
       end;
     finally
       FreeAndNil(lIterator);
@@ -52,13 +52,13 @@ end;
 procedure TfrmComandosControllerView.btnAdicionarClick(Sender: TObject);
 var
   lView: TfrmComandoView;
-  lComando: TRpDataFlashComandItem;
+  lComando: TRpDataFlashCommandItem;
 begin
   lView := TfrmComandoView.Create(Self);
   if lView.ShowModal = mrOk then
   begin
-    lView.CarregarComando(FComandos, lComando);
-    ctrlComandos.AddItem(lComando.Nome, lComando);
+    lView.CarregarComando(FCommands, lComando);
+    ctrlComandos.AddItem(lComando.Name, lComando);
   end;
 //  AtualizarListaComandos;
   lView.Free;
