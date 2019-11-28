@@ -10,7 +10,7 @@ type
   TFoods = (ftPizza, ftPasta, ftFruits, ftSalad, ftBread);
   TFoodSet = set of TFoods;
 
-  TCar = class(TCustomSerializableObject)
+  TCar = class(TBaseSerializableObject)
   private
     FModel: string;
     FYear: Integer;
@@ -27,7 +27,7 @@ type
     property NeedReplace : Boolean read FNeedReplace write FNeedReplace;
   end;
 
-  TFamily = class(TCustomSerializableObject)
+  TFamily = class(TBaseSerializableObject)
   private
     FName: string;
     FAge: Integer;
@@ -43,18 +43,18 @@ type
     property Age : Integer read FAge write FAge;
   end;
 
-  TFamilyList = class(TCustomSerializableList)
+  TFamilyList = class(TBaseSerializableList)
   private
     function GetItem(AIndex: Integer): TFamily;
   protected
-    function GetItemClass: TCustomSerializableObjectClass; override;
+    function GetItemClass: TBaseSerializableObjectClass; override;
   public
     property Items[AIndex : Integer] : TFamily read GetItem; default;
 
     function AddMember(const AName : string; const AAge : Integer) : TFamily;
   end;
 
-  TUserInfo = class(TCustomSerializableObject)
+  TUserInfo = class(TBaseSerializableObject)
   private
     FFirstName: string;
     FLastName: string;
@@ -248,7 +248,7 @@ begin
   Result := TFamily(inherited GetItem(AIndex));
 end;
 
-function TFamilyList.GetItemClass: TCustomSerializableObjectClass;
+function TFamilyList.GetItemClass: TBaseSerializableObjectClass;
 begin
   Result := TFamily;
 end;

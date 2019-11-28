@@ -5,17 +5,16 @@ unit uRpJSONPlatform;
 interface
 
 uses
-  Math, SysUtils, StrUtils
   {$IFDEF ANDROID}
-    , System.Generics.Collections
+    System.Generics.Collections,
   {$ELSE}
     {$IFDEF XE3UP}
-    , System.Contnrs
+      System.Contnrs, System.Classes, System.Types,
     {$ELSE}
-    , Contnrs
+      Contnrs, Classes,
     {$ENDIF}
   {$ENDIF}
-  ;
+  Math, SysUtils, StrUtils;
 
 type
   UnicodeString = string;
