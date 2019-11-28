@@ -6,6 +6,11 @@ interface
 
 uses
   uRpDataFlash.Command, Classes, uRpDataFlash.Components, SysUtils,
+  {$IFDEF UNICODE}
+  System.Types, System.Contnrs,
+  {$ELSE}
+  Contnrs,
+  {$ENDIF}
   uRpDataFlash.Types, uRpDataFlash.Utils;
 
 type

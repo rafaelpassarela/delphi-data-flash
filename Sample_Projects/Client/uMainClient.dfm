@@ -2,7 +2,7 @@ object FormMainClient: TFormMainClient
   Left = 0
   Top = 0
   Caption = 'Client'
-  ClientHeight = 472
+  ClientHeight = 477
   ClientWidth = 907
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,7 +15,7 @@ object FormMainClient: TFormMainClient
   OnDestroy = FormDestroy
   DesignSize = (
     907
-    472)
+    477)
   PixelsPerInch = 96
   TextHeight = 13
   object LabelNomeServer: TLabel
@@ -49,10 +49,20 @@ object FormMainClient: TFormMainClient
   end
   object Gauge1: TGauge
     Left = 299
-    Top = 446
+    Top = 449
     Width = 417
     Height = 18
+    Anchors = [akLeft, akRight, akBottom]
     Progress = 0
+    ExplicitTop = 446
+  end
+  object LabelStatus: TLabel
+    Left = 299
+    Top = 432
+    Width = 56
+    Height = 13
+    Anchors = [akLeft, akRight, akBottom]
+    Caption = 'LabelStatus'
   end
   object EditNomeServer: TEdit
     Left = 84
@@ -102,7 +112,7 @@ object FormMainClient: TFormMainClient
     Left = 8
     Top = 128
     Width = 285
-    Height = 336
+    Height = 341
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
       'select ID, NOME, IDADE, DATA_CADASTRO, SALARIO'
@@ -110,14 +120,16 @@ object FormMainClient: TFormMainClient
       'group by ID, NOME, IDADE, DATA_CADASTRO, '
       'SALARIO')
     TabOrder = 5
+    ExplicitHeight = 336
   end
   object ScrollBoxComandos: TScrollBox
     Left = 722
     Top = 0
     Width = 185
-    Height = 472
+    Height = 477
     Align = alRight
     TabOrder = 6
+    ExplicitHeight = 472
     object ButtonSomarProxy: TButton
       AlignWithMargins = True
       Left = 8
@@ -267,10 +279,10 @@ object FormMainClient: TFormMainClient
     Left = 300
     Top = 276
     Width = 416
-    Height = 164
+    Height = 149
     TabOrder = 14
     ControlData = {
-      4C000000FF2A0000F31000000000000000000000000000000000000000000000
+      4C000000FF2A0000660F00000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800
       2B2E126208000000000000004C0000000114020000000000C000000000000046
       8000000000000000000000000000000000000000000000000000000000000000
@@ -294,12 +306,14 @@ object FormMainClient: TFormMainClient
     Server = 'LOCALHOST'
     UserName = 'TESTE'
     Password = '1234'
-    Left = 256
+    OnNewLog = RpDataFlashClientConnectionTesteNewLog
+    OnStatus = RpDataFlashClientConnectionTesteStatus
+    Left = 192
     Top = 24
   end
   object DataSource1: TDataSource
     DataSet = RpDataFlashDataSetPessoas
-    Left = 256
+    Left = 224
     Top = 88
   end
   object RpDataFlashDataSetFormatter1: TRpDataFlashDataSetFormatter
@@ -354,8 +368,8 @@ object FormMainClient: TFormMainClient
     ProviderClass = 'DFPCadastro_Pessoas'
     Params = <>
     Formatter = RpDataFlashDataSetFormatter1
-    Left = 256
-    Top = 56
+    Left = 224
+    Top = 24
     object RpDataFlashDataSetPessoasID: TIntegerField
       FieldName = 'ID'
       Origin = 'PESSOAS.ID'

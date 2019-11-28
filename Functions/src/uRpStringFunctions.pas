@@ -313,12 +313,8 @@ begin
   while EnumName <> '' do
   begin
     EnumValue := GetEnumValue(EnumInfo, EnumName);
-    if EnumValue < 0 then
-    begin
-      SetOrdValue(Info, SetParam, 0);
-      Exit;
-    end;
-    Include(TIntegerSet(SetValue), EnumValue);
+    if EnumValue >= 0 then
+      Include(TIntegerSet(SetValue), EnumValue);
     EnumName := string( NextWord(P) );
   end;
   SetOrdValue(Info, SetParam, SetValue);

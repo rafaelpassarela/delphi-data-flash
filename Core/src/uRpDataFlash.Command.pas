@@ -434,7 +434,7 @@ type
     property OnExecuteMessage : TRpDataFlashOnExecuteMessage read FOnExecuteMessage write FOnExecuteMessage;
   end;
 
-  IFileProxy = interface
+  IRpFileProxy = interface
   ['{1F83A425-C29D-486D-9D39-7FAC3FF83EE6}']
     function Save : string;
     function Load(const AFileStream : string) : string;
@@ -468,10 +468,10 @@ type
     property Stream : TStream read GetStream;
 
     function DecodeInfo(const AInfo : string) : TRpDataFlashFtpFileInfo;
-    procedure CopyInfo(const ASource : IFileProxy);
+    procedure CopyInfo(const ASource : IRpFileProxy);
   end;
 
-  TRpFileProxy = class(TInterfacedPersistent, IFileProxy)
+  TRpFileProxy = class(TInterfacedPersistent, IRpFileProxy)
   private
     FFileStream: TStringStream;
     FFileName: string;
@@ -501,7 +501,7 @@ type
     function Put(const ASupport: IRpDataFlashFileTransferSupport): Boolean;
     function Remove : Boolean;
     function DecodeInfo(const AInfo : string) : TRpDataFlashFtpFileInfo;
-    procedure CopyInfo(const ASource : IFileProxy);
+    procedure CopyInfo(const ASource : IRpFileProxy);
 
     property FileName : string read GetFileName write SetFileName;
     property FileID : string read GetFileID write SetFileID;
@@ -2151,7 +2151,7 @@ begin
   Result := FFileStream.Size > 0;
 end;
 
-procedure TRpFileProxy.CopyInfo(const ASource: IFileProxy);
+procedure TRpFileProxy.CopyInfo(const ASource: IRpFileProxy);
 begin
   FFileID := ASource.FileID;
   FFileName := ASource.FileName;

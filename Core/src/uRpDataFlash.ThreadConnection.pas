@@ -76,10 +76,10 @@ begin
 
       if not lConectado then
       begin
-        if TRpDataFlashThreadInternalAdapter(Conexao).TimeOutConexao <= 0 then
+        if TRpDataFlashThreadInternalAdapter(Conexao).ConnectionTimeOut <= 0 then
           Sleep(1000)
         else
-          Sleep(TRpDataFlashThreadInternalAdapter(Conexao).TimeOutConexao)
+          Sleep(TRpDataFlashThreadInternalAdapter(Conexao).ConnectionTimeOut)
       end;
     until lConectado or Terminated;
 
