@@ -9,11 +9,11 @@ uses
   uRpAlgorithms, uRpStringFunctions, uRpDataFlash.Utils;
 
 type
-  TRpDataFlashComandItemBase = class;
+  TRpDataFlashCommandItemBase = class;
 
   TRpDataFlashComandoItem = class(TRpDataFlashCommand)
   private
-    FItem : TRpDataFlashComandItemBase;
+    FItem : TRpDataFlashCommandItemBase;
   protected
     function GetCommand: string; override;
     function DoExecute : Boolean; override;
@@ -31,7 +31,7 @@ type
     procedure DoValidateParams; override;
     procedure DoExecuteBeforeBridgeConnection(var AContinue : Boolean); override;
   public
-    constructor Create(const AItem : TRpDataFlashComandItemBase); reintroduce;
+    constructor Create(const AItem : TRpDataFlashCommandItemBase); reintroduce;
   end;
 
   TRpDataFlashNotifyEvent = procedure(const AComando : IRpDataFlashCommandInterfaced) of object;
@@ -48,14 +48,14 @@ type
 
   TRpDataFlashBaseParametroItem = class(TCollectionItem)
   private
-    FNome: string;
+    FName: string;
     FTipo: TRpDataFlashParamType;
     FTipoValor: TRpDataFlashParamValueType;
     FBaseClass: string;
     procedure SetNome(const Value: string);
   protected
     function GetDisplayName: string; override;
-    property Nome : string read FNome write SetNome;
+    property Name : string read FName write SetNome;
     property Tipo : TRpDataFlashParamType read FTipo write FTipo;
     property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
     property BaseClass : string read FBaseClass write FBaseClass;
@@ -63,7 +63,7 @@ type
 
   TRpDataFlashParametroItem = class(TRpDataFlashBaseParametroItem)
   published
-    property Nome;
+    property Name;
     property Tipo;
     property TipoValor;
     property BaseClass;
@@ -97,7 +97,7 @@ type
 
     function IsNull : Boolean;
   published
-    property Nome;
+    property Name;
     property TipoValor;
     property BaseClass;
     property Valor : Variant read FValor write FValor;
@@ -121,13 +121,13 @@ type
     procedure SetTipoParametro(Item: TCollectionItem); override;
   end;
 
-  TRpDataFlashComandItemBase = class(TCollectionItem)
+  TRpDataFlashCommandItemBase = class(TCollectionItem)
   private
-    FParametros: TRpDataFlashParametrosCollection;
-    FComando : IRpDataFlashCommandInterfaced;
-    FNome: string;
-    FDescricao: string;
-    FTipoProcessamento: TRpDataFlashProcessType;
+    FParams: TRpDataFlashParametrosCollection;
+    FCommand : IRpDataFlashCommandInterfaced;
+    FName: string;
+    FDescription: string;
+    FProcessType: TRpDataFlashProcessType;
     FOnExecute: TRpDataFlashOnExecutarComandItemEvent;
     FOnExecutarPonteInvalida: TRpDataFlashOnExecutarPonteInvalida;
     FOnExecutarPonteBemSucedida: TRpDataFlashOnExecutarPonteBemSucedidaEvent;
@@ -144,14 +144,14 @@ type
   public
     function IsCsDesigning : Boolean;
 
-    property Comando : IRpDataFlashCommandInterfaced read FComando write FComando;
+    property Command : IRpDataFlashCommandInterfaced read FCommand write FCommand;
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
 
-    property Nome : string read FNome write SetNome;
-    property Descricao : string read FDescricao write FDescricao;
-    property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
-    property Parametros : TRpDataFlashParametrosCollection read FParametros write FParametros;
+    property Name : string read FName write SetNome;
+    property Description : string read FDescription write FDescription;
+    property ProcessType : TRpDataFlashProcessType read FProcessType write FProcessType default prtRemote;
+    property Params : TRpDataFlashParametrosCollection read FParams write FParams;
     property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property OnExecute : TRpDataFlashOnExecutarComandItemEvent read FOnExecute write FOnExecute;
@@ -166,12 +166,12 @@ type
     property OnValidarParametros : TRpDataFlashOnValidarParametrosEvent read FOnValidarParametros write FOnValidarParametros;
   end;
 
-  TRpDataFlashComandItem = class (TRpDataFlashComandItemBase)
+  TRpDataFlashCommandItem = class (TRpDataFlashCommandItemBase)
   published
-    property Nome;
-    property Descricao;
-    property TipoProcessamento;
-    property Parametros;
+    property Name;
+    property Description;
+    property ProcessType;
+    property Params;
     property LifeCycle;
 
     property OnExecute;
@@ -185,9 +185,9 @@ type
     property OnValidarParametros;
   end;
 
-  TRpDataFlashComandItemClass = class of TRpDataFlashComandItemBase;
+  TRpDataFlashCommandItemClass = class of TRpDataFlashCommandItemBase;
 
-  TRpDataFlashComandList = class(TOwnedCollection)
+  TRpDataFlashCommandList = class(TOwnedCollection)
   public type
     TIteratorComand = class
     private
@@ -197,36 +197,36 @@ type
       constructor Create(const AOwner : TOwnedCollection);
 
       function TemProximo : Boolean;
-      function Proximo : TRpDataFlashComandItemBase;
+      function Proximo : TRpDataFlashCommandItemBase;
     end;
   public
     function IsCsDesigning : Boolean;
-    function Novo : TRpDataFlashComandItemBase;
+    function Novo : TRpDataFlashCommandItemBase;
     function Iterator : TIteratorComand;
     function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
 
-  TRpDataFlashComandListClass = class of TRpDataFlashComandList;
+  TRpDataFlashCommandListClass = class of TRpDataFlashCommandList;
 
 implementation
 
-{ TRpDataFlashComandList }
+{ TRpDataFlashCommandList }
 
-function TRpDataFlashComandList.IsCsDesigning: Boolean;
+function TRpDataFlashCommandList.IsCsDesigning: Boolean;
 begin
   Result := (GetOwner <> nil)
         and (csDesigning in TComponent(GetOwner).ComponentState);
 end;
 
-function TRpDataFlashComandList.Iterator: TIteratorComand;
+function TRpDataFlashCommandList.Iterator: TIteratorComand;
 begin
   Result := TIteratorComand.Create(Self);
 end;
 
-function TRpDataFlashComandList.Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
+function TRpDataFlashCommandList.Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
 var
   lEnum: TCollectionEnumerator;
-  lItem: TRpDataFlashComandItemBase;
+  lItem: TRpDataFlashCommandItemBase;
 begin
   Result := False;
   AObjComando := nil;
@@ -234,8 +234,8 @@ begin
   try
     while (lEnum.MoveNext) and (not Result) do
     begin
-      lItem := TRpDataFlashComandItemBase(lEnum.Current);
-      if lItem.Nome = ANome then
+      lItem := TRpDataFlashCommandItemBase(lEnum.Current);
+      if lItem.Name = ANome then
       begin
         AObjComando := TRpDataFlashComandoItem.Create(lItem);
         Result := True;
@@ -246,47 +246,47 @@ begin
   end;
 end;
 
-function TRpDataFlashComandList.Novo: TRpDataFlashComandItemBase;
+function TRpDataFlashCommandList.Novo: TRpDataFlashCommandItemBase;
 begin
-  Result := TRpDataFlashComandItemBase(Add);
+  Result := TRpDataFlashCommandItemBase(Add);
 end;
 
-{ TRpDataFlashComandList.TIteratorComand }
+{ TRpDataFlashCommandList.TIteratorComand }
 
-constructor TRpDataFlashComandList.TIteratorComand.Create(const AOwner: TOwnedCollection);
+constructor TRpDataFlashCommandList.TIteratorComand.Create(const AOwner: TOwnedCollection);
 begin
   FOwner := AOwner;
   FIndex := -1;
 end;
 
-function TRpDataFlashComandList.TIteratorComand.Proximo: TRpDataFlashComandItemBase;
+function TRpDataFlashCommandList.TIteratorComand.Proximo: TRpDataFlashCommandItemBase;
 begin
   FIndex  := FIndex + 1;
-  Result := TRpDataFlashComandItemBase(FOwner.Items[FIndex]);
+  Result := TRpDataFlashCommandItemBase(FOwner.Items[FIndex]);
 end;
 
-function TRpDataFlashComandList.TIteratorComand.TemProximo: Boolean;
+function TRpDataFlashCommandList.TIteratorComand.TemProximo: Boolean;
 begin
   Result := ((FOwner.Count - 1) > (FIndex));
 end;
 
-{ TRpDataFlashComandItemBase }
+{ TRpDataFlashCommandItemBase }
 
-constructor TRpDataFlashComandItemBase.Create(Collection: TCollection);
+constructor TRpDataFlashCommandItemBase.Create(Collection: TCollection);
 begin
   inherited;
-  FParametros := TRpDataFlashParametrosCollection.Create(Self, TRpDataFlashParametroItem);
-  FTipoProcessamento := prtRemote;
+  FParams := TRpDataFlashParametrosCollection.Create(Self, TRpDataFlashParametroItem);
+  FProcessType := prtRemote;
   FLifeCycle := tlfInstance;
 end;
 
-destructor TRpDataFlashComandItemBase.Destroy;
+destructor TRpDataFlashCommandItemBase.Destroy;
 begin
-  FreeAndNil(FParametros);
+  FreeAndNil(FParams);
   inherited;
 end;
 
-function TRpDataFlashComandItemBase.GetDisplayName: string;
+function TRpDataFlashCommandItemBase.GetDisplayName: string;
 var
   lTipo: string;
   lLife: string;
@@ -301,7 +301,7 @@ begin
     lLife := 'Erro LifeCycle';
   end;
 
-  case FTipoProcessamento of
+  case FProcessType of
     prtLocal: lTipo := 'Local';
     prtRemote: lTipo := 'Remote';
     prtRemoteOnly: lTipo := 'RemoteOnly';
@@ -309,29 +309,29 @@ begin
     lTipo := 'Erro TipoProc';
   end;
 
-  Result := Format('%s (%s/%s)', [FNome, lTipo, lLife, FDescricao]);
-  if FDescricao <> EmptyStr then
+  Result := Format('%s (%s/%s)', [FName, lTipo, lLife, FDescription]);
+  if FDescription <> EmptyStr then
   begin
-    Result := Result + '  ' + Copy(FDescricao, 1, 50);
-    if Length(FDescricao) > 50 then
+    Result := Result + '  ' + Copy(FDescription, 1, 50);
+    if Length(FDescription) > 50 then
       Result := Result + '...';
   end;
 end;
 
-function TRpDataFlashComandItemBase.IsCsDesigning: Boolean;
+function TRpDataFlashCommandItemBase.IsCsDesigning: Boolean;
 begin
   Result := (GetOwner <> nil)
-        and (TRpDataFlashComandList(GetOwner).IsCsDesigning);
+        and (TRpDataFlashCommandList(GetOwner).IsCsDesigning);
 end;
 
-procedure TRpDataFlashComandItemBase.SetNome(const Value: string);
+procedure TRpDataFlashCommandItemBase.SetNome(const Value: string);
 begin
-  FNome := TRpDataFlashValidations.NameValidation( Value );
+  FName := TRpDataFlashValidations.NameValidation( Value );
 end;
 
 { TRpDataFlashComandoItem }
 
-constructor TRpDataFlashComandoItem.Create(const AItem: TRpDataFlashComandItemBase);
+constructor TRpDataFlashComandoItem.Create(const AItem: TRpDataFlashCommandItemBase);
 begin
   FItem := AItem;
   inherited Create;
@@ -390,12 +390,12 @@ var
   lItem: TRpDataFlashParametroItem;
 begin
   inherited;
-  lEnum := FItem.Parametros.GetEnumerator;
+  lEnum := FItem.Params.GetEnumerator;
   try
     while lEnum.MoveNext do
     begin
       lItem := TRpDataFlashParametroItem(lEnum.Current);
-      Params.AddNew(lItem.Nome, EmptyStr, lItem.Tipo, lItem.TipoValor);
+      Params.AddNew(lItem.Name, EmptyStr, lItem.Tipo, lItem.TipoValor);
     end;
   finally
     FreeAndNil(lEnum);
@@ -418,7 +418,7 @@ end;
 
 function TRpDataFlashComandoItem.GetCommand: string;
 begin
-  Result := FItem.Nome;
+  Result := FItem.Name;
 end;
 
 function TRpDataFlashComandoItem.GetLifeCycle: TRpDataFlashLifeCycle;
@@ -428,7 +428,7 @@ end;
 
 function TRpDataFlashComandoItem.GetProcessType: TRpDataFlashProcessType;
 begin
-  Result := FItem.TipoProcessamento;
+  Result := FItem.ProcessType;
 end;
 
 { TRpDataFlashBaseParametroItem }
@@ -436,14 +436,14 @@ end;
 function TRpDataFlashBaseParametroItem.GetDisplayName: string;
 begin
   Result := Format('%s - %s / %s', [
-    FNome,
+    FName,
     TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamType), Ord(FTipo)),
     TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamValueType), Ord(FTipoValor)) ]);
 end;
 
 procedure TRpDataFlashBaseParametroItem.SetNome(const Value: string);
 begin
-  FNome := TRpDataFlashValidations.NameValidation( Value );
+  FName := TRpDataFlashValidations.NameValidation( Value );
 end;
 
 { TRpDataFlashParametrosValueCollection }
@@ -492,7 +492,7 @@ begin
   for i := 0 to Count do
   begin
     lItem := TOwnedCollection(Self).Items[i];
-    if lValueItem.Nome = AIndexStr then
+    if lValueItem.Name = AIndexStr then
     begin
       Result := i;
       Break;

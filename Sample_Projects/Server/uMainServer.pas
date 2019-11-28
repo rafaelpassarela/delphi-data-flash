@@ -4,22 +4,20 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, uLRDF.Types, uLRDF.ProxyGenerator, uLRDF.Comando,
-  uLRDF.DataSetProvider, uLRDF.Component;
-
-//  , uLRDF.Component, uLRDF.Types, uLRDF.Comando, uLRDF.DataSetProvider,
-//  uLRDF.ComandoGetProviderList, uLRDF.ProxyGenerator;
+  Dialogs, StdCtrls, uRpDataFlash.Types, uRpDataFlash.ProxyGenerator,
+  uRpDataFlash.CommandHelper, uRpDataFlash.Command,
+  uRpDataFlash.DataSetProvider, uRpDataFlash.Components;
 
 type
-  TComandoCodeInverter = class(TLRDataFlashComando)
+  TComandoCodeInverter = class(TRpDataFlashCommand)
   protected
-    function DoExecutar : Boolean; override;
     function DoGetDescricao: string; override;
-    procedure DoRegistrarParametros; override;
+    function DoExecute: Boolean; override;
+    procedure DoRegisterParams; override;
   end;
 
   TFormMainServer = class(TForm)
-    LRDataFlashConexaoServerTeste: TLRDataFlashConexaoServer;
+    RpDataFlashServerConnectionTeste: TRpDataFlashServerConnection;
     LabelNomeServer: TLabel;
     EditNomeServer: TEdit;
     LabelPorta: TLabel;
@@ -28,32 +26,34 @@ type
     ButtonDesconectar: TButton;
     MemoLog: TMemo;
     ButtonVerLog: TButton;
-    DFCControllerMatematica: TLRDataFlashComandController;
-    DFPCadastro_Pessoas: TLRDataFlashDataSetProvider;
-    DFCControllerManipulaTexto: TLRDataFlashComandController;
-    DFCControllerArquivos: TLRDataFlashComandController;
+    DFCControllerMath: TRpDataFlashCommandController;
+    DFPCadastro_Pessoas: TRpDataFlashDataSetProvider;
+    DFCControllerManipulaTexto: TRpDataFlashCommandController;
+    DFCControllerFiles: TRpDataFlashCommandController;
     procedure FormCreate(Sender: TObject);
     procedure ButtonConectarClick(Sender: TObject);
     procedure ButtonDesconectarClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure LRDataFlashConexaoServerTesteNovoLog(Sender: TObject;
-      ATipoLog: TLRDataFlashTipoLogService; const ALog: string;
-      const AClientInfo: TLRDataFlashClientInfo);
     procedure ButtonVerLogClick(Sender: TObject);
-    function DFCControllerMatematicaComandos0Execute(
-      const AComando: IComandoTCPInterfaced): Boolean;
-    procedure LRDataFlashConexaoServerTesteConexaoCliente(Sender: TObject;
-      const AConexaoItem: TLRDataFlashConexaoItem);
-    procedure LRDataFlashConexaoServerTesteAutenticarCliente(Sender: TObject;
-      const AItemConexao: IAutenticationProvider; out AAutenticado: Boolean;
-      out AErrorMessage: string);
-    function DFCControllerManipulaTextoComandos0Execute(
-      const AComando: IComandoTCPInterfaced): Boolean;
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    function DFCControllerArquivosComandos0Execute(
-      const AComando: IComandoTCPInterfaced): Boolean;
-    function DFCControllerArquivosComandos1Execute(
-      const AComando: IComandoTCPInterfaced): Boolean;
+    procedure RpDataFlashServerConnectionTesteAuthenticateClient(
+      Sender: TObject; const AConnectionItem: IAutenticationProvider;
+      out AAutenticado: Boolean; out AErrorMessage: string);
+    procedure RpDataFlashServerConnectionTesteNewLog(Sender: TObject;
+      ALogType: TRpDataFlashServiceLog; const ALog: string;
+      const AClientInfo: TRpDataFlashClientInfo);
+    procedure RpDataFlashServerConnectionTesteClientConnection(Sender: TObject;
+      const AConnectionItem: TRpDataFlashConnectionItem);
+    function DFCControllerMathCommands0Execute(
+      const AComando: IRpDataFlashCommandInterfaced): Boolean;
+    function DFCControllerMathCommands1Execute(
+      const AComando: IRpDataFlashCommandInterfaced): Boolean;
+    function DFCControllerManipulaTextoCommands0Execute(
+      const AComando: IRpDataFlashCommandInterfaced): Boolean;
+    function DFCControllerFilesCommands1Execute(
+      const AComando: IRpDataFlashCommandInterfaced): Boolean;
+    function DFCControllerFilesCommands0Execute(
+      const AComando: IRpDataFlashCommandInterfaced): Boolean;
   private
     { Private declarations }
     FInternalLog: TStrings;
@@ -77,67 +77,101 @@ begin
   FInternalLog.Clear;
 end;
 
-function TFormMainServer.DFCControllerArquivosComandos0Execute(
-  const AComando: IComandoTCPInterfaced): Boolean;
+function TFormMainServer.DFCControllerFilesCommands0Execute(
+  const AComando: IRpDataFlashCommandInterfaced): Boolean;
+var
+  lFile : IRpFileProxy;
+  lFileName: string;
+  lPath : string;
+begin
+  lFile := TRpFileProxy.Create;
+  lFileName := AComando.GetParams.Param['FileName'].AsString;
+  lFileName := ExtractFileName(lFileName);
+
+  lPath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))
+         + 'ServerFiles\';
+
+  ForceDirectories(lPath);
+
+  lFileName := lPath + lFileName;
+  AComando.GetParams.Param['FileData'].SaveToFile( lFileName );
+  AComando.GetParams.ResultParam['SavePath'].AsString := lFileName;
+
+  Result := True;
+end;
+
+function TFormMainServer.DFCControllerFilesCommands1Execute(
+  const AComando: IRpDataFlashCommandInterfaced): Boolean;
 var
   lNomeArquivo: string;
-  lFile : TFileProxy;
+  lFile : TRpFileProxy;
 begin
-  lNomeArquivo := AComando.GetParametros.Parametro['FileName'].AsString;
-  lFile := TFileProxy.Create;
+  lNomeArquivo := AComando.GetParams.Param['FileName'].AsString;
+  lFile := TRpFileProxy.Create;
   try
     lFile.LoadFromFile( lNomeArquivo );
-    AComando.GetParametros.Retorno['FileData'].AsBase64 := lFile.Save;
+    AComando.GetParams.ResultParam['FileData'].AsBase64 := lFile.Save;
     Result := True;
   finally
     FreeAndNil( lFile );
   end;
 end;
 
-function TFormMainServer.DFCControllerArquivosComandos1Execute(
-  const AComando: IComandoTCPInterfaced): Boolean;
+function TFormMainServer.DFCControllerManipulaTextoCommands0Execute(
+  const AComando: IRpDataFlashCommandInterfaced): Boolean;
 var
-//  lFile : IFileProxy;
-  lFileName: string;
+  lText : string;
+  lInv : string;
+  i: Integer;
 begin
-//  lFile := TFileProxy.Create;
-  lFileName := AComando.GetParametros.Parametro['FileName'].AsString;
-  lFileName := ExtractFileName(lFileName);
+  lText := AComando.GetParams.Param['Text'].AsString;
+  lInv := EmptyStr;
 
-  lFileName := 'D:\Arq_Client_' + lFileName;
-  AComando.GetParametros.Parametro['FileData'].SaveToFile( lFileName );
-  AComando.GetParametros.Retorno['LocalSalvo'].AsString := lFileName;
+  for i := 1 to Length(lText) do
+    lInv := lText[i] + lInv;
+
+  AComando.GetParams.ResultParam['Inverted'].AsString := lInv;
 
   Result := True;
 end;
 
-function TFormMainServer.DFCControllerManipulaTextoComandos0Execute(
-  const AComando: IComandoTCPInterfaced): Boolean;
-begin
-  try
-    AComando.GetParametros.Retorno['StrC'].AsString := AComando.GetParametros.Parametro['StrA'].AsString
-                                                     + AComando.GetParametros.Parametro['StrB'].AsString;
-    Result := True;
-  except
-    Result := False;
-  end;
-end;
-
-function TFormMainServer.DFCControllerMatematicaComandos0Execute(
-  const AComando: IComandoTCPInterfaced): Boolean;
+function TFormMainServer.DFCControllerMathCommands0Execute(
+  const AComando: IRpDataFlashCommandInterfaced): Boolean;
 var
   lA, lB, lTotal : Double;
 begin
   try
     // read input parans
-    lA := AComando.GetParametros.Parametro['A'].AsFloat;
-    lB := AComando.GetParametros.Parametro['B'].AsFloat;
+    lA := AComando.GetParams.Param['A'].AsFloat;
+    lB := AComando.GetParams.Param['B'].AsFloat;
 
     // execute the command event
     lTotal := lA + lB;
 
     // return the output value to client
-    AComando.GetParametros.Retorno['X'].AsFloat := lTotal;
+    AComando.GetParams.ResultParam['X'].AsFloat := lTotal;
+    Result := True;
+  except
+    // on any error, sinalize as "not executed"
+    Result := False;
+  end;
+end;
+
+function TFormMainServer.DFCControllerMathCommands1Execute(
+  const AComando: IRpDataFlashCommandInterfaced): Boolean;
+var
+  lA, lB, lTotal : Double;
+begin
+  try
+    // read input parans
+    lA := AComando.GetParams.Param['A'].AsFloat;
+    lB := AComando.GetParams.Param['B'].AsFloat;
+
+    // execute the command event
+    lTotal := lA * lB;
+
+    // return the output value to client
+    AComando.GetParams.ResultParam['X'].AsFloat := lTotal;
     Result := True;
   except
     // on any error, sinalize as "not executed"
@@ -148,11 +182,11 @@ end;
 procedure TFormMainServer.ButtonConectarClick(Sender: TObject);
 begin
   try
-    LRDataFlashConexaoServerTeste.Porta := StrToInt64Def( EditPorta.Text, 8890 );
-    EditPorta.Text := IntToStr(LRDataFlashConexaoServerTeste.Porta);
+    RpDataFlashServerConnectionTeste.ConfigTCPIP.Port := StrToInt64Def( EditPorta.Text, 8890 );
+    EditPorta.Text := IntToStr(RpDataFlashServerConnectionTeste.ConfigTCPIP.Port);
 
-    LRDataFlashConexaoServerTeste.Conectar;
-    if LRDataFlashConexaoServerTeste.Conectado then
+    RpDataFlashServerConnectionTeste.Connect;
+    if RpDataFlashServerConnectionTeste.Connected then
       SetEnables(False)
     else
       SetEnables(True);
@@ -167,19 +201,19 @@ end;
 
 procedure TFormMainServer.ButtonDesconectarClick(Sender: TObject);
 begin
-  LRDataFlashConexaoServerTeste.Desconectar;
+  RpDataFlashServerConnectionTeste.Disconnect;
   SetEnables(True);
 end;
 
 procedure TFormMainServer.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
-  LRDataFlashConexaoServerTeste.Desconectar;
+  RpDataFlashServerConnectionTeste.Disconnect;
 end;
 
 procedure TFormMainServer.FormCreate(Sender: TObject);
 begin
-  EditNomeServer.Text := LRDataFlashConexaoServerTeste.Servidor;
+  EditNomeServer.Text := RpDataFlashServerConnectionTeste.Server;
   FInternalLog := TStringList.Create;
   SetEnabled(True);
 end;
@@ -189,41 +223,43 @@ begin
   FreeAndNil(FInternalLog);
 end;
 
-procedure TFormMainServer.LRDataFlashConexaoServerTesteAutenticarCliente(
-  Sender: TObject; const AItemConexao: IAutenticationProvider;
+procedure TFormMainServer.RpDataFlashServerConnectionTesteAuthenticateClient(
+  Sender: TObject; const AConnectionItem: IAutenticationProvider;
   out AAutenticado: Boolean; out AErrorMessage: string);
 begin
-  AAutenticado := (AItemConexao.UserName = 'TESTE') and (AItemConexao.Password = '1234');
+  AAutenticado := (AConnectionItem.UserName = 'TESTE') and (AConnectionItem.Password = '1234');
   if not AAutenticado then
     AErrorMessage := 'Usuário ou senha inválidos. Para login, utilize:'#10#13'Usuário = TESTE'#10#13'Senha = 1234';
 end;
 
-procedure TFormMainServer.LRDataFlashConexaoServerTesteConexaoCliente(
-  Sender: TObject; const AConexaoItem: TLRDataFlashConexaoItem);
+
+procedure TFormMainServer.RpDataFlashServerConnectionTesteClientConnection(
+  Sender: TObject; const AConnectionItem: TRpDataFlashConnectionItem);
 begin
-  // cria uma conexão entre o cliente e o banco de dados
-  AConexaoItem.Executor := (TDataModuleServer.Create(nil) as IExecutorComandoPacote);
+  AConnectionItem.Executor := (TDataModuleServer.Create(nil) as IRpPackageCommandExecutor);
 end;
 
-procedure TFormMainServer.LRDataFlashConexaoServerTesteNovoLog(Sender: TObject;
-  ATipoLog: TLRDataFlashTipoLogService; const ALog: string;
-  const AClientInfo: TLRDataFlashClientInfo);
+procedure TFormMainServer.RpDataFlashServerConnectionTesteNewLog(
+  Sender: TObject; ALogType: TRpDataFlashServiceLog; const ALog: string;
+  const AClientInfo: TRpDataFlashClientInfo);
 var
   lLinha : string;
 begin
   if Assigned(FInternalLog) then
   begin
-    case ATipoLog of
-      tlsConexao    : lLinha := 'Conexao: ';
-      tlsDesconexao : lLinha := 'Desconexao: ';
-      tlsEnvio      : lLinha := 'Envio: ';
-      tlsRecebimento: lLinha := 'Recebimento: ';
-      tlsErro       : lLinha := 'ERRO: ';
-      tlsStatus     : lLinha := 'Status: ';
-      tlsPonte      : lLinha := 'Ponte: ';
-      tlsComando    : lLinha := 'Comando: ';
-      tlsRegra      : lLinha := 'Regra: ';
-      tlsArquivo    : lLinha := 'Arquivo: ';
+    case ALogType of
+      slOnConnection: lLinha := 'Connection: ';
+      slOnDisconnection: lLinha := 'Disconnection: ';
+      slOnSend: lLinha := 'Send: ';
+      slOnReceive: lLinha := 'Receive: ';
+      slOnError: lLinha := 'ERROR: ';
+      slOnStatus: lLinha := 'Status: ';
+      slOnBridge: lLinha := 'Brigde: ';
+      slOnCommand: lLinha := 'Command: ';
+      slOnApplyRule: lLinha := 'ApplyRule: ';
+      slOnFile: lLinha := 'File: ';
+      slOnSync: lLinha := 'Sync: ';
+      slOnSyncXml: lLinha := 'Sync XML: ';
     end;
 
     lLinha := lLinha + '[ ' + AClientInfo.DisplayName + ' / ' + AClientInfo.IP + ' ] -> ' + ALog;
@@ -244,18 +280,18 @@ end;
 
 { TComandoHardCode }
 
-function TComandoCodeInverter.DoExecutar: Boolean;
+function TComandoCodeInverter.DoExecute: Boolean;
 var
   i: Integer;
   lPalavra: string;
   lInvertida: string;
 begin
   lInvertida := EmptyStr;
-  lPalavra := Parametro['Palavra'].AsString;
+  lPalavra := Param['Palavra'].AsString;
   for i := 1 to Length(lPalavra) do
     lInvertida := lPalavra[i] + lInvertida;
 
-  Retorno['Invertida'].AsString := lInvertida;
+  ResultParam['Invertida'].AsString := lInvertida;
   Result := True;
 end;
 
@@ -265,11 +301,11 @@ begin
           + 'Este comando recebe uma palavra e retorna ela invertida.';
 end;
 
-procedure TComandoCodeInverter.DoRegistrarParametros;
+procedure TComandoCodeInverter.DoRegisterParams;
 begin
   inherited;
-  NovoParametro('Palavra', tvpString);
-  NovoRetorno('Invertida', tvpString);
+  NewParam('Palavra', tvpString);
+  NewParam('Invertida', tvpString);
 end;
 
 initialization

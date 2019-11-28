@@ -115,7 +115,7 @@ type
     function AddGrupo(const pNomeGrupo : string) : TProxyGruposItem;
     function Find(const pNomeGrupo : string) : TProxyGruposItem;
     procedure RegistrarComando(const pRegistroComando : TTcpClassRegisterItem); overload;
-    procedure RegistrarComando(const pRegistroComando : TRpDataFlashComandItem;
+    procedure RegistrarComando(const pRegistroComando : TRpDataFlashCommandItem;
       const pNomeGrupo : string); overload;
     procedure RegistrarComando(const pRegistroComando : TRpDataFlashCustomDataSetProvider); overload;
 
@@ -847,8 +847,8 @@ var
   lEnumGrupos: TListEnumerator;
   lEnumComandos: TCollectionEnumerator;
 
-  lController: TRpDataFlashComandController;
-  lItemComando: TRpDataFlashComandItem;
+  lController: TRpDataFlashCommandController;
+  lItemComando: TRpDataFlashCommandItem;
 begin
   // registrar os comandos do Collection
   if GetServer.UseControllers then
@@ -857,15 +857,15 @@ begin
     lEnumGrupos := GetServer.Controllers.GetEnumerator;
     while (lEnumGrupos.MoveNext) do
     begin
-      lController := TRpDataFlashComandController(lEnumGrupos.Current);
-      lEnumComandos := lController.Comandos.GetEnumerator;
+      lController := TRpDataFlashCommandController(lEnumGrupos.Current);
+      lEnumComandos := lController.Commands.GetEnumerator;
       try
         while lEnumComandos.MoveNext do
         begin
-          lItemComando := TRpDataFlashComandItem(lEnumComandos.Current);
-          if FListaSelecionados.GrupoValido(lController.Grupo)
-          and FListaSelecionados.ComandoSelecionado(lController.Grupo, lItemComando.Nome) then
-            FGrupos.RegistrarComando(lItemComando, lController.Grupo);
+          lItemComando := TRpDataFlashCommandItem(lEnumComandos.Current);
+          if FListaSelecionados.GrupoValido(lController.GroupName)
+          and FListaSelecionados.ComandoSelecionado(lController.GroupName, lItemComando.Name) then
+            FGrupos.RegistrarComando(lItemComando, lController.GroupName);
         end;
       finally
         FreeAndNil(lEnumComandos);
@@ -1314,16 +1314,16 @@ var
   lGrupo : TProxyGruposItem;
 begin
   // busca o grupo do comando ou cria um novo
-  lGrupo := AddGrupo( pRegistroComando.Grupo );
+  lGrupo := AddGrupo( pRegistroComando.GroupName );
 
   if Assigned(lGrupo) then
   begin
     // retorna o comando
-    lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Descricao );
+    lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Description );
   end;
 end;
 
-procedure TProxyGruposList.RegistrarComando(const pRegistroComando: TRpDataFlashComandItem;
+procedure TProxyGruposList.RegistrarComando(const pRegistroComando: TRpDataFlashCommandItem;
   const pNomeGrupo : string);
 var
   lGrupo : TProxyGruposItem;
@@ -1335,10 +1335,10 @@ begin
   if Assigned(lGrupo) then
   begin
     // retorna o comando
-    lComando := lGrupo.ListaComandos.AddComando( pRegistroComando.Nome, pRegistroComando.Descricao );
+    lComando := lGrupo.ListaComandos.AddComando( pRegistroComando.Name, pRegistroComando.Description );
 
     // adiciona os parametros do comando
-    lComando.LoadParams( pRegistroComando.Parametros );
+    lComando.LoadParams( pRegistroComando.Params );
   end;
 end;
 
@@ -1688,7 +1688,7 @@ var
 begin
   lParametro := TProxyParametroComandoItem.Create;
 
-  lParametro.Nome := PParams.Nome;
+  lParametro.Nome := PParams.Name;
   lParametro.TipoParametro := PParams.Tipo;
   lParametro.TipoValor := PParams.TipoValor;
   lParametro.BaseClass := PParams.BaseClass;

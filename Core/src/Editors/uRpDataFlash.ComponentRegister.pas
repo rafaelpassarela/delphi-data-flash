@@ -53,7 +53,7 @@ begin
     [TRpDataFlashServerConnection,
      TRpDataFlashClientConnection,
      TRpDataFlashRESTClient,
-     TRpDataFlashComandController,
+     TRpDataFlashCommandController,
      TRpDataFlashDataSet,
      TRpDataFlashDataSetProvider,
      TRpDataFlashDataSetFormatter,
@@ -61,7 +61,7 @@ begin
 
   RegisterComponentEditor(TRpDataFlashClientConnection, TRpDataFlashConexaoClienteEditor);
   RegisterComponentEditor(TRpDataFlashDataSetProvider, TRpDataFlashEditorComandosProvider);
-  RegisterComponentEditor(TRpDataFlashComandController, TRpDataFlashComandControllerEditor);
+  RegisterComponentEditor(TRpDataFlashCommandController, TRpDataFlashComandControllerEditor);
 
   RegisterPropertyEditor(TypeInfo(String), TRpDataFlashDataSet, 'ProviderClass', TRpDataFlashDataSetProviderList);
   RegisterPropertyEditor(TypeInfo(String), TRpDataFlashCommandExecutor, 'Command', TRpDataFlashExecutorComandoList);
@@ -75,7 +75,7 @@ begin
   RegisterSelectionEditor(TRpDataFlashRESTClient,    TRpDataFlashConexaoClientSelectionEditor);
 
   // units inseridas com o CommandController
-  RegisterSelectionEditor(TRpDataFlashComandController, TRpDataFlashCommandControllerSelectionEditor);
+  RegisterSelectionEditor(TRpDataFlashCommandController, TRpDataFlashCommandControllerSelectionEditor);
 
   // units inseridas com o ExecutorComando
   RegisterSelectionEditor(TRpDataFlashCommandExecutor, TRpDataFlashExecutorComandoSelectionEditor);
@@ -145,7 +145,7 @@ end;
 procedure TRpDataFlashCommandControllerSelectionEditor.RequiresUnits(Proc: TGetStrProc);
 begin
   inherited;
-  Proc('uRpDataFlash.Comando');
+  Proc('uRpDataFlash.Command');
 end;
 
 { TRpDataFlashConexaoClientSelectionEditor }

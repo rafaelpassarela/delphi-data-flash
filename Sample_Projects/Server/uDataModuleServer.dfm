@@ -11,6 +11,7 @@ object DataModuleServer: TDataModuleServer
       'user_name=sysdba'
       'password=masterkey')
     LoginPrompt = False
+    ServerType = 'IBServer'
     SQLDialect = 1
     Left = 48
     Top = 24

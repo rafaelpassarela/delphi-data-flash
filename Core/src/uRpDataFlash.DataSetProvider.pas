@@ -49,13 +49,13 @@ type
 
   TRpDataFlashCustomDataSetProvider = class(TComponent)
   private
-    FGrupo: string;
+    FGroupName: string;
     FServer: TRpDataFlashServerConnection;
     FInsertSQL: TStrings;
     FUpdateSQL: TStrings;
     FDeleteSQL: TStrings;
     FSelectSQL: TStrings;
-    FTipoProcessamento: TRpDataFlashProcessType;
+    FProcessType: TRpDataFlashProcessType;
     FOnSendCallback: TRpDataFlashOnProviderSendCallback;
 //    FOnCommit: TRpDataFlashOnTransactionEvent;
 //    FOnRollback: TRpDataFlashOnTransactionEvent;
@@ -64,8 +64,8 @@ type
     FLifeCycle: TRpDataFlashLifeCycle;
     FOnBeforeDataSetSelectSQL: TRpDataFlashOnSelect;
     FOnBeforeDataSetExecuteSQL: TRpDataFlashOnExecSQL;
-    FDescricao: string;
-    procedure SetGrupo(const Value: string);
+    FDescription: string;
+    procedure SetGroupName(const Value: string);
     procedure SetServer(const Value: TRpDataFlashServerConnection);
     procedure SetInsertSQL(const Value: TStrings);
     procedure SetUpdateSQL(const Value: TStrings);
@@ -75,7 +75,7 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     property Server : TRpDataFlashServerConnection read FServer write SetServer;
-    property TipoProcessamento : TRpDataFlashProcessType read FTipoProcessamento write FTipoProcessamento default prtRemote;
+    property ProcessType : TRpDataFlashProcessType read FProcessType write FProcessType default prtRemote;
     property LifeCycle : TRpDataFlashLifeCycle read FLifeCycle write FLifeCycle default tlfInstance;
 
     property InsertSQL : TStrings read FInsertSQL write SetInsertSQL;
@@ -97,8 +97,8 @@ type
     destructor Destroy; override;
     procedure EditarProvider;
 
-    property Grupo : string read FGrupo write SetGrupo;
-    property Descricao : string read FDescricao write FDescricao;
+    property GroupName : string read FGroupName write SetGroupName;
+    property Description : string read FDescription write FDescription;
   end;
 
 {  TRpDataFlashMasterDataSetProvider = class(TRpDataFlashCustomDataSetProvider)
@@ -113,10 +113,10 @@ type
 
   TRpDataFlashDataSetProvider = class(TRpDataFlashCustomDataSetProvider)
   published
-    property Grupo;
-    property Descricao;
+    property GroupName;
+    property Description;
     property Server;
-    property TipoProcessamento;
+    property ProcessType;
     property LifeCycle;
 
     property InsertSQL;
@@ -226,7 +226,7 @@ end;
 
 function TRpDataFlashDataSetCommandProvider.GetProcessType: TRpDataFlashProcessType;
 begin
-  Result := FProvider.TipoProcessamento;
+  Result := FProvider.ProcessType;
 end;
 
 function TRpDataFlashDataSetCommandProvider.GetUpdateSQL: string;
@@ -304,8 +304,8 @@ end;
 constructor TRpDataFlashCustomDataSetProvider.Create(AOwner: TComponent);
 begin
   inherited;
-  FGrupo := C_WITHOUT_GROUP;
-  FTipoProcessamento := prtRemote;
+  FGroupName := C_WITHOUT_GROUP;
+  FProcessType := prtRemote;
   FLifeCycle := tlfInstance;
 
   FInsertSQL := TStringList.Create;
@@ -360,11 +360,11 @@ begin
   FDeleteSQL.Assign( Value );
 end;
 
-procedure TRpDataFlashCustomDataSetProvider.SetGrupo(const Value: string);
+procedure TRpDataFlashCustomDataSetProvider.SetGroupName(const Value: string);
 begin
-  FGrupo := TRpDataFlashValidations.NameValidation( Value );
-  if FGrupo = EmptyStr then
-    FGrupo := C_WITHOUT_GROUP;
+  FGroupName := TRpDataFlashValidations.NameValidation( Value );
+  if FGroupName = EmptyStr then
+    FGroupName := C_WITHOUT_GROUP;
 end;
 
 procedure TRpDataFlashCustomDataSetProvider.SetInsertSQL(const Value: TStrings);
