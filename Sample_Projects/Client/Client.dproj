@@ -88,7 +88,7 @@
         <DCC_HppOutput>..\..\..\dcu</DCC_HppOutput>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
-        <DCC_UnitSearchPath>..\..\Bin\Dcu;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\Bin\Dcu;..\..\Core\src;..\..\Core\src\Editors;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ResourcePath>..\..\..\dcu;$(DCC_ResourcePath)</DCC_ResourcePath>
         <DCC_ObjPath>..\..\..\dcu;$(DCC_ObjPath)</DCC_ObjPath>
         <DCC_IncludePath>..\..\..\dcu;$(DCC_IncludePath)</DCC_IncludePath>

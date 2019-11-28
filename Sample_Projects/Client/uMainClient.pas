@@ -3,9 +3,9 @@ unit uMainClient;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, DB, DBClient, Grids, DBGrids, ExtCtrls, DBCtrls, OleCtrls, SHDocVw,
-  uRpDataFlash.ProxyGenerator, Gauges, uRpDataFlash.Types,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, SHDocVw,
+  Dialogs, StdCtrls, DB, DBClient, Grids, DBGrids, ExtCtrls, DBCtrls, OleCtrls,
+  uRpDataFlash.ProxyGenerator, Gauges, uRpDataFlash.Types, uRpDataFlash.Command,
   uRpDataFlash.DataSet, uRpDataFlash.CommandExecutor, uRpDataFlash.Components,
   uRpDataFlash.CommandHelper;
 
@@ -48,12 +48,10 @@ type
     ButtonGetFile: TButton;
     ButtonSendFile: TButton;
     Gauge1: TGauge;
+    LabelStatus: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ButtonVerLogClick(Sender: TObject);
-    procedure LRDataFlashConexaoClienteTesteNovoLog(Sender: TObject;
-      ATipoLog: TLRDataFlashTipoLogService; const ALog: string;
-      const AClientInfo: TLRDataFlashClientInfo);
     procedure ButtonDesconectarClick(Sender: TObject);
     procedure ButtonConectarClick(Sender: TObject);
     procedure ButtonSomarProxyClick(Sender: TObject);
@@ -67,9 +65,15 @@ type
       const pDisp: IDispatch; const URL: OleVariant);
     procedure ButtonGetFileClick(Sender: TObject);
     procedure ButtonSendFileClick(Sender: TObject);
-    procedure LRDataFlashConexaoClienteTesteStatus(Sender: TObject;
-      const ASituacao: TLRDataFlashStatusType; const AProcessamentoTotal,
-      AProcessamentoAtual: Integer);
+    procedure RpDataFlashClientConnectionTesteNewLog(Sender: TObject;
+      ALogType: TRpDataFlashServiceLog; const ALog: string;
+      const AClientInfo: TRpDataFlashClientInfo);
+    procedure RpDataFlashClientConnectionTesteStatus(Sender: TObject;
+      const AStatus: TRpDataFlashStatusType; const AProcTotal,
+      AProcCurrent: Integer; const AStatusStr: string);
+//    procedure LRDataFlashConexaoClienteTesteStatus(Sender: TObject;
+//      const ASituacao: TLRDataFlashStatusType; const AProcessamentoTotal,
+//      AProcessamentoAtual: Integer);
   private
     { Private declarations }
     FInternalLog: TStrings;
@@ -93,14 +97,14 @@ uses
 procedure TFormMainClient.ButtonOpenDSClick(Sender: TObject);
 begin
   if MemoLog.Text = EmptyStr then
-    LRDataFlashDataSetPessoas.ProviderClass := 'DFPCadastro_Pessoas'
+    RpDataFlashDataSetPessoas.ProviderClass := 'DFPCadastro_Pessoas'
   else
   begin
-    LRDataFlashDataSetPessoas.ProviderClass := '';
-    LRDataFlashDataSetPessoas.ProviderCustom.SelectSQL.Text := MemoLog.Text;
+    RpDataFlashDataSetPessoas.ProviderClass := '';
+    RpDataFlashDataSetPessoas.ProviderCustom.SelectSQL.Text := MemoLog.Text;
   end;
-  LRDataFlashDataSetPessoas.StartTransaction;
-  LRDataFlashDataSetPessoas.Open( EditFiltro.Text );
+  RpDataFlashDataSetPessoas.StartTransaction;
+  RpDataFlashDataSetPessoas.Open( EditFiltro.Text );
 end;
 
 procedure TFormMainClient.ButtonXMLDataClick(Sender: TObject);
@@ -111,9 +115,9 @@ begin
   lTempFile := StringReplace(Application.ExeName, '.exe', '.xml', [rfIgnoreCase]);
   lXml := TStringList.Create;
   try
-    lXml.Text := LRDataFlashDataSetPessoas.XMLData;
+    lXml.Text := RpDataFlashDataSetPessoas.XMLData;
     lXml.SaveToFile(lTempFile);
-    WebBrowser1.Hint := lTempFile;   
+    WebBrowser1.Hint := lTempFile;
     WebBrowser1.Navigate(lTempFile);
   finally
     FreeAndNil(lXml);
@@ -122,44 +126,44 @@ end;
 
 procedure TFormMainClient.ButtonGetFileClick(Sender: TObject);
 var
-  lFileData: IFileProxy;
+  lFileData: IRpFileProxy;
 begin
-  lFileData := TFileProxy.Create;
+  lFileData := TRpFileProxy.Create;
 
-  if ProxyFactory.Arquivos.GetFile('c:\Daruma32.log', lFileData) then
-    lFileData.SaveToFile('c:\NewFile.txt')
-  else
-    ShowMessage( ProxyFactory.Arquivos.GetLastError );
+//  if ProxyFactory.Arquivos.GetFile('c:\Daruma32.log', lFileData) then
+//    lFileData.SaveToFile('c:\NewFile.txt')
+//  else
+//    ShowMessage( ProxyFactory.Arquivos.GetLastError );
 
 end;
 
 procedure TFormMainClient.ButtonCloseDSClick(Sender: TObject);
 begin
-  LRDataFlashDataSetPessoas.Close;
+  RpDataFlashDataSetPessoas.Close;
 end;
 
 procedure TFormMainClient.ButtonCommitClick(Sender: TObject);
 begin
-  LRDataFlashDataSetPessoas.ApplyUpdates(0);
-  LRDataFlashDataSetPessoas.CommitRetaining;
+  RpDataFlashDataSetPessoas.ApplyUpdates(0);
+  RpDataFlashDataSetPessoas.CommitRetaining;
 end;
 
 procedure TFormMainClient.ButtonConectarClick(Sender: TObject);
 begin
   try
-    LRDataFlashConexaoClienteTeste.Servidor := EditNomeServer.Text;
-      
-    LRDataFlashConexaoClienteTeste.Porta := StrToInt64Def( EditPorta.Text, 8890 );
-    EditPorta.Text := IntToStr(LRDataFlashConexaoClienteTeste.Porta);
+    RpDataFlashClientConnectionTeste.Server := EditNomeServer.Text;
 
-    LRDataFlashConexaoClienteTeste.UserName := EditUser.Text;
-    LRDataFlashConexaoClienteTeste.Password := EditSenha.Text;    
+    RpDataFlashClientConnectionTeste.Port := StrToInt64Def( EditPorta.Text, 8890 );
+    EditPorta.Text := IntToStr(RpDataFlashClientConnectionTeste.Port);
 
-    LRDataFlashConexaoClienteTeste.Conectar;
-    if LRDataFlashConexaoClienteTeste.Conectado then
+    RpDataFlashClientConnectionTeste.UserName := EditUser.Text;
+    RpDataFlashClientConnectionTeste.Password := EditSenha.Text;
+
+    RpDataFlashClientConnectionTeste.Connect;
+    if RpDataFlashClientConnectionTeste.Connected then
     begin
       SetEnables(False);
-      ConfigureProxy(LRDataFlashConexaoClienteTeste);
+//      ConfigureProxy(RpDataFlashClientConnectionTeste);
     end
     else
       SetEnables(True);
@@ -174,7 +178,7 @@ end;
 
 procedure TFormMainClient.ButtonDesconectarClick(Sender: TObject);
 begin
-  LRDataFlashConexaoClienteTeste.Desconectar;
+  RpDataFlashClientConnectionTeste.Disconnect;
   SetEnables(True);
 end;
 
@@ -183,27 +187,28 @@ var
   lPalavra, lResult: string;
 begin
   InputQuery('Informe uma Palavra', 'Informe uma palavra ou frase:', lPalavra);
-  if not ProxyFactory.HARD_CODE.CodeInverter(lPalavra, lResult) then
-    ShowMessage('Erro de proxy. ' + ProxyFactory.HARD_CODE.GetLastError)
-  else
-    ShowMessage(lPalavra + ' <-> ' + lResult);
+
+//  if not ProxyFactory.HARD_CODE.CodeInverter(lPalavra, lResult) then
+//    ShowMessage('Erro de proxy. ' + ProxyFactory.HARD_CODE.GetLastError)
+//  else
+//    ShowMessage(lPalavra + ' <-> ' + lResult);
 end;
 
 procedure TFormMainClient.ButtonSendFileClick(Sender: TObject);
 var
-  lFile : IFileProxy;
+  lFile : IRpFileProxy;
   lDestino: string;
 begin
   with TOpenDialog.Create(Self) do
   try
     if Execute then
     begin
-      lFile := TFileProxy.Create;
+      lFile := TRpFileProxy.Create;
       lFile.LoadFromFile( FileName );
-      if ProxyFactory.Arquivos.SendFile(lFile, FileName, lDestino) then
-        ShowMessage('Arquivo salvo em: ' + lDestino)
-      else
-        ShowMessage('ERRO!! ' + ProxyFactory.Arquivos.GetLastError);
+//      if ProxyFactory.Arquivos.SendFile(lFile, FileName, lDestino) then
+//        ShowMessage('Arquivo salvo em: ' + lDestino)
+//      else
+//        ShowMessage('ERRO!! ' + ProxyFactory.Arquivos.GetLastError);
     end;
 
   finally
@@ -216,18 +221,18 @@ var
   lAux: string;
 begin
   InputQuery('Valor A', 'Informe o valor de A:', lAux);
-  LRDataFlashExecutorComandoSomar.Parametros['A'].AsFloat := StrToFloatDef(lAux, 0);
+  RpDataFlashCommandExecutorSomar.Params['A'].AsFloat := StrToFloatDef(lAux, 0);
 
   InputQuery('Valor B', 'Informe o valor de B:', lAux);
-  LRDataFlashExecutorComandoSomar.Parametros['B'].AsFloat := StrToFloatDef(lAux, 0);
+  RpDataFlashCommandExecutorSomar.Params['B'].AsFloat := StrToFloatDef(lAux, 0);
 
-  if LRDataFlashExecutorComandoSomar.Execute then
+  if RpDataFlashCommandExecutorSomar.Execute then
     ShowMessage( Format('%f + %f = %f', [
-      LRDataFlashExecutorComandoSomar.Parametros['A'].AsFloat,
-      LRDataFlashExecutorComandoSomar.Parametros['B'].AsFloat,
-      LRDataFlashExecutorComandoSomar.Retornos['X'].AsFloat] ) )
-  else
-    ShowMessage('Erro de processamento. ' + ProxyFactory.Matematica.GetLastError);
+      RpDataFlashCommandExecutorSomar.Params['A'].AsFloat,
+      RpDataFlashCommandExecutorSomar.Params['B'].AsFloat,
+      RpDataFlashCommandExecutorSomar.ResultParams['X'].AsFloat] ) )
+//  else
+//    ShowMessage('Erro de processamento. ' + ProxyFactory.Matematica.GetLastError);
 end;
 
 procedure TFormMainClient.ButtonSomarProxyClick(Sender: TObject);
@@ -241,10 +246,10 @@ begin
   InputQuery('Valor B', 'Informe o valor de B:', lAux);
   lB := StrToFloatDef(lAux, 0);
 
-  if ProxyFactory.Matematica.Somar(lA, lB, lTotal) then
-    ShowMessage( Format('%f + %f = %f', [lA, lB, lTotal] ) )
-  else
-    ShowMessage('Erro de processamento. ' + ProxyFactory.Matematica.GetLastError);  
+//  if ProxyFactory.Matematica.Somar(lA, lB, lTotal) then
+//    ShowMessage( Format('%f + %f = %f', [lA, lB, lTotal] ) )
+//  else
+//    ShowMessage('Erro de processamento. ' + ProxyFactory.Matematica.GetLastError);
 end;
 
 procedure TFormMainClient.ButtonVerLogClick(Sender: TObject);
@@ -256,8 +261,9 @@ end;
 procedure TFormMainClient.FormCreate(Sender: TObject);
 begin
   FInternalLog := TStringList.Create;
+  LabelStatus.Caption := EmptyStr;
 
-  ConfigureProxy( LRDataFlashConexaoClienteTeste );
+//  ConfigureProxy( RpDataFlashClientConnectionTeste );
 
   SetEnables( True );
 end;
@@ -267,37 +273,48 @@ begin
   FreeAndNil( FInternalLog );
 end;
 
-procedure TFormMainClient.LRDataFlashConexaoClienteTesteNovoLog(Sender: TObject;
-  ATipoLog: TLRDataFlashTipoLogService; const ALog: string;
-  const AClientInfo: TLRDataFlashClientInfo);
+procedure TFormMainClient.RpDataFlashClientConnectionTesteNewLog(
+  Sender: TObject; ALogType: TRpDataFlashServiceLog; const ALog: string;
+  const AClientInfo: TRpDataFlashClientInfo);
 var
-  lLinha : string;
+  lLogTxt : string;
 begin
-  case ATipoLog of
-    tlsConexao    : lLinha := 'Conexao: ';
-    tlsDesconexao : lLinha := 'Desconexao: ';
-    tlsEnvio      : lLinha := 'Envio: ';
-    tlsRecebimento: lLinha := 'Recebimento: ';
-    tlsErro       : lLinha := 'ERRO: ';
-    tlsStatus     : lLinha := 'Status: ';
-    tlsPonte      : lLinha := 'Ponte: ';
-    tlsComando    : lLinha := 'Comando: ';
-    tlsRegra      : lLinha := 'Regra: ';
-    tlsArquivo    : lLinha := 'Arquivo: ';
+  case ALogType of
+    slOnConnection: lLogTxt := 'Connection: ';
+    slOnDisconnection : lLogTxt := 'Disconnection: ';
+    slOnSend : lLogTxt := 'Send: ';
+    slOnReceive: lLogTxt := 'Receive: ';
+    slOnError : lLogTxt := 'ERROR: ';
+    slOnStatus : lLogTxt := 'Status: ';
+    slOnBridge : lLogTxt := 'Bridge: ';
+    slOnCommand : lLogTxt := 'Command: ';
+    slOnApplyRule : lLogTxt := 'Apply Rule: ';
+    slOnFile : lLogTxt := 'File: ';
+    slOnSync : lLogTxt := 'Sync: ';
+    slOnSyncXml : lLogTxt := 'Sync XML: ';
   end;
 
-  lLinha := lLinha + '[ ' + AClientInfo.DisplayName + ' / ' + AClientInfo.IP + ' ] -> ' + ALog;
+  lLogTxt := lLogTxt + '[ ' + AClientInfo.DisplayName + ' / ' + AClientInfo.IP + ' ] -> ' + ALog;
 
-  FInternalLog.Add( lLinha );
+  FInternalLog.Add( lLogTxt );
   FInternalLog.Add( StringOfChar('-', 80 ) );
 end;
 
-procedure TFormMainClient.LRDataFlashConexaoClienteTesteStatus(Sender: TObject;
-  const ASituacao: TLRDataFlashStatusType; const AProcessamentoTotal,
-  AProcessamentoAtual: Integer);
+procedure TFormMainClient.RpDataFlashClientConnectionTesteStatus(
+  Sender: TObject; const AStatus: TRpDataFlashStatusType; const AProcTotal,
+  AProcCurrent: Integer; const AStatusStr: string);
+var
+  lLog : string;
 begin
-  Gauge1.MaxValue := AProcessamentoTotal;
-  Gauge1.Progress := AProcessamentoAtual;
+  Gauge1.MaxValue := AProcTotal;
+  Gauge1.Progress := AProcCurrent;
+
+  case AStatus of
+    stPreparingData: lLog := 'PreparingData: ';
+    stSendingData: lLog := 'SendingData: ';
+    stReceivingData: lLog := 'ReceivingData: ';
+  end;
+  LabelStatus.Caption := lLog + AStatusStr;
 end;
 
 procedure TFormMainClient.SetEnables(const Value: Boolean);
