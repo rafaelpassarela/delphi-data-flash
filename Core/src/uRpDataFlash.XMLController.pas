@@ -1,11 +1,16 @@
 unit uRpDataFlash.XMLController;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Contnrs, SysUtils, Classes, Variants, DBClient, DB, XMLDoc, XMLIntf,
+  SysUtils, Classes, Variants, DBClient, DB, XMLDoc, XMLIntf,
+  {$IFDEF UNICODE}
+  System.Types, System.Contnrs,
+  {$ELSE}
+  Contnrs,
+  {$ENDIF}
   uRpEncryption;
 
 const

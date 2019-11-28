@@ -19,7 +19,7 @@ type
     FDoDisconnect: TRpDataFlashOnConnectEvent;
     FOnConnect: TRpDataFlashOnConnectOnServer;
     FOnNoService: TRpDataFlashOnNoService;
-    FNovaExcecao: TRpDataFlashOnExceptionHandler;
+    FNewException: TRpDataFlashOnExceptionHandler;
     FConector: TIdTCPClientCustom;
     FOwner: TComponent;
     FServidor: string;
@@ -50,7 +50,7 @@ type
     property OnNoService: TRpDataFlashOnNoService read FOnNoService write FOnNoService;
     property DoConnect: TRpDataFlashOnConnectEvent read FDoConnect write FDoConnect;
     property DoDisconnect : TRpDataFlashOnConnectEvent read FDoDisconnect write FDoDisconnect;
-    property NovaExcecao: TRpDataFlashOnExceptionHandler read FNovaExcecao write FNovaExcecao;
+    property NewException: TRpDataFlashOnExceptionHandler read FNewException write FNewException;
     property URL : string read GetURL;
   end;
 
@@ -116,7 +116,7 @@ begin
     on E: ERpDataFlashAuthError do
     begin
       // pode estar conectado, neste caso desconecta o cliente
-      NovaExcecao(E);
+      NewException(E);
       if IsConectado then
         Disconnect;
       raise;
@@ -128,7 +128,7 @@ begin
         Reconectar(E)
       else
       begin
-        NovaExcecao(E);
+        NewException(E);
         raise;
       end;
     end;

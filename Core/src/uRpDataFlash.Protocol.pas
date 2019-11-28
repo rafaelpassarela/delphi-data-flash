@@ -5,7 +5,12 @@ unit uRpDataFlash.Protocol;
 interface
 
 uses
-  SysUtils, Classes, DBClient, Variants, Contnrs, ActiveX, uRpEncryption,
+  SysUtils, Classes, DBClient, Variants, ActiveX, uRpEncryption,
+  {$IFDEF UNICODE}
+  System.Types, System.Contnrs,
+  {$ELSE}
+  Contnrs,
+  {$ENDIF}
   uRpDataFlash.XMLController, uRpDataFlash.Types, uRpResourceString;
 
 type
