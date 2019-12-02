@@ -26,7 +26,7 @@ object FormMainClient: TFormMainClient
     Caption = 'Server Name/IP'
   end
   object LabelPorta: TLabel
-    Left = 52
+    Left = 64
     Top = 43
     Width = 20
     Height = 13
@@ -41,8 +41,8 @@ object FormMainClient: TFormMainClient
     Caption = 'Default Filter'
   end
   object LabelUser: TLabel
-    Left = 8
-    Top = 72
+    Left = 32
+    Top = 70
     Width = 52
     Height = 13
     Caption = 'User / Pwd'
@@ -65,7 +65,7 @@ object FormMainClient: TFormMainClient
     Caption = 'LabelStatus'
   end
   object EditNomeServer: TEdit
-    Left = 84
+    Left = 86
     Top = 13
     Width = 207
     Height = 21
@@ -73,7 +73,7 @@ object FormMainClient: TFormMainClient
     Text = 'LOCALHOST'
   end
   object EditPorta: TEdit
-    Left = 84
+    Left = 86
     Top = 40
     Width = 121
     Height = 21
@@ -83,7 +83,7 @@ object FormMainClient: TFormMainClient
   object ButtonVerLog: TButton
     Left = 8
     Top = 99
-    Width = 52
+    Width = 70
     Height = 25
     Caption = 'Log'
     TabOrder = 2
@@ -287,7 +287,7 @@ object FormMainClient: TFormMainClient
       00000000000000000100000000000000000000000000000000000000}
   end
   object EditUser: TEdit
-    Left = 84
+    Left = 86
     Top = 67
     Width = 85
     Height = 21
@@ -295,21 +295,12 @@ object FormMainClient: TFormMainClient
     Text = 'TESTE'
   end
   object EditSenha: TEdit
-    Left = 175
+    Left = 177
     Top = 67
     Width = 85
     Height = 21
     TabOrder = 16
     Text = '1234'
-  end
-  object Button1: TButton
-    Left = 600
-    Top = 245
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
-    TabOrder = 17
-    OnClick = Button1Click
   end
   object RpDataFlashClientConnectionTeste: TRpDataFlashClientConnection
     Port = 7200

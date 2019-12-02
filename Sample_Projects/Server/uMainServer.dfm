@@ -20,7 +20,7 @@ object FormMainServer: TFormMainServer
   PixelsPerInch = 96
   TextHeight = 13
   object LabelNomeServer: TLabel
-    Left = 8
+    Left = 16
     Top = 16
     Width = 62
     Height = 13
@@ -81,7 +81,7 @@ object FormMainServer: TFormMainServer
   object ButtonVerLog: TButton
     Left = 8
     Top = 67
-    Width = 52
+    Width = 70
     Height = 25
     Caption = 'Log'
     TabOrder = 5
@@ -234,5 +234,10 @@ object FormMainServer: TFormMainServer
     GroupName = 'FileManager'
     Left = 72
     Top = 176
+  end
+  object ApplicationEvents1: TApplicationEvents
+    OnException = ApplicationEvents1Exception
+    Left = 264
+    Top = 32
   end
 end

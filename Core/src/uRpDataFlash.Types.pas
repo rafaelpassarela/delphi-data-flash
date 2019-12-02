@@ -140,6 +140,8 @@ type
     function GetCommunicationType: TRpDataFlashCommunicationType;
     function GetEncryptionType: TRpDataFlashEncryptionType;
     function GetLocalHostToIP : Boolean;
+    function GetPassword : string;
+    function GetUserName : string;
 
     property ServerName : string read GetServerName;
     property ServerPort : Integer read GetServerPort;
@@ -148,6 +150,8 @@ type
     property CommunicationType : TRpDataFlashCommunicationType read GetCommunicationType;
     property EncryptionType : TRpDataFlashEncryptionType read GetEncryptionType;
     property LocalHostToIP : Boolean read GetLocalHostToIP;
+    property Password : string read GetPassword;
+    property UserName : string read GetUserName;
   end;
 
   IRpDataFlashFileTransferSupport = interface

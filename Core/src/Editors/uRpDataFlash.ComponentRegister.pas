@@ -37,7 +37,7 @@ procedure Register;
 implementation
 
 uses
-  uRpDataFlash.ConexaoClienteEditor,
+  uRpDataFlash.ProxyFactory.ClientGenerator,
   uRpDataFlash.CommandControllerEditor,
   uRpDataFlash.DataSetProviderList,
   uRpDataFlash.ExecutorCommandList,

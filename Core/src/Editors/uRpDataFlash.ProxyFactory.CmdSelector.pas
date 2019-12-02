@@ -291,9 +291,9 @@ begin
   begin
     with TIniFile.Create(FConfigFileName) do
     try
-      EditProxyName.Text      := ReadString('config', 'proxy.filename', '');
-      EditUnitConfig.Text     := ReadString('config', 'inft.filename', '');
-      EditClassName.Text      := ReadString('config', 'intf.class', '');
+      EditProxyName.Text := ReadString('config', 'proxy.filename', '');
+      EditUnitConfig.Text := ReadString('config', 'inft.filename', '');
+      EditClassName.Text := ReadString('config', 'intf.class', '');
       CheckBoxUsarBase.Checked := ReadBool( 'config', 'transport', False);
 //      EditUnitBaseClass.Text  := ReadString('config', 'base.finelame', '');
 //      EditBaseName.Text       := ReadString('config', 'base.class', '');
@@ -331,7 +331,7 @@ begin
     WriteString('config', 'proxy.filename', EditProxyName.Text);
     WriteString('config', 'inft.filename', EditUnitConfig.Text);
     WriteString('config', 'intf.class', EditClassName.Text);
-    WriteBool(  'config', 'transport', CheckBoxUsarBase.Checked );
+    WriteBool(  'config', 'transport', CheckBoxUsarBase.Checked);
 //    WriteString('config', 'base.finelame', EditUnitBaseClass.Text);
 //    WriteString('config', 'base.class', EditBaseName.Text);
 

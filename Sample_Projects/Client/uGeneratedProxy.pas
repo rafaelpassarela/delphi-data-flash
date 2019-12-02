@@ -2,15 +2,15 @@ unit uGeneratedProxy;
 
 //   Não modifique esta Unit, seu código é gerado automaticamente pelo Cliente de
 // TCP buscando as classes de serviço registradas no servidor.
-// - Gerado em...: 28/11/2019 17:12:02
-// - App Servidor: "D:\Git\delphi-data-flash\Bin\Server.exe"
-// - Server......: Programacao-2
+// - Gerado em...: 02/12/2019 03:15:53
+// - App Servidor: "D:\Projetos Delphi\delphi-data-flash\Bin\Server.exe"
+// - Server......: AcerVX15
 
 interface
 
 uses
   SysUtils, uRpDataFlash.Command, uRpDataFlash.Components, uRpDataFlash.Types, 
-  uRpSerialization, Windows, ShellApi;
+  uRpSerialization, Windows, uProxyConfig, ShellApi;
 
 type
   TBase64 = string;
@@ -31,7 +31,7 @@ type
       Comando de Teste declarado no código, diferente dos outros que é no componente. 
 Este comando
       recebe uma palavra e retorna ela invertida. }
-    function CodeInverter(const pPalavra: String; const pInvertida: String) : Boolean;
+    function CodeInverter(const pPalavra: String; out AInvertida: String) : Boolean;
   end;
 
   TProxyMathAndText = class(TCustomProxy)
@@ -84,7 +84,8 @@ Este comando
       const AConnectionType : TConnectionType;
       const ALocalHostToIP : Boolean; 
       const ATipoCriptografia : TRpDataFlashEncryptionType = tcBase64Compressed;
-      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText); overload;
+      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText;
+      const AUserName : string = ''; const APassword : string = ''); overload;
     procedure Config(const AConexaoTCP : TRpDataFlashClientConnection); overload;
     procedure Config(const AConexaoREST : TRpDataFlashRESTClient); overload;
     function ServerOnline : Boolean;
@@ -200,15 +201,18 @@ end;
 
 { TProxyHARD_CODE }
 
-function TProxyHARD_CODE.CodeInverter(const pPalavra: String; const pInvertida: String) : Boolean;
+function TProxyHARD_CODE.CodeInverter(const pPalavra: String; out AInvertida: String) : Boolean;
 var
   lParametros : TRpDataFlashCommandParameterList;
 begin
   lParametros := TRpDataFlashCommandParameterList.Create(nil);
   try
     lParametros.AddNew('Palavra', pPalavra, tpInput, tvpString);
-    lParametros.AddNew('Invertida', pInvertida, tpInput, tvpString);
     Result := DoEnviar('TComandoCodeInverter', lParametros);
+    if Result then
+    begin
+      AInvertida := lParametros.ResultParam['Invertida'].AsString;
+    end;
   finally
     FreeAndNil(lParametros);
   end;
@@ -336,33 +340,37 @@ begin
   FSharedClientREST := Assigned(FClientREST);
   if (not FSharedClientREST) or (not FSharedClientTCP) then
   begin
-//    lFileConf := IRpDataFlashConfig(TObject.Create);
-//    try
-//      if not FSharedClientTCP then
-//      begin
-//        FClientTCP := TRpDataFlashClientConnection.Create(nil);
-//        FClientTCP.Server := lFileConf.ServerName;
-//        FClientTCP.Port := lFileConf.ServerPort;
-//        FClientTCP.FileTransfer.Port := lFileConf.FTPPort;
-//        FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;
-//        FClientTCP.EncryptionType := lFileConf.EncryptionType;
-//        FClientTCP.CommunicationType := lFileConf.CommunicationType;
-//        FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
-//      end;
-//      if not FSharedClientREST then
-//      begin
-//        FClientREST := TRpDataFlashRESTClient.Create(nil);
-//        FClientREST.Server := lFileConf.ServerName;
-//        FClientREST.Port := lFileConf.RestPort;
-//        FClientREST.FileTransfer.Port := lFileConf.FTPPort;
-//        FClientREST.FileTransfer.Enabled := FClientREST.FileTransfer.Port > 0;
-//        FClientREST.EncryptionType := lFileConf.EncryptionType;
-//        FClientREST.CommunicationType := lFileConf.CommunicationType;
-//        FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
-//      end;
-//    finally
-//      lFileConf := nil;
-//    end;
+    lFileConf := TProxyConfigDemo.Create;
+    try
+      if not FSharedClientTCP then
+      begin
+        FClientTCP := TRpDataFlashClientConnection.Create(nil);
+        FClientTCP.Server := lFileConf.ServerName;
+        FClientTCP.Port := lFileConf.ServerPort;
+        FClientTCP.FileTransfer.Port := lFileConf.FTPPort;
+        FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;
+        FClientTCP.EncryptionType := lFileConf.EncryptionType;
+        FClientTCP.CommunicationType := lFileConf.CommunicationType;
+        FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
+        FClientTCP.Password := lFileConf.Password;
+        FClientTCP.UserName := lFileConf.UserName;
+      end;
+      if not FSharedClientREST then
+      begin
+        FClientREST := TRpDataFlashRESTClient.Create(nil);
+        FClientREST.Server := lFileConf.ServerName;
+        FClientREST.Port := lFileConf.RestPort;
+        FClientREST.FileTransfer.Port := lFileConf.FTPPort;
+        FClientREST.FileTransfer.Enabled := FClientREST.FileTransfer.Port > 0;
+        FClientREST.EncryptionType := lFileConf.EncryptionType;
+        FClientREST.CommunicationType := lFileConf.CommunicationType;
+        FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
+        FClientREST.Password := lFileConf.Password;
+        FClientREST.UserName := lFileConf.UserName;
+      end;
+    finally
+      lFileConf := nil;
+    end;
   end;
 end;
 
@@ -413,7 +421,8 @@ procedure TProxyFactory.Config(const AHost: string; const APorta, APortaFTP: Int
   const AConnectionType : TConnectionType;
   const ALocalHostToIP : Boolean;
   const ATipoCriptografia : TRpDataFlashEncryptionType;
-  const ATipoComunicacao : TRpDataFlashCommunicationType);
+  const ATipoComunicacao : TRpDataFlashCommunicationType;
+  const AUserName, APassword : string);
 begin
   if AConnectionType = ctTcpIp then
   begin
@@ -435,6 +444,8 @@ begin
     FClientTCP.FileTransfer.Port := APortaFTP;
     FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;
     FClientTCP.ConvertLocalHostToIP := ALocalHostToIP;
+    FClientTCP.UserName := AUserName;
+    FClientTCP.Password := APassword;
   end else
   begin
     if (FClientREST <> nil) and (not FSharedClientREST) then
@@ -450,6 +461,8 @@ begin
     FClientREST.FileTransfer.Port := APortaFTP;
     FClientREST.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;
     FClientREST.ConvertLocalHostToIP := ALocalHostToIP;
+    FClientREST.UserName := AUserName;
+    FClientREST.Password := APassword;
   end;
 end;
 
@@ -521,9 +534,11 @@ begin
     ctTcpIp,
     AConexaoTCP.ConvertLocalHostToIP,
     AConexaoTCP.EncryptionType,
-    AConexaoTCP.CommunicationType);
+    AConexaoTCP.CommunicationType,
+    AConexaoTCP.UserName,
+    AConexaoTCP.Password);
 end;
-
+ 
 procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashRESTClient);
 begin
   ProxyFactory.Config(
@@ -533,7 +548,9 @@ begin
     ctREST,
     AConexaoREST.ConvertLocalHostToIP,
     AConexaoREST.EncryptionType,
-    AConexaoREST.CommunicationType);
+    AConexaoREST.CommunicationType,
+    AConexaoREST.UserName,
+    AConexaoREST.Password);
 end;
  
 procedure TProxyFactory.BusyCallback(const AStart: Boolean);

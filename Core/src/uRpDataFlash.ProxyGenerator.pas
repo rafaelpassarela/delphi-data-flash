@@ -370,6 +370,8 @@ begin
       lImplement.Add('        FClientTCP.EncryptionType := lFileConf.EncryptionType;');
       lImplement.Add('        FClientTCP.CommunicationType := lFileConf.CommunicationType;');
       lImplement.Add('        FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
+      lImplement.Add('        FClientTCP.Password := lFileConf.Password;');
+      lImplement.Add('        FClientTCP.UserName := lFileConf.UserName;');
       lImplement.Add('      end;');
       lImplement.Add('      if not FSharedClientREST then');
       lImplement.Add('      begin');
@@ -381,6 +383,8 @@ begin
       lImplement.Add('        FClientREST.EncryptionType := lFileConf.EncryptionType;');
       lImplement.Add('        FClientREST.CommunicationType := lFileConf.CommunicationType;');
       lImplement.Add('        FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
+      lImplement.Add('        FClientREST.Password := lFileConf.Password;');
+      lImplement.Add('        FClientREST.UserName := lFileConf.UserName;');
       lImplement.Add('      end;');
       lImplement.Add('    finally');
       lImplement.Add('      lFileConf := nil;');
@@ -451,7 +455,8 @@ begin
     lImplement.Add('  const AConnectionType : TConnectionType;');
     lImplement.Add('  const ALocalHostToIP : Boolean;');
     lImplement.Add('  const ATipoCriptografia : TRpDataFlashEncryptionType;');
-    lImplement.Add('  const ATipoComunicacao : TRpDataFlashCommunicationType);');
+    lImplement.Add('  const ATipoComunicacao : TRpDataFlashCommunicationType;');
+    lImplement.Add('  const AUserName, APassword : string);');
     lImplement.Add('begin');
     lImplement.Add('  if AConnectionType = ctTcpIp then');
     lImplement.Add('  begin');
@@ -473,6 +478,8 @@ begin
     lImplement.Add('    FClientTCP.FileTransfer.Port := APortaFTP;');
     lImplement.Add('    FClientTCP.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;');
     lImplement.Add('    FClientTCP.ConvertLocalHostToIP := ALocalHostToIP;');
+    lImplement.Add('    FClientTCP.UserName := AUserName;');
+    lImplement.Add('    FClientTCP.Password := APassword;');
     lImplement.Add('  end else');
     lImplement.Add('  begin');
     lImplement.Add('    if (FClientREST <> nil) and (not FSharedClientREST) then');
@@ -488,6 +495,8 @@ begin
     lImplement.Add('    FClientREST.FileTransfer.Port := APortaFTP;');
     lImplement.Add('    FClientREST.FileTransfer.Enabled := FClientTCP.FileTransfer.Port > 0;');
     lImplement.Add('    FClientREST.ConvertLocalHostToIP := ALocalHostToIP;');
+    lImplement.Add('    FClientREST.UserName := AUserName;');
+    lImplement.Add('    FClientREST.Password := APassword;');
     lImplement.Add('  end;');
     lImplement.Add('end;');
     lImplement.Add('');
@@ -533,7 +542,9 @@ begin
     lImplement.Add('    ctTcpIp,');
     lImplement.Add('    AConexaoTCP.ConvertLocalHostToIP,');
     lImplement.Add('    AConexaoTCP.EncryptionType,');
-    lImplement.Add('    AConexaoTCP.CommunicationType);');
+    lImplement.Add('    AConexaoTCP.CommunicationType,');
+    lImplement.Add('    AConexaoTCP.UserName,');
+    lImplement.Add('    AConexaoTCP.Password);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashRESTClient);');
@@ -545,7 +556,9 @@ begin
     lImplement.Add('    ctREST,');
     lImplement.Add('    AConexaoREST.ConvertLocalHostToIP,');
     lImplement.Add('    AConexaoREST.EncryptionType,');
-    lImplement.Add('    AConexaoREST.CommunicationType);');
+    lImplement.Add('    AConexaoREST.CommunicationType,');
+    lImplement.Add('    AConexaoREST.UserName,');
+    lImplement.Add('    AConexaoREST.Password);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure TProxyFactory.BusyCallback(const AStart: Boolean);');
@@ -756,7 +769,8 @@ begin
     lImplement.Add('      const AConnectionType : TConnectionType;');
     lImplement.Add('      const ALocalHostToIP : Boolean; ');
     lImplement.Add('      const ATipoCriptografia : TRpDataFlashEncryptionType = tcBase64Compressed;');
-    lImplement.Add('      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText); overload;');
+    lImplement.Add('      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText;');
+    lImplement.Add('      const AUserName : string = ''''; const APassword : string = ''''); overload;');
     lImplement.Add('    procedure Config(const AConexaoTCP : TRpDataFlashClientConnection); overload;');
     lImplement.Add('    procedure Config(const AConexaoREST : TRpDataFlashRESTClient); overload;');
     lImplement.Add('    function ServerOnline : Boolean;');
