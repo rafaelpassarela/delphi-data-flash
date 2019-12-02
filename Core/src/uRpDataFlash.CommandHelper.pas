@@ -26,7 +26,7 @@ var
   lObjeto: TBaseSerializableObject;
   lClassName: string;
   lOperacao: TRpDataFlashHelperAction;
-  lIntf : ISerializableBaseHelper;
+  lIntf : IBaseSerializableHelper;
   lDataComponent: TComponent;
 begin
   lIntf := nil;
@@ -49,7 +49,7 @@ begin
 
       if lContinuar then
       begin
-        if Supports(lObjeto, ISerializableBaseHelper, lIntf) then
+        if Supports(lObjeto, IBaseSerializableHelper, lIntf) then
         begin
           if Assigned(Executor) then
             lDataComponent := Executor.GetDataComponent

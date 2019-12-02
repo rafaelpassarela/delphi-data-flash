@@ -220,7 +220,7 @@ type
   protected
     function GetIdentifier: string; virtual;
     function GetConnected: Boolean; virtual;
-    function GetNomeComputadorLocal : string;
+    function GetLocalComputerName : string;
 
     procedure DoConnect; virtual; abstract;
     procedure DoDisconnect; virtual; abstract;
@@ -1065,7 +1065,7 @@ begin
   Result := EmptyStr;
 end;
 
-function TRpDataFlashCustomConnection.GetNomeComputadorLocal: string;
+function TRpDataFlashCustomConnection.GetLocalComputerName: string;
 begin
   Result := TRpDataFlashUtils.GetLocalComputerName;
 end;
@@ -2134,7 +2134,7 @@ procedure TRpDataFlashServerConnection.Inicializar;
 begin
   inherited;
   FInterfaceList := TInterfaceList.Create;
-  FServer := GetNomeComputadorLocal;
+  FServer := GetLocalComputerName;
   FControllers := TRpDataFlashCommandControllerList.Create(False);
   FProviders := TRpDataFlashProviderControllerList.Create(False);
   FUtilizarControllers := True;
@@ -2154,7 +2154,7 @@ end;
 procedure TRpDataFlashServerConnection.Clear;
 begin
   inherited;
-  FServer := GetNomeComputadorLocal;
+  FServer := GetLocalComputerName;
 end;
 
 function TRpDataFlashServerConnection.FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;

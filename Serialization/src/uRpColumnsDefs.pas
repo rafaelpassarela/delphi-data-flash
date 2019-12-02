@@ -53,7 +53,7 @@ type
     function _Release: Integer; stdcall;
     function QueryInterface(const IID: TGUID; out Obj): HRESULT; stdcall;
     // IRpXMLSupport
-    function GetSerializationController: ISerializableBase;
+    function GetSerializationController: IBaseSerializable;
     function GetSerializationNodeName: string;
 
     function GetFieldOnlyName: String;
@@ -276,7 +276,7 @@ begin
     Result := Copy(Result, 1, Pos(';', Result) - 1);
 end;
 
-function TRpColumnDefs.GetSerializationController: ISerializableBase;
+function TRpColumnDefs.GetSerializationController: IBaseSerializable;
 begin
   Result := FFileController;
 end;

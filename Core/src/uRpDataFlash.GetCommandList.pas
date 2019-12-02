@@ -19,7 +19,7 @@ type
     procedure DoLoadFromNode(const ANode: IXMLNode); override;
   public
     procedure Reset; override;
-    procedure FromOther(const AOther: ISerializableBase); override;
+    procedure FromOther(const AOther: IBaseSerializable); override;
 
     property Nome : string read FNome write FNome;
     property Tipo : TRpDataFlashParamType read FTipo write FTipo;
@@ -48,7 +48,7 @@ type
     procedure Finalize; override;
   public
     procedure Reset; override;
-    procedure FromOther(const AOther: ISerializableBase); override;
+    procedure FromOther(const AOther: IBaseSerializable); override;
 
     property NomeComando : string read FNomeComando write FNomeComando;
     property ListaParametros : TRpDataFlashParamTransportList read FListaParametros;
@@ -79,7 +79,7 @@ begin
   inherited;
 end;
 
-procedure TRpDataFlashInfoCommand.FromOther(const AOther: ISerializableBase);
+procedure TRpDataFlashInfoCommand.FromOther(const AOther: IBaseSerializable);
 var
   lInfo : TRpDataFlashInfoCommand absolute AOther;
 begin
@@ -130,7 +130,7 @@ begin
   ToNode('Tipo', Ord(FTipo));
 end;
 
-procedure TRpDataFlashParamInfoComando.FromOther(const AOther: ISerializableBase);
+procedure TRpDataFlashParamInfoComando.FromOther(const AOther: IBaseSerializable);
 var
   lInfo : TRpDataFlashParamInfoComando absolute AOther;
 begin

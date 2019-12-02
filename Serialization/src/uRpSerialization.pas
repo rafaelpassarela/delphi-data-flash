@@ -31,7 +31,7 @@ type
   TBaseSerializableList = class;
   TBaseSerializableListClass = class of TBaseSerializableList;
 
-  ISerializableBase = interface
+  IBaseSerializable = interface
     ['{FC07098F-E2E1-47F7-A2FD-D72028DB71C3}']
     procedure SaveToNode(const ANodeName : string = ''; const ASaveParent : Boolean = True); overload;
     procedure LoadFromNode(const ANode : IXMLNode); overload;
@@ -83,11 +83,11 @@ type
 
   ISerializationSupport = interface
     ['{16325BDB-62C8-433B-925D-445803DF0ECF}']
-    function GetSerializationController : ISerializableBase;
+    function GetSerializationController : IBaseSerializable;
     function GetSerializationNodeName: string;
   end;
 
-  ISerializableBaseHelper = interface
+  IBaseSerializableHelper = interface
     ['{539FE1C3-E805-491A-8AF2-E4411DD2B7D9}']
     function DoSave(const ADataComponent : TComponent) : Boolean;
     function DoLoad(const ADataComponent : TComponent) : Boolean;
@@ -95,7 +95,7 @@ type
     function DoExecute(const ADataComponent : TComponent) : Boolean;
   end;
 
-  TBaseSerializableObject = class(TInterfacedPersistent, ISerializableBase)
+  TBaseSerializableObject = class(TInterfacedPersistent, IBaseSerializable)
   private
     // XML
     FXMLFile : IXMLDocument;
@@ -149,21 +149,21 @@ type
     procedure FromNode(const AFieldName : string; const AItem : TBaseSerializableObject); overload;
     procedure FromNode(const AFieldName : string; const AList : TBaseSerializableList); overload;
 
-    procedure FromNode(const AFieldName : string; out AItem : ISerializableBase); overload;
-    procedure FromNode(const ANode: IXMLNode;     out AItem : ISerializableBase); overload;
-    procedure FromNode(const AJSon: IJSONObject;  out AItem : ISerializableBase); overload;
+    procedure FromNode(const AFieldName : string; out AItem : IBaseSerializable); overload;
+    procedure FromNode(const ANode: IXMLNode;     out AItem : IBaseSerializable); overload;
+    procedure FromNode(const AJSon: IJSONObject;  out AItem : IBaseSerializable); overload;
 
-    function FromNodeAsInterface(const ANode : IXMLNode) : ISerializableBase; overload;
-    function FromNodeAsInterface(const AFieldName : string) : ISerializableBase; overload;
+    function FromNodeAsInterface(const ANode : IXMLNode) : IBaseSerializable; overload;
+    function FromNodeAsInterface(const AFieldName : string) : IBaseSerializable; overload;
 
     procedure ToNode(const AFieldName : string; const AValue : Variant); overload;
     procedure ToNode(const AFieldName : string; const AFieldClass : TStrings); overload;
     procedure ToNode(const AFieldName : string; const AValue : string; const ABase64 : Boolean); overload;
-    procedure ToNode(const AFieldName : string; const AItem : ISerializableBase); overload;
+    procedure ToNode(const AFieldName : string; const AItem : IBaseSerializable); overload;
     procedure ToNode(const AFieldName : string; ASetTypeInfo : PTypeInfo; const ASetValue); overload;
     procedure ToNode(const AFieldName : string; const AEnumValue : Cardinal; ASetTypeInfo : PTypeInfo); overload;
     procedure ToNode(const AFieldName : string; const AList : TBaseSerializableList); overload;
-    procedure ToNode(const AFieldName : string; const AItem : ISerializableBase; const AGuid : TGuid); overload;
+    procedure ToNode(const AFieldName : string; const AItem : IBaseSerializable; const AGuid : TGuid); overload;
     procedure ToNode(const AFieldName : string; const AList : TInterfaceList; const AGuid : TGuid); overload;
 
     procedure DoSaveToNode; virtual; abstract;
@@ -185,8 +185,8 @@ type
     destructor Destroy; override;
 
     procedure Reset; virtual; abstract;
-    procedure FromOther(const AOther : ISerializableBase); virtual; abstract;
-    procedure Assign(const AOther : ISerializableBase); reintroduce;
+    procedure FromOther(const AOther : IBaseSerializable); virtual; abstract;
+    procedure Assign(const AOther : IBaseSerializable); reintroduce;
     procedure SetLastError(const AError : string);
 
     procedure SaveToNode(const ANodeName : string = ''; const ASaveParent : Boolean = True);
@@ -256,14 +256,14 @@ type
 
     procedure Clear;
     procedure Reset; override;
-    procedure FromOther(const AOther: ISerializableBase); override;
+    procedure FromOther(const AOther: IBaseSerializable); override;
 
     property Items[AIndex : Integer] : TBaseSerializableObject read GetItem; default;
     property OwnsObjects : Boolean read GetOwnsObjects write SetOwnsObjects;
     property ItemClassName : string read GetItemClassName;
   end;
 
-  TCustomSerializableObjectEx = class(TBaseSerializableObject, ISerializableBaseHelper)
+  TCustomSerializableObjectEx = class(TBaseSerializableObject, IBaseSerializableHelper)
   protected
     function DoDelete(const ADataComponent: TComponent): Boolean; virtual;
     function DoSave(const ADataComponent: TComponent): Boolean; virtual;
@@ -306,7 +306,7 @@ type
     procedure DoLoadFromNode(const ANode : IXMLNode); override;
   public
     procedure Reset; override;
-    procedure FromOther(const AOther: ISerializableBase); override;
+    procedure FromOther(const AOther: IBaseSerializable); override;
   end;
 
   // Used to control the save of forms, panels, groupBox, etc...
@@ -337,7 +337,7 @@ implementation
 
 { TCustomSerializableObject }
 
-procedure TBaseSerializableObject.Assign(const AOther: ISerializableBase);
+procedure TBaseSerializableObject.Assign(const AOther: IBaseSerializable);
 var
   lNode: IXMLNode;
 begin
@@ -503,7 +503,7 @@ begin
 // dummy
 end;
 
-procedure TBaseSerializableObject.FromNode(const AFieldName : string; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const AFieldName : string; out AItem: IBaseSerializable);
 var
   lNode: IXMLNode;
   lPair: TJSONPair;
@@ -581,7 +581,7 @@ begin
       raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_UNKNOWN_OBJECT_TYPE, [AItem.ClassName]);
 end;
 
-procedure TBaseSerializableObject.FromNode(const ANode: IXMLNode; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const ANode: IXMLNode; out AItem: IBaseSerializable);
 var
   lObjClass: TBaseSerializableObjectClass;
   lNodeClass: IXMLNode;
@@ -651,7 +651,7 @@ begin
   end;
 end;
 
-procedure TBaseSerializableObject.FromNode(const AJSon: IJSONObject; out AItem: ISerializableBase);
+procedure TBaseSerializableObject.FromNode(const AJSon: IJSONObject; out AItem: IBaseSerializable);
 var
   lObjClass: TBaseSerializableObjectClass;
   lPair: TJSONPair;
@@ -711,7 +711,7 @@ begin
   end;
 end;
 
-function TBaseSerializableObject.FromNodeAsInterface(const ANode: IXMLNode): ISerializableBase;
+function TBaseSerializableObject.FromNodeAsInterface(const ANode: IXMLNode): IBaseSerializable;
 var
   lObjClass: TBaseSerializableObjectClass;
   lNodeClass: IXMLNode;
@@ -728,7 +728,7 @@ begin
   end;
 end;
 
-function TBaseSerializableObject.FromNodeAsInterface(const AFieldName: string): ISerializableBase;
+function TBaseSerializableObject.FromNodeAsInterface(const AFieldName: string): IBaseSerializable;
 var
   lNode: IXMLNode;
 begin
@@ -819,7 +819,7 @@ end;
 function TBaseSerializableObject.GetParentFileName: string;
 var
   lParent: TObject;
-  lIntf: ISerializableBase;
+  lIntf: IBaseSerializable;
   lIntf2: ISerializationSupport;
 begin
   lParent := Self;
@@ -832,7 +832,7 @@ begin
       lParent := TBaseSerializableObject(lParent).Parent;
     end
     else
-      if Supports(lParent, ISerializableBase, lIntf) then
+      if Supports(lParent, IBaseSerializable, lIntf) then
       begin
         Result := lIntf.FileName;
         lParent := lIntf.Parent;
@@ -1211,7 +1211,7 @@ procedure TBaseSerializableObject.SaveToNode(const ANodeName: string; const ASav
 var
   lNode: IXMLNode;
   lCreateNewFile: Boolean;
-  lIntf: ISerializableBase;
+  lIntf: IBaseSerializable;
   lIntf2: ISerializationSupport;
 begin
   lNode := nil;
@@ -1236,7 +1236,7 @@ begin
       end
       else
         // Interface test
-        if Supports(FParent, ISerializableBase, lIntf) then
+        if Supports(FParent, IBaseSerializable, lIntf) then
         begin
           FXMLFile := lIntf.XMLFile;
           FFormatType := lIntf.FormatType;
@@ -1500,7 +1500,7 @@ begin
   end;
 end;
 
-procedure TBaseSerializableObject.ToNode(const AFieldName : string; const AItem: ISerializableBase);
+procedure TBaseSerializableObject.ToNode(const AFieldName : string; const AItem: IBaseSerializable);
 begin
   AItem.NodeName := AFieldName;
 
@@ -1716,7 +1716,7 @@ begin
   inherited;
 end;
 
-procedure TBaseSerializableList.FromOther(const AOther: ISerializableBase);
+procedure TBaseSerializableList.FromOther(const AOther: IBaseSerializable);
 var
   lItem: TBaseSerializableObject;
   i: Integer;
@@ -2138,7 +2138,7 @@ procedure TSerializationBaseController.DoSaveToNode;
 begin
 end;
 
-procedure TSerializationBaseController.FromOther(const AOther: ISerializableBase);
+procedure TSerializationBaseController.FromOther(const AOther: IBaseSerializable);
 begin
 end;
 
@@ -2146,7 +2146,7 @@ procedure TSerializationBaseController.Reset;
 begin
 end;
 
-procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AItem: ISerializableBase; const AGuid: TGuid);
+procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AItem: IBaseSerializable; const AGuid: TGuid);
 begin
   if AItem <> nil then
   begin
@@ -2167,8 +2167,8 @@ var
 begin
   for I := 0 to AList.Count - 1 do
   begin
-    if Supports(AList[I], ISerializableBase) then
-      ToNode(AFieldName, AList[I] as ISerializableBase, AGuid);
+    if Supports(AList[I], IBaseSerializable) then
+      ToNode(AFieldName, AList[I] as IBaseSerializable, AGuid);
   end;
 end;
 
