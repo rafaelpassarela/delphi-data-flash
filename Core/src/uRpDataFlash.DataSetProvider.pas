@@ -5,11 +5,11 @@ unit uRpDataFlash.DataSetProvider;
 interface
 
 uses
-  uRpDataFlash.Command, Classes, uRpDataFlash.Components, SysUtils,
+  uRpDataFlash.Command, uRpDataFlash.Components,
   {$IFDEF UNICODE}
-  System.Types, System.Contnrs,
+  System.Types, System.Contnrs, System.Classes, System.SysUtils,
   {$ELSE}
-  Contnrs,
+  Contnrs, Classes, SysUtils,
   {$ENDIF}
   uRpDataFlash.Types, uRpDataFlash.Utils;
 

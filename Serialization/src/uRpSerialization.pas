@@ -22,7 +22,7 @@ uses
 type
   IXMLNode = XMLIntf.IXMLNode;
 
-  TSerializationFormat = (sfXML, sfJSON, sfUnknown);
+  TSerializationFormat = (sfXML, sfJSON, sfAuto);
 
   EBaseSerializationTypeUnknown = Exception;
 
@@ -36,8 +36,8 @@ type
     procedure SaveToNode(const ANodeName : string = ''; const ASaveParent : Boolean = True); overload;
     procedure LoadFromNode(const ANode : IXMLNode); overload;
 
-    procedure LoadFromFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown);
-    procedure LoadFromString(const AString : string; const AFormat : TSerializationFormat = sfUnknown);
+    procedure LoadFromFile(const AFile : string; const AFormat : TSerializationFormat = sfAuto);
+    procedure LoadFromString(const AString : string; const AFormat : TSerializationFormat = sfAuto);
     procedure LoadFromJSONString(const AJSONString : string);
     procedure LoadFromXMLString(const AXMLString : string);
 
@@ -64,7 +64,7 @@ type
     function GetIncludeClassName : Boolean;
 
     procedure Save;
-    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown);
+    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfAuto);
     function SaveToXmlString : string;
     function SaveToJSONString : string;
     function SaveFileToXmlString : string;
@@ -192,7 +192,7 @@ type
     procedure SaveToNode(const ANodeName : string = ''; const ASaveParent : Boolean = True);
     procedure LoadFromNode(const ANode : IXMLNode); overload;
 
-    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown); virtual;
+    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfAuto); virtual;
 
     // XML
     function SaveToXmlString : string; virtual;
@@ -200,8 +200,8 @@ type
     // JSON
     function SaveToJSONString : string; virtual;
 
-    procedure LoadFromFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown); virtual;
-    procedure LoadFromString(const AString : string; const AFormat : TSerializationFormat = sfUnknown); virtual;
+    procedure LoadFromFile(const AFile : string; const AFormat : TSerializationFormat = sfAuto); virtual;
+    procedure LoadFromString(const AString : string; const AFormat : TSerializationFormat = sfAuto); virtual;
 
     function GetXMLDoc(const AIncludeParent : Boolean = True) : IXMLDocument;
     function GetClassName: string;
@@ -509,7 +509,7 @@ var
   lPair: TJSONPair;
   lTmpObject: TJSONObject;
 begin
-  if FFormatType = sfUnknown then
+  if FFormatType = sfAuto then
     raise Exception.Create(R_SERIALIZE_UNKNOWN_FILE_TYPE);
 
   if FFormatType = sfXML then
@@ -990,7 +990,7 @@ begin
   end;
 end;
 
-procedure TBaseSerializableObject.LoadFromFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
+procedure TBaseSerializableObject.LoadFromFile(const AFile: string; const AFormat : TSerializationFormat = sfAuto);
 var
   lRootNode: IXMLNode;
   lFormat : TSerializationFormat;
@@ -1009,7 +1009,7 @@ begin
   FFileName := AFile;
 
   try
-    if AFormat = sfUnknown then
+    if AFormat = sfAuto then
     begin
       InternalLoadFile;
       lChar := Copy(lFileStr.Text, 1, 1);
@@ -1093,7 +1093,7 @@ var
 begin
   lStr := Trim( AString );
 
-  if AFormat = sfUnknown then
+  if AFormat = sfAuto then
   begin
     lChar := Copy(lStr, 1, 1);
     if lChar = '<' then
@@ -1162,14 +1162,14 @@ begin
   Result := FXMLFile.XML.Text;
 end;
 
-procedure TBaseSerializableObject.SaveToFile(const AFile: string; const AFormat : TSerializationFormat = sfUnknown);
+procedure TBaseSerializableObject.SaveToFile(const AFile: string; const AFormat : TSerializationFormat = sfAuto);
 var
   lExt : string;
 begin
-  if AFormat <> sfUnknown then
+  if AFormat <> sfAuto then
     FFormatType := AFormat;
 
-  if FFormatType = sfUnknown then
+  if FFormatType = sfAuto then
   begin
     lExt := AnsiUpperCase(ExtractFileExt(AFile));
     if (lExt = '.JSON') or (lExt = '.JSN') or (lExt = '.JSO') or (lExt = '.J') then
@@ -1258,7 +1258,7 @@ begin
   if ANodeName <> '' then
     FNodeName := ANodeName;
 
-  if FFormatType = sfUnknown then
+  if FFormatType = sfAuto then
     FFormatType := C_DEFAULT_FORMAT;
 
   case FFormatType of
@@ -1284,7 +1284,7 @@ begin
   sfJSON:
     InitializeJson;
 
-  sfUnknown:
+  sfAuto:
     raise EBaseSerializationTypeUnknown.CreateFmt(R_SERIALIZE_UNKNOWN_FILE_TYPE_EX, [Self.ClassName]);
   end;
 
@@ -1525,7 +1525,7 @@ procedure TBaseSerializableObject.ToNode(const AFieldName: string; const AValue:
 var
   lClear: Boolean;
 begin
-  if FFormatType = sfUnknown then
+  if FFormatType = sfAuto then
     FFormatType := C_DEFAULT_FORMAT;
 
   if FProxyMode then

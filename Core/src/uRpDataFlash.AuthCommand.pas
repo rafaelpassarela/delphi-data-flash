@@ -15,7 +15,7 @@ type
     procedure DoExecuteBridgeError(var AContinue : Boolean); override;
     procedure DoExecuteBridgeSuccessfully(var AContinue : Boolean); override;
   public
-    class function Autenticar(ATcpClient : TRpDataFlashCustomClientConnection;
+    class function Autenticar(const ATcpClient : TRpDataFlashCustomClientConnection;
       const AUsername, APassword : string; out AResultMSG : string) : Boolean;
   end;
 
@@ -23,7 +23,8 @@ implementation
 
 { TRpDataFlashComandoAutenticar }
 
-class function TRpDataFlashComandoAutenticar.Autenticar(ATcpClient: TRpDataFlashCustomClientConnection;
+class function TRpDataFlashComandoAutenticar.Autenticar(
+  const ATcpClient: TRpDataFlashCustomClientConnection;
   const AUsername, APassword : string; out AResultMSG: string): Boolean;
 const
   C_ERRO_AUTENTICACAO = 'Erro enviando pedido de autenticação. ';
@@ -35,6 +36,8 @@ begin
     try
       lCmd.Param['Username'].AsString := AUsername;
       lCmd.Param['Password'].AsBase64 := APassword;
+
+      lCmd.SerializationFormat := ATcpClient.SerializationFormat;
 
       ATcpClient.Comunicar(lCmd);
       Result := lCmd.ReturnStatus;

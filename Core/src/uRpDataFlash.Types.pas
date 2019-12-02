@@ -142,6 +142,7 @@ type
     function GetLocalHostToIP : Boolean;
     function GetPassword : string;
     function GetUserName : string;
+    function GetSerializationFormat : TSerializationFormat;
 
     property ServerName : string read GetServerName;
     property ServerPort : Integer read GetServerPort;
@@ -152,6 +153,7 @@ type
     property LocalHostToIP : Boolean read GetLocalHostToIP;
     property Password : string read GetPassword;
     property UserName : string read GetUserName;
+    property SerializationFormat : TSerializationFormat read GetSerializationFormat;
   end;
 
   IRpDataFlashFileTransferSupport = interface

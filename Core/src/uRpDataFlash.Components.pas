@@ -451,6 +451,7 @@ type
     FOnAfterConnect: TRpDataFlashOnConnectOnServer;
     FOnBeforeConnect: TRpDataFlashOnConnectOnServer;
     FConvertLocalHostToIP: Boolean;
+    FSerializationFormat: TSerializationFormat;
     function Enviar(const AIdentificador, AMenssage, ANomeComando : string) : string; virtual;
     function PodeConectar : Boolean;
     procedure DoNovaExcecao(const E:Exception);
@@ -513,6 +514,7 @@ type
     property UserName : string read FUserName write FUserName;
     property Password : string read FPassword write FPassword;
     property ConvertLocalHostToIP : Boolean read FConvertLocalHostToIP write FConvertLocalHostToIP default False;
+    property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat default sfAuto;
 
     property OnBeforeConnect : TRpDataFlashOnConnectOnServer read FOnBeforeConnect write FOnBeforeConnect;
     property OnConnect : TRpDataFlashOnConnectOnServer read FOnConnect write FOnConnect;
@@ -548,6 +550,7 @@ type
     property EncryptionType;
     property FileTransfer;
     property ConvertLocalHostToIP;
+    property SerializationFormat;
 
     property OnBeforeConnect;
     property OnConnect;
@@ -584,6 +587,7 @@ type
     property EncryptionType;
     property FileTransfer;
     property ConvertLocalHostToIP;
+    property SerializationFormat;
 
     property OnBeforeConnect;
     property OnConnect;
@@ -2718,7 +2722,7 @@ begin
   try
     Result := Enviar(AIdentificador, AMenssage, ANomeComando);
   except
-    on E:Exception Do
+    on E:Exception do
     begin
       NewException(E);
       raise;
@@ -2789,6 +2793,9 @@ end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand): string;
 begin
+  if ACommand.SerializationFormat = sfAuto then
+    ACommand.SerializationFormat := Self.SerializationFormat;
+
   Result := Comunicar(ACommand, ACommand.Params);
 end;
 
@@ -2843,6 +2850,12 @@ end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: IRpDataFlashCommandInterfaced; const AParametros : TRpDataFlashCommandParameterList): string;
 begin
+  if ACommand.SerializationFormat = sfAuto then
+  begin
+    AParametros.SerializationFormat := Self.SerializationFormat;
+    ACommand.SerializationFormat := Self.SerializationFormat;
+  end;
+
   AParametros.Command := ACommand.Command;
   ACommand.DoSerialize(AParametros);
   Result := Comunicar(TAG_COMMAND, AParametros.Serialize);
@@ -2852,6 +2865,9 @@ end;
 
 function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand; const ACallBackClassName: string): string;
 begin
+  if ACommand.SerializationFormat = sfAuto then
+    ACommand.SerializationFormat := Self.SerializationFormat;
+
   Result := DoComunicarComThred(ACommand, ACallBackClassName, nil);
 end;
 
@@ -2865,6 +2881,7 @@ begin
   FLazyConnection := False;
   FExecutorCallBackClass := EmptyStr;
   FExecutorCallBackInterfaced := nil;
+  FSerializationFormat := sfAuto;
 end;
 
 procedure TRpDataFlashCustomClientConnection.DoLoadConfig(const ANode: IXMLNode);
@@ -3225,6 +3242,9 @@ end;
 function TRpDataFlashCustomClientConnection.Comunicar(const ACommand: TRpDataFlashCommand;
   const AExecutorCallBack: IRpDataFlashExecutorCallBack): string;
 begin
+  if ACommand.SerializationFormat = sfAuto then
+    ACommand.SerializationFormat := Self.SerializationFormat;
+
   Result := DoComunicarComThred(ACommand, EmptyStr, AExecutorCallBack);
 end;
 
