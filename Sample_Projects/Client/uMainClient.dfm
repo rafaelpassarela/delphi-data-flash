@@ -307,6 +307,7 @@ object FormMainClient: TFormMainClient
     Server = 'LOCALHOST'
     UserName = 'TESTE'
     Password = '1234'
+    SerializationFormat = sfXML
     OnNewLog = RpDataFlashClientConnectionTesteNewLog
     OnStatus = RpDataFlashClientConnectionTesteStatus
     Left = 192

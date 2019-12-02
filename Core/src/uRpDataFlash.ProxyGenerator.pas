@@ -345,10 +345,16 @@ begin
     lImplement.Add('  case AConnectionType of');
     lImplement.Add('    ctTcpIp:');
     lImplement.Add('      if Assigned(AClient) then');
+    lImplement.Add('      begin');
     lImplement.Add('        FClientTCP := AClient as TRpDataFlashClientConnection;');
+    lImplement.Add('        FSerializationFormat := FClientTCP.SerializationFormat;');
+    lImplement.Add('      end;');
     lImplement.Add('    ctREST:');
     lImplement.Add('      if Assigned(AClient) then');
+    lImplement.Add('      begin');
     lImplement.Add('        FClientREST := AClient as TRpDataFlashRESTClient;');
+    lImplement.Add('        FSerializationFormat := FClientREST.SerializationFormat;');
+    lImplement.Add('      end;');
     lImplement.Add('  end;');
     lImplement.Add('  FSharedClientTCP := Assigned(FClientTCP);');
     lImplement.Add('  FSharedClientREST := Assigned(FClientREST);');
@@ -372,6 +378,7 @@ begin
       lImplement.Add('        FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
       lImplement.Add('        FClientTCP.Password := lFileConf.Password;');
       lImplement.Add('        FClientTCP.UserName := lFileConf.UserName;');
+      lImplement.Add('        FClientTCP.SerializationFormat := lFileConf.SerializationFormat;');
       lImplement.Add('      end;');
       lImplement.Add('      if not FSharedClientREST then');
       lImplement.Add('      begin');
@@ -385,6 +392,7 @@ begin
       lImplement.Add('        FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;');
       lImplement.Add('        FClientREST.Password := lFileConf.Password;');
       lImplement.Add('        FClientREST.UserName := lFileConf.UserName;');
+      lImplement.Add('        FClientREST.SerializationFormat := lFileConf.SerializationFormat;');
       lImplement.Add('      end;');
       lImplement.Add('    finally');
       lImplement.Add('      lFileConf := nil;');
@@ -456,7 +464,8 @@ begin
     lImplement.Add('  const ALocalHostToIP : Boolean;');
     lImplement.Add('  const ATipoCriptografia : TRpDataFlashEncryptionType;');
     lImplement.Add('  const ATipoComunicacao : TRpDataFlashCommunicationType;');
-    lImplement.Add('  const AUserName, APassword : string);');
+    lImplement.Add('  const AUserName, APassword : string;');
+    lImplement.Add('  const ASerializationFormat : TSerializationFormat);');
     lImplement.Add('begin');
     lImplement.Add('  if AConnectionType = ctTcpIp then');
     lImplement.Add('  begin');
@@ -480,6 +489,7 @@ begin
     lImplement.Add('    FClientTCP.ConvertLocalHostToIP := ALocalHostToIP;');
     lImplement.Add('    FClientTCP.UserName := AUserName;');
     lImplement.Add('    FClientTCP.Password := APassword;');
+    lImplement.Add('    FClientTCP.SerializationFormat := ASerializationFormat;');
     lImplement.Add('  end else');
     lImplement.Add('  begin');
     lImplement.Add('    if (FClientREST <> nil) and (not FSharedClientREST) then');
@@ -497,6 +507,7 @@ begin
     lImplement.Add('    FClientREST.ConvertLocalHostToIP := ALocalHostToIP;');
     lImplement.Add('    FClientREST.UserName := AUserName;');
     lImplement.Add('    FClientREST.Password := APassword;');
+    lImplement.Add('    FClientREST.SerializationFormat := ASerializationFormat;');
     lImplement.Add('  end;');
     lImplement.Add('end;');
     lImplement.Add('');
@@ -544,7 +555,8 @@ begin
     lImplement.Add('    AConexaoTCP.EncryptionType,');
     lImplement.Add('    AConexaoTCP.CommunicationType,');
     lImplement.Add('    AConexaoTCP.UserName,');
-    lImplement.Add('    AConexaoTCP.Password);');
+    lImplement.Add('    AConexaoTCP.Password,');
+    lImplement.Add('    AConexaoTCP.SerializationFormat);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashRESTClient);');
@@ -558,7 +570,8 @@ begin
     lImplement.Add('    AConexaoREST.EncryptionType,');
     lImplement.Add('    AConexaoREST.CommunicationType,');
     lImplement.Add('    AConexaoREST.UserName,');
-    lImplement.Add('    AConexaoREST.Password);');
+    lImplement.Add('    AConexaoREST.Password,');
+    lImplement.Add('    AConexaoREST.SerializationFormat);');
     lImplement.Add('end;');
     lImplement.Add(' ');
     lImplement.Add('procedure TProxyFactory.BusyCallback(const AStart: Boolean);');
@@ -770,7 +783,8 @@ begin
     lImplement.Add('      const ALocalHostToIP : Boolean; ');
     lImplement.Add('      const ATipoCriptografia : TRpDataFlashEncryptionType = tcBase64Compressed;');
     lImplement.Add('      const ATipoComunicacao : TRpDataFlashCommunicationType = ctText;');
-    lImplement.Add('      const AUserName : string = ''''; const APassword : string = ''''); overload;');
+    lImplement.Add('      const AUserName : string = ''''; const APassword : string = '''';');
+    lImplement.Add('      const ASerializationFormat : TSerializationFormat = sfAuto); overload;');
     lImplement.Add('    procedure Config(const AConexaoTCP : TRpDataFlashClientConnection); overload;');
     lImplement.Add('    procedure Config(const AConexaoREST : TRpDataFlashRESTClient); overload;');
     lImplement.Add('    function ServerOnline : Boolean;');

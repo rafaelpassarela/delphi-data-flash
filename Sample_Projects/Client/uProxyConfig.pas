@@ -5,10 +5,10 @@ interface
 uses
   System.Classes, uRpDataFlash.Types, System.SysUtils,
   // don't do that, it's just for demonstrate ;)
-  uMainClient;
+  uMainClient, uRpSerialization;
 
 type
-  TProxyConfigDemo = class(TInterfacedPersistent, IRpDataFlashConfig)
+  TProxyConfigDemo = class(TInterfacedObject, IRpDataFlashConfig)
   public
     function GetServerName: string;
     function GetServerPort: Integer;
@@ -19,6 +19,7 @@ type
     function GetLocalHostToIP: Boolean;
     function GetPassword: string;
     function GetUserName: string;
+    function GetSerializationFormat: TSerializationFormat;
   end;
 
 implementation
@@ -53,6 +54,11 @@ end;
 function TProxyConfigDemo.GetRestPort: Integer;
 begin
   Result := 0;
+end;
+
+function TProxyConfigDemo.GetSerializationFormat: TSerializationFormat;
+begin
+  Result := FormMainClient.RpDataFlashClientConnectionTeste.SerializationFormat;
 end;
 
 function TProxyConfigDemo.GetServerName: string;

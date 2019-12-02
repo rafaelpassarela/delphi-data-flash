@@ -741,6 +741,7 @@ end;
 function TRpDataFlashCommandParameter.ToJson: string;
 var
   lFormatStr: string;
+  lValue : Variant;
 begin
 //      "InternalStatusProcessamento": {
 //         "Tipo": "2",
@@ -748,7 +749,10 @@ begin
 //         "Valor": "4"
 //      },
 
-  FValue := StringReplace(FValue, '\', '\\', [rfReplaceAll]);
+  if VarIsNull(FValue) then
+    lValue := 'null'
+  else
+    lValue := StringReplace(FValue, '\', '\\', [rfReplaceAll]);
 
   lFormatStr := '"%s":{"Tipo":%d,"TipoValor":%d,"BaseClass":"%s","Valor":';
   if ((FValueType = tvpJSON) or (FValueType = tvpBase)) then
@@ -761,7 +765,7 @@ begin
     Integer(FParamType),
     Integer(FValueType),
     FBaseClass,
-    FValue]);
+    lValue]);
 end;
 
 procedure TRpDataFlashCommandParameter.ToNode(const ANode: IXMLNode);
@@ -1164,11 +1168,11 @@ begin
   if FCommand = '' then
     raise Exception.Create('Serialização. Comando não pode ser vazio!');
 
-  if SerializationFormat = sfUnknown then
+  if SerializationFormat = sfAuto then
     SerializationFormat := TSerializationFormat(Param[C_PARAM_INT_FORMAT_TYPE].AsInteger);
 
   // mantem como padrao o JSON
-  if SerializationFormat in [sfUnknown, sfJSON] then
+  if SerializationFormat in [sfAuto, sfJSON] then
   begin
     Result := '{"Comando":"' + FCommand + '",';
     Result := Result

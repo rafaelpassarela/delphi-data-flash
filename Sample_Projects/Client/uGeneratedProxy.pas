@@ -85,7 +85,8 @@ Este comando
       const ALocalHostToIP : Boolean; 
       const ATipoCriptografia : TRpDataFlashEncryptionType = tcBase64Compressed;
       const ATipoComunicacao : TRpDataFlashCommunicationType = ctText;
-      const AUserName : string = ''; const APassword : string = ''); overload;
+      const AUserName : string = ''; const APassword : string = '';
+      const ASerializationFormat : TSerializationFormat = sfAuto); overload;
     procedure Config(const AConexaoTCP : TRpDataFlashClientConnection); overload;
     procedure Config(const AConexaoREST : TRpDataFlashRESTClient); overload;
     function ServerOnline : Boolean;
@@ -331,10 +332,16 @@ begin
   case AConnectionType of
     ctTcpIp:
       if Assigned(AClient) then
+      begin
         FClientTCP := AClient as TRpDataFlashClientConnection;
+        FSerializationFormat := FClientTCP.SerializationFormat;
+      end;
     ctREST:
       if Assigned(AClient) then
+      begin
         FClientREST := AClient as TRpDataFlashRESTClient;
+        FSerializationFormat := FClientREST.SerializationFormat;
+      end;
   end;
   FSharedClientTCP := Assigned(FClientTCP);
   FSharedClientREST := Assigned(FClientREST);
@@ -354,6 +361,7 @@ begin
         FClientTCP.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
         FClientTCP.Password := lFileConf.Password;
         FClientTCP.UserName := lFileConf.UserName;
+        FClientTCP.SerializationFormat := lFileConf.SerializationFormat;
       end;
       if not FSharedClientREST then
       begin
@@ -367,6 +375,7 @@ begin
         FClientREST.ConvertLocalHostToIP := lFileConf.LocalHostToIP;
         FClientREST.Password := lFileConf.Password;
         FClientREST.UserName := lFileConf.UserName;
+        FClientREST.SerializationFormat := lFileConf.SerializationFormat;
       end;
     finally
       lFileConf := nil;
@@ -422,7 +431,8 @@ procedure TProxyFactory.Config(const AHost: string; const APorta, APortaFTP: Int
   const ALocalHostToIP : Boolean;
   const ATipoCriptografia : TRpDataFlashEncryptionType;
   const ATipoComunicacao : TRpDataFlashCommunicationType;
-  const AUserName, APassword : string);
+  const AUserName, APassword : string;
+  const ASerializationFormat : TSerializationFormat);
 begin
   if AConnectionType = ctTcpIp then
   begin
@@ -446,6 +456,7 @@ begin
     FClientTCP.ConvertLocalHostToIP := ALocalHostToIP;
     FClientTCP.UserName := AUserName;
     FClientTCP.Password := APassword;
+    FClientTCP.SerializationFormat := ASerializationFormat;
   end else
   begin
     if (FClientREST <> nil) and (not FSharedClientREST) then
@@ -463,6 +474,7 @@ begin
     FClientREST.ConvertLocalHostToIP := ALocalHostToIP;
     FClientREST.UserName := AUserName;
     FClientREST.Password := APassword;
+    FClientREST.SerializationFormat := ASerializationFormat;
   end;
 end;
 
@@ -536,7 +548,8 @@ begin
     AConexaoTCP.EncryptionType,
     AConexaoTCP.CommunicationType,
     AConexaoTCP.UserName,
-    AConexaoTCP.Password);
+    AConexaoTCP.Password,
+    AConexaoTCP.SerializationFormat);
 end;
  
 procedure TProxyFactory.Config(const AConexaoREST: TRpDataFlashRESTClient);
@@ -550,7 +563,8 @@ begin
     AConexaoREST.EncryptionType,
     AConexaoREST.CommunicationType,
     AConexaoREST.UserName,
-    AConexaoREST.Password);
+    AConexaoREST.Password,
+    AConexaoREST.SerializationFormat);
 end;
  
 procedure TProxyFactory.BusyCallback(const AStart: Boolean);

@@ -88,7 +88,7 @@ type
     // xml
     function SaveToXmlString : string;
     function SaveToJSONString : string;
-    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfUnknown);
+    procedure SaveToFile(const AFile : string; const AFormat : TSerializationFormat = sfAuto);
     procedure LoadFromFile(const AFile : string);
     procedure LoadFromXmlString(const AXmlString : string);
     procedure LoadFromJSONString(const AJSONString : string);
