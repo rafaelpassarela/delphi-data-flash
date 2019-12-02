@@ -9,13 +9,13 @@
         <Projects Include="Server\Server.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="..\Serialization\RpSerialization.dproj">
+            <Dependencies/>
+        </Projects>
         <Projects Include="..\Core\RpDataFlashCommR.dproj">
             <Dependencies/>
         </Projects>
         <Projects Include="..\Core\RpDataFlashCommD.dproj">
-            <Dependencies/>
-        </Projects>
-        <Projects Include="..\Serialization\RpSerialization.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -44,6 +44,15 @@
     <Target Name="Server:Make">
         <MSBuild Projects="Server\Server.dproj" Targets="Make"/>
     </Target>
+    <Target Name="RpSerialization">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj"/>
+    </Target>
+    <Target Name="RpSerialization:Clean">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="RpSerialization:Make">
+        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Make"/>
+    </Target>
     <Target Name="RpDataFlashCommR">
         <MSBuild Projects="..\Core\RpDataFlashCommR.dproj"/>
     </Target>
@@ -62,23 +71,14 @@
     <Target Name="RpDataFlashCommD:Make">
         <MSBuild Projects="..\Core\RpDataFlashCommD.dproj" Targets="Make"/>
     </Target>
-    <Target Name="RpSerialization">
-        <MSBuild Projects="..\Serialization\RpSerialization.dproj"/>
-    </Target>
-    <Target Name="RpSerialization:Clean">
-        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="RpSerialization:Make">
-        <MSBuild Projects="..\Serialization\RpSerialization.dproj" Targets="Make"/>
-    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Client;Server;RpDataFlashCommR;RpDataFlashCommD;RpSerialization"/>
+        <CallTarget Targets="Client;Server;RpSerialization;RpDataFlashCommR;RpDataFlashCommD"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Client:Clean;Server:Clean;RpDataFlashCommR:Clean;RpDataFlashCommD:Clean;RpSerialization:Clean"/>
+        <CallTarget Targets="Client:Clean;Server:Clean;RpSerialization:Clean;RpDataFlashCommR:Clean;RpDataFlashCommD:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Client:Make;Server:Make;RpDataFlashCommR:Make;RpDataFlashCommD:Make;RpSerialization:Make"/>
+        <CallTarget Targets="Client:Make;Server:Make;RpSerialization:Make;RpDataFlashCommR:Make;RpDataFlashCommD:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

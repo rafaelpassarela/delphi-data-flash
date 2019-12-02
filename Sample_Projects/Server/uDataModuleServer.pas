@@ -76,7 +76,6 @@ var
 begin
   lNomeBanco := IncludeTrailingPathDelimiter( ExtractFilePath(Application.ExeName) );
   lNomeBanco := lNomeBanco + 'TESTEDATAFLASH.FDB';
-  // conecta no banco de dados
   try
     IBDatabaseServico.Close;
 //    IBDatabaseServico.Params.Clear;

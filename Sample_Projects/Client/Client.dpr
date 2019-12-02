@@ -3,7 +3,8 @@ program Client;
 uses
   Forms,
   uMainClient in 'uMainClient.pas' {FormMainClient},
-  uGeneratedProxy in 'uGeneratedProxy.pas';
+  uGeneratedProxy in 'uGeneratedProxy.pas',
+  uProxyConfig in 'uProxyConfig.pas';
 
 {$R *.res}
 

@@ -7,6 +7,8 @@ uses
 
 type
   TRpDataFlashUtils = class
+  private class var
+    _LocalName : string;
   public
     class function GetLocalComputerName : string;
     class function GetLocalComputerIp : string;
@@ -39,12 +41,17 @@ class function TRpDataFlashUtils.GetLocalComputerName: string;
 var
   lStackWin : TIdStackWindows;
 begin
-  lStackWin := TIdStackWindows.Create;
-  try
-    Result := lStackWin.HostByAddress(lStackWin.LocalAddress);
-  finally
-    lStackWin.Free;
+  if _LocalName = EmptyStr then
+  begin
+    lStackWin := TIdStackWindows.Create;
+    try
+      _LocalName := lStackWin.HostByAddress(lStackWin.LocalAddress);
+    finally
+      lStackWin.Free;
+    end;
   end;
+
+  Result := _LocalName;
 end;
 
 { TRpDataFlashValidations }
@@ -68,7 +75,9 @@ begin;
     if Value[i] in ['A'..'Z', 'a'..'z', '0'..'9', '_'] then
   {$ENDIF}
       Result := Result + Value[i];
-
 end;
+
+initialization
+  TRpDataFlashUtils._LocalName := EmptyStr;
 
 end.

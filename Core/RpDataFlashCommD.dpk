@@ -39,7 +39,7 @@ requires
 
 contains
   uRpDataFlash.ComponentRegister in 'src\Editors\uRpDataFlash.ComponentRegister.pas',
-  uRpDataFlash.ConexaoClienteEditor in 'src\Editors\uRpDataFlash.ConexaoClienteEditor.pas',
+  uRpDataFlash.ProxyFactory.ClientGenerator in 'src\Editors\uRpDataFlash.ProxyFactory.ClientGenerator.pas',
   uRpDataFlash.CommandControllerEditor in 'src\Editors\uRpDataFlash.CommandControllerEditor.pas',
   uRpDataFlash.DataSetProviderList in 'src\Editors\uRpDataFlash.DataSetProviderList.pas',
   uRpDataFlash.EditorComandosSemAutenticacao in 'src\Editors\uRpDataFlash.EditorComandosSemAutenticacao.pas' {FormComandosSemAutenticacao},

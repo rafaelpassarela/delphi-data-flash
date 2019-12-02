@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, uRpDataFlash.Types, uRpDataFlash.ProxyGenerator,
   uRpDataFlash.CommandHelper, uRpDataFlash.Command,
-  uRpDataFlash.DataSetProvider, uRpDataFlash.Components;
+  uRpDataFlash.DataSetProvider, uRpDataFlash.Components, Vcl.AppEvnts;
 
 type
   TComandoCodeInverter = class(TRpDataFlashCommand)
@@ -30,6 +30,7 @@ type
     DFPCadastro_Pessoas: TRpDataFlashDataSetProvider;
     DFCControllerManipulaTexto: TRpDataFlashCommandController;
     DFCControllerFiles: TRpDataFlashCommandController;
+    ApplicationEvents1: TApplicationEvents;
     procedure FormCreate(Sender: TObject);
     procedure ButtonConectarClick(Sender: TObject);
     procedure ButtonDesconectarClick(Sender: TObject);
@@ -54,6 +55,7 @@ type
       const AComando: IRpDataFlashCommandInterfaced): Boolean;
     function DFCControllerFilesCommands0Execute(
       const AComando: IRpDataFlashCommandInterfaced): Boolean;
+    procedure ApplicationEvents1Exception(Sender: TObject; E: Exception);
   private
     { Private declarations }
     FInternalLog: TStrings;
@@ -176,6 +178,16 @@ begin
   except
     // on any error, sinalize as "not executed"
     Result := False;
+  end;
+end;
+
+procedure TFormMainServer.ApplicationEvents1Exception(Sender: TObject; E: Exception);
+begin
+  MemoLog.Lines.BeginUpdate;
+  try
+    MemoLog.Lines.Add(Format('ERROR: [%s] %s', [E.ClassName, E.Message]));
+  finally
+    MemoLog.Lines.EndUpdate;
   end;
 end;
 
@@ -305,7 +317,7 @@ procedure TComandoCodeInverter.DoRegisterParams;
 begin
   inherited;
   NewParam('Palavra', tvpString);
-  NewParam('Invertida', tvpString);
+  NewResult('Invertida', tvpString);
 end;
 
 initialization

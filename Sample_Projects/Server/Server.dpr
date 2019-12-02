@@ -14,7 +14,6 @@ begin
   ReportMemoryLeaksOnShutdown := True; //DebugHook <> 0;
   Application.MainFormOnTaskbar := True;
   Application.Title := 'DataFlash Server';
-  TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TFormMainServer, FormMainServer);
   Application.Run;
 end.

@@ -445,7 +445,7 @@ begin
   lBase := nil;
   lBase := ABaseClass.Create(nil);
   try
-    InterfaceEntry := lBase.GetInterfaceEntry(ISerializableBase);
+    InterfaceEntry := lBase.GetInterfaceEntry(IBaseSerializable);
     Result := InterfaceEntry <> nil;
   finally
     FreeAndNil(lBase);

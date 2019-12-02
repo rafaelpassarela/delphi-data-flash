@@ -2,7 +2,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
   Left = 192
   Top = 107
   BorderIcons = [biSystemMenu, biMaximize]
-  Caption = 'Lista de Comandos Dispon'#237'veis no Servidor'
+  Caption = 'List of commands available on the server'
   ClientHeight = 497
   ClientWidth = 619
   Color = clBtnFace
@@ -71,7 +71,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Margins.Bottom = 8
       Align = alLeft
       Cancel = True
-      Caption = '&Cancelar'
+      Caption = '&Cancel'
       ModalResult = 2
       TabOrder = 0
     end
@@ -106,7 +106,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Width = 93
       Height = 40
       Align = alLeft
-      Caption = '&Marcar Todos'
+      Caption = '&Check All'
       TabOrder = 0
       OnClick = ButtonMarcarClick
     end
@@ -118,7 +118,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Height = 40
       Margins.Left = 8
       Align = alLeft
-      Caption = '&Desmarcar Todos'
+      Caption = '&Uncheck All'
       TabOrder = 1
       OnClick = ButtonDesmarcarClick
     end
@@ -130,7 +130,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Height = 40
       Margins.Right = 8
       Align = alRight
-      Caption = '&Expandir'
+      Caption = '&Expand'
       TabOrder = 2
       OnClick = ButtonExpandirClick
     end
@@ -141,7 +141,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Width = 80
       Height = 40
       Align = alRight
-      Caption = '&Recolher'
+      Caption = 'C&ollapse'
       TabOrder = 3
       OnClick = ButtonRecolherClick
     end
@@ -169,18 +169,16 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
     object LabelProxyName: TLabel
       Left = 9
       Top = 11
-      Width = 128
+      Width = 129
       Height = 13
-      Caption = 'Nome do Arquivo de Proxy'
+      Caption = 'Proxy File Name (Full Path)'
     end
     object LabelAvisoSave: TLabel
       Left = 143
       Top = 35
-      Width = 426
+      Width = 262
       Height = 13
-      Caption = 
-        '* Deixe em branco para mostrar o di'#225'logo de salvamento no moment' +
-        'o de salvar o proxy.'
+      Caption = '* Leave blank to show save dialog when saving proxy.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clRed
       Font.Height = -11
@@ -201,22 +199,24 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Top = 54
       Width = 601
       Height = 73
-      Caption = ' Classe de Configura'#231#245'es '
+      Caption = 'Config Class Info '
       TabOrder = 1
       DesignSize = (
         601
         73)
       object LabelAvisoInterface: TLabel
         AlignWithMargins = True
-        Left = 447
+        Left = 411
         Top = 18
-        Width = 144
+        Width = 180
         Height = 45
         Margins.Left = 8
         Margins.Right = 8
         Margins.Bottom = 8
         Align = alRight
-        Caption = 'Deve implementar a interface "IFileControlConfig".'
+        Caption = 
+          'Must implement interface "IRpDataFlashConfig" from unit "uRpData' +
+          'Flash.Types.pas"'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clRed
         Font.Height = -11
@@ -224,34 +224,33 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
         Font.Style = []
         ParentFont = False
         WordWrap = True
-        ExplicitHeight = 26
       end
       object LabelUnitConfig: TLabel
-        Left = 19
-        Top = 19
-        Width = 175
+        Left = 26
+        Top = 18
+        Width = 151
         Height = 13
-        Caption = 'Unit (somente nome, Ex.: "uConfig")'
+        Caption = 'Only unit name (Ex.: "uConfig")'
       end
       object LabelClassName: TLabel
-        Left = 146
+        Left = 122
         Top = 46
         Width = 55
         Height = 13
         Caption = 'Class Name'
       end
       object EditUnitConfig: TEdit
-        Left = 207
+        Left = 183
         Top = 16
-        Width = 229
+        Width = 217
         Height = 21
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 0
       end
       object EditClassName: TEdit
-        Left = 207
+        Left = 183
         Top = 43
-        Width = 229
+        Width = 217
         Height = 21
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 1
@@ -262,7 +261,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
       Top = 133
       Width = 288
       Height = 17
-      Caption = 'Utilizar arquivos para transporte (TFileCustomObject)'
+      Caption = 'Use Files for Transport (TFileCustomObject)'
       TabOrder = 2
     end
   end
@@ -270,7 +269,7 @@ object FormLRDataFlashProxyGenerator: TFormLRDataFlashProxyGenerator
     Left = 232
     Top = 292
     Bitmap = {
-      494C010105000900240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000900040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
