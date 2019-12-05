@@ -185,7 +185,7 @@ type
     destructor Destroy; override;
 
     procedure Reset; virtual; abstract;
-    procedure FromOther(const AOther : IBaseSerializable); virtual; abstract;
+    procedure FromOther(const AOther : IBaseSerializable); virtual;
     procedure Assign(const AOther : IBaseSerializable); reintroduce;
     procedure SetLastError(const AError : string);
 
@@ -340,15 +340,21 @@ implementation
 procedure TBaseSerializableObject.Assign(const AOther: IBaseSerializable);
 var
   lNode: IXMLNode;
+  lOldFormat: TSerializationFormat;
 begin
   Reset;
 
-  Self.FFormatType := C_DEFAULT_FORMAT;
-  AOther.FormatType := C_DEFAULT_FORMAT;
+  lOldFormat := AOther.FormatType;
+
+  Self.FFormatType := sfXML;
+  AOther.FormatType := sfXML;
 
   AOther.SaveToNode;
   lNode := AOther.XMLNode.CloneNode(True);
   LoadFromNode(lNode);
+
+  if lOldFormat <> sfXML then
+    AOther.FormatType := lOldFormat;
 end;
 
 constructor TBaseSerializableObject.Create(AOwner: TObject; const ANodeName: string);
@@ -438,7 +444,7 @@ begin
 
   lObjClass := Self;
 
-  Result := lObjClass.Create(nil);
+  Result := lObjClass.Create(AOwner);
   Result.LoadFromXmlString(AXmlString);
 end;
 
@@ -735,6 +741,11 @@ begin
   lNode := FXMLNode.ChildNodes.FindNode(AFieldName);
   if lNode <> nil then
     Result := FromNodeAsInterface(lNode);
+end;
+
+procedure TBaseSerializableObject.FromOther(const AOther: IBaseSerializable);
+begin
+  Assign(AOther);
 end;
 
 procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: TTime);
