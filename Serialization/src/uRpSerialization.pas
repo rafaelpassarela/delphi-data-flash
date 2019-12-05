@@ -340,21 +340,20 @@ implementation
 procedure TBaseSerializableObject.Assign(const AOther: IBaseSerializable);
 var
   lNode: IXMLNode;
-  lOldFormat: TSerializationFormat;
 begin
   Reset;
 
-  lOldFormat := AOther.FormatType;
+  Self.FFormatType := AOther.FormatType;
 
-  Self.FFormatType := sfXML;
-  AOther.FormatType := sfXML;
-
-  AOther.SaveToNode;
-  lNode := AOther.XMLNode.CloneNode(True);
-  LoadFromNode(lNode);
-
-  if lOldFormat <> sfXML then
-    AOther.FormatType := lOldFormat;
+  if AOther.FormatType = sfXML then
+  begin
+    AOther.SaveToNode;
+    lNode := AOther.XMLNode.CloneNode(True);
+    LoadFromNode(lNode);
+  end else
+  begin
+    LoadFromJSONString( AOther.SaveToJSONString );
+  end;
 end;
 
 constructor TBaseSerializableObject.Create(AOwner: TObject; const ANodeName: string);
