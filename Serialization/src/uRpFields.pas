@@ -48,6 +48,7 @@ type
     procedure SetAsInteger(const Value: Integer); virtual;
     procedure SetAsBoolean(const Value: Boolean); virtual;
   protected
+    function VarIsNullEx(const Value : Variant) : Boolean;
     function GetValue : Variant; virtual;
     procedure SetValue(const Value: Variant); virtual;
   public
@@ -171,7 +172,7 @@ var
   lValue: Variant;
 begin
   lValue := GetValue;
-  if VarIsNull(lValue) then
+  if VarIsNullEx(lValue) then
     Result := False
   else
     try
@@ -189,7 +190,7 @@ begin
   Result := 0;
 
   lValue := GetValue;
-  if VarIsNull(lValue) then
+  if VarIsNullEx(lValue) then
     Exit;
 
   lResultDate := lValue;
@@ -227,7 +228,7 @@ var
   lValue: Variant;
 begin
   lValue := GetValue;
-  if VarIsNull(lValue) then
+  if VarIsNullEx(lValue) then
     Result := 0
   else
   begin
@@ -267,7 +268,7 @@ var
   lValue: Variant;
 begin
   lValue := GetValue;
-  if VarIsNull(lValue) then
+  if VarIsNullEx(lValue) then
     Result := 0
   else
     try
@@ -282,7 +283,7 @@ var
   lValue: Variant;
 begin
   lValue := GetValue;
-  if VarIsNull(lValue) then
+  if VarIsNullEx(lValue) then
     Result := ''
   else
     Result := VarToStr(lValue);
@@ -379,6 +380,15 @@ end;
 procedure TRpFieldsBase.SetValue(const Value: Variant);
 begin
   FValue := Value;
+end;
+
+function TRpFieldsBase.VarIsNullEx(const Value: Variant): Boolean;
+begin
+  Result := VarIsNull(Value) or (FValue = Unassigned);
+  if not Result then
+    Result := (Value = 'null')
+           or (Value = 'Null')
+           or (Value = 'NULL');
 end;
 
 { TJSONFieldNode }
