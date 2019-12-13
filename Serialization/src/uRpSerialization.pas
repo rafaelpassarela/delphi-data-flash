@@ -110,6 +110,7 @@ type
     FProxyMode : Boolean;
     FLastError: string;
     FIncludeClassName: Boolean;
+    FIncludeEmptyFields: Boolean;
     function GetParentFileName : string;
     function InternalGetField(const AFieldName : string) : TRpFieldsBase;
     function GetNodeName: string;
@@ -215,6 +216,7 @@ type
     property NodeName : string read GetNodeName write SetNodeName;
     property FormatType : TSerializationFormat read GetFormatType write SetFormatType;
     property IncludeClassName : Boolean read GetIncludeClassName write SetIncludeClassName default True;
+    property IncludeEmptyFields : Boolean read FIncludeEmptyFields write FIncludeEmptyFields default False;
     property ProxyMode : Boolean read GetProxyMode write SetProxyMode;
     property LastError : string read FLastError;
 
@@ -360,6 +362,7 @@ constructor TBaseSerializableObject.Create(AOwner: TObject; const ANodeName: str
 begin
   FFormatType := C_DEFAULT_FORMAT;
   FIncludeClassName := True;
+  FIncludeEmptyFields := False;
   FXMLNode := nil;
   FFileName := EmptyStr;
   FLastError := EmptyStr;
@@ -1466,7 +1469,7 @@ begin
       lStr := '';
     end;
 
-    if (lStr <> '') and (lStr <> '[]') then
+    if ((lStr <> '') and (lStr <> '[]')) or (FIncludeEmptyFields) then
       ToNode(AFieldName, lStr);
   end;
 end;
@@ -1505,7 +1508,7 @@ begin
       lStr := '';
     end;
 
-    if lStr <> '' then
+    if (lStr <> '') or (FIncludeEmptyFields) then
       ToNode(AFieldName, lStr);
   end;
 end;
@@ -1546,7 +1549,7 @@ begin
            or (VarIsNumeric(AValue) and (AValue = 0))
            or ((FindVarData(AValue)^.VType = varDate) and (AValue <= 2));
 
-    if not lClear then
+    if (not lClear) or (FIncludeEmptyFields) then
     begin
       if FFormatType = sfXML then
       begin
