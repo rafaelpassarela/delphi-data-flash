@@ -32,14 +32,11 @@ type
     {$ENDIF}
 
     class procedure ResetLength(var S : string);
+    class procedure StringToSet(Info: PTypeInfo; var SetParam; const Value: string);
 
     class function EnumToStr(const ATypInfo : PTypeInfo; const AEnumOrdValue : Cardinal) : string;
     class function StrToEnumOrd(const ATypInfo : PTypeInfo; const AEnumName : string) : Integer;
     class function SetToString(Info: PTypeInfo; const SetParam; Brackets: Boolean = True): string;
-    {$IFNDEF ANDROID}
-    class procedure StringToSet(Info: PTypeInfo; var SetParam; const Value: string);
-    {$ENDIF}
-
     class function InsertWhereCondition(const ASQL, AWhereCondition : string) : string;
     class function StringReplaceWholeWord(const AText, ASearchText, AReplaceText: string;
       const AReplaceFlags: TReplaceFlags): String;
@@ -210,15 +207,16 @@ begin
     Result := '[' + Result + ']';
 end;
 
-{$IFNDEF ANDROID}
 class function TRpStrings.StringReplaceWholeWord(const AText, ASearchText, AReplaceText: string;
   const AReplaceFlags: TReplaceFlags): String;
 const
-  C_SEPARATORS : set of AnsiChar = [' ', '.', ',', '?', '!',#13, #10, #09, '(', ')'];
+  {$WARN WIDECHAR_REDUCED OFF}
+  C_SEPARATORS : set of {$IFDEF ANDROID} Char {$ELSE} AnsiChar {$ENDIF} = [' ', '.', ',', '?', '!',#13, #10, #09, '(', ')'];
+  {$WARN WIDECHAR_REDUCED ON}
 
 var
   lStartPos, lEndPos : Integer;
-  lLeft, lRight : WideString;
+  lLeft, lRight : {$IFDEF ANDROID} string {$ELSE} WideString {$ENDIF};
 
   function isWordThere(const AText, AWord: string; AReplaceFlags: TReplaceFlags;
     var AStartPos, AEndPos: Integer) : Boolean;
@@ -275,26 +273,37 @@ begin
   Result := lLeft + AReplaceText + lRight;
 end;
 
-class procedure TRpStrings.StringToSet(Info: PTypeInfo; var SetParam;
-  const Value: string);
+class procedure TRpStrings.StringToSet(Info: PTypeInfo; var SetParam; const Value: string);
+type
+  PMyChar = {$IFDEF ANDROID} PChar {$ELSE} PAnsiChar {$ENDIF};
 var
-  P: PAnsiChar;
+  P: PMyChar; // {$IFDEF ANDROID} Char {$ELSE} PAnsiChar {$ENDIF};
   EnumInfo: PTypeInfo;
   EnumName: string;
   EnumValue, SetValue: Longint;
 
-  function NextWord(var P: PAnsiChar) : AnsiString;
+  function NextWord(var P: PMyChar) : {$IFDEF ANDROID} string {$ELSE} AnsiString {$ENDIF};
   var
     I: Integer;
   begin
     I := 0;
     // scan til whitespace
+    {$IFDEF XE3UP}
+    while not CharInSet(P[I], [',', ' ', #0,']'] ) do
+    {$ELSE}
     while not (P[I] in [',', ' ', #0,']']) do
+    {$ENDIF}
       Inc(I);
+
     SetString(Result, P, I);
     // skip whitespace
+    {$IFDEF XE3UP}
+    while CharInSet(P[I], [',', ' ',']'] ) do
+    {$ELSE}
     while P[I] in [',', ' ',']'] do
+    {$ENDIF}
       Inc(I);
+
     Inc(P, I);
   end;
 
@@ -304,10 +313,15 @@ begin
     Exit;
 
   SetValue := 0;
-  P := PAnsiChar( AnsiString(Value) );
+  P := PMyChar( {$IFNDEF ANDROID} AnsiString {$ENDIF}(Value) );
   // skip leading bracket and whitespace
+  {$IFDEF XE3UP}
+  while CharInSet(P^, ['[',' '] ) do
+  {$ELSE}
   while P^ in ['[',' '] do
+  {$ENDIF}
     Inc(P);
+
   EnumInfo := GetTypeData(Info)^.CompType^;
   EnumName := string(NextWord(P));
   while EnumName <> '' do
@@ -319,7 +333,6 @@ begin
   end;
   SetOrdValue(Info, SetParam, SetValue);
 end;
-{$ENDIF}
 
 class function TRpStrings.StrToEnumOrd(const ATypInfo: PTypeInfo;
   const AEnumName: string): Integer;

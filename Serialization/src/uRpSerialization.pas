@@ -282,15 +282,28 @@ type
     property SerializationClassName : string read FSerializationClassName write FSerializationClassName;
   end;
 
-  TSerializationClassRegister = class({$IFDEF XE3UP} System.Contnrs.TObjectList {$ELSE} Contnrs.TObjectList {$ENDIF})
+  TSerializationClassRegister = class(
+    {$IFDEF XE3UP}
+      {$IFDEF ANDROID}
+        TList<TSerializationClassRegisterItem>
+      {$ELSE}
+        System.Contnrs.TObjectList
+      {$ENDIF}
+    {$ELSE}
+      Contnrs.TObjectList
+    {$ENDIF})
   protected
+    {$IFNDEF ANDROID}
     function GetItem(const Index : Integer) : TSerializationClassRegisterItem;
+    {$ENDIF}
   public
     class var InternalClassRegister: TSerializationClassRegister;
     procedure Registrate(const AClass : TBaseSerializableObjectClass);
     function GetClass(const AClassName : string) : TBaseSerializableObjectClass; overload;
     function GetClass(const AIndex : Integer) : TBaseSerializableObjectClass; overload;
+    {$IFNDEF ANDROID}
     property Items[const Index: Integer]: TSerializationClassRegisterItem read GetItem; default;
+    {$ENDIF}
   end;
 
   SerializationClassRegistrer = class
@@ -1459,7 +1472,11 @@ begin
     FXMLNode[AFieldName] := ASetTypeInfo.Name;
     lNode := FXMLNode.ChildNodes.FindNode(AFieldName);
     lNode.Attributes['ex'] := 'set';
-    FXMLNode.Attributes[String(ASetTypeInfo.Name)] := 'set of ' + lItensInfo.Name;
+    {$IFDEF ANDROID}
+      FXMLNode.Attributes[ASetTypeInfo.NameFld.ToString] := 'set of ' + lItensInfo.NameFld.ToString;
+    {$ELSE}
+      FXMLNode.Attributes[String(ASetTypeInfo.Name)] := 'set of ' + lItensInfo.Name;
+    {$ENDIF}
   end
   else
   begin
@@ -1498,7 +1515,11 @@ begin
       lValues := lValues  + GetEnumName(ASetTypeInfo, I);
     end;
 
-    FXMLNode.Attributes[string(ASetTypeInfo.Name)] := lValues;
+    {$IFDEF ANDROID}
+      FXMLNode.Attributes[ASetTypeInfo.NameFld.ToString] := lValues;
+    {$ELSE}
+      FXMLNode.Attributes[string(ASetTypeInfo.Name)] := lValues;
+    {$ENDIF}
   end
   else
   begin
@@ -1917,10 +1938,12 @@ begin
   Result := TBaseSerializableObjectClass(Items[AIndex].SerializationClass);
 end;
 
+{$IFNDEF ANDROID}
 function TSerializationClassRegister.GetItem(const Index: Integer): TSerializationClassRegisterItem;
 begin
   Result := TSerializationClassRegisterItem(Self.Get(Index));
 end;
+{$ENDIF}
 
 procedure TSerializationClassRegister.Registrate(const AClass: TBaseSerializableObjectClass);
 var
