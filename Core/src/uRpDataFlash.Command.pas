@@ -1,13 +1,24 @@
 unit uRpDataFlash.Command;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uRpDataFlash.Types, IdContext,
-  Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uRpDataFlash.ConvertUtils,
-  uRpSerialization, Windows, IdCustomHttpServer, uRpResourceString;
+  IdCustomHttpServer, IdContext,
+  {$IFDEF XE3UP}
+    System.Classes, System.SysUtils, Xml.XMLIntf, Xml.XMLDoc, System.Variants,
+    System.StrUtils,
+    {$IFDEF ANDROID}
+
+    {$ELSE}
+       System.Contnrs,
+    {$ENDIF}
+  {$ELSE}
+    Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, Variants, StrUtils,
+  {$ENDIF}
+  uRpDataFlash.Types, uRpAlgorithms, uRpJsonBase, uRpDataFlash.ConvertUtils,
+  uRpSerialization, uRpResourceString;
 
 type
   TRpDataFlashCommandParameterList = class;

@@ -5,8 +5,18 @@ unit uRpDataFlash.Types;
 interface
 
 uses
-  SysUtils, Classes, Contnrs, DB, uRpAlgorithms, StrUtils,
-  DBConsts, Variants, uRpSerialization;
+  {$IFDEF XE3UP}
+    System.SysUtils, System.Classes, Data.DB, Data.DBConsts, System.StrUtils,
+    System.Variants,
+    {$IFDEF ANDROID}
+
+    {$ELSE}
+      System.Contnrs,
+    {$ENDIF}
+  {$ELSE}
+    SysUtils, Classes, Contnrs, DB, DBConsts, StrUtils, Variants,
+  {$ENDIF}
+  uRpAlgorithms, uRpSerialization;
 
 const
   TAG_RET_ERROR = 'ERROR';

@@ -6,12 +6,17 @@ interface
 
 uses
   {$IFDEF XE3UP}
-  Vcl.Graphics, System.Types, Vcl.Controls, System.SysUtils, Winapi.Windows,
-  System.Classes, Vcl.Forms, System.DateUtils,
+    System.SysUtils, System.DateUtils,
+    {$IFDEF ANDROID}
+
+    {$ELSE}
+      Winapi.Windows,
+    {$ENDIF}
   {$ELSE}
-  TypInfo, Graphics, Types, Controls, SysUtils, Windows, Classes, Forms, DateUtils,
+    TypInfo, Graphics, Types, Controls, SysUtils, Windows, Classes, Forms,
+    DateUtils, StrUtils,
   {$ENDIF}
-  StrUtils, uRpResourceString;
+  uRpResourceString;
 
 type
   TRpDateTime = class
@@ -63,7 +68,11 @@ var
 var
   lFormatSettings : TFormatSettings;
 begin
-  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, lFormatSettings);
+  {$IFDEF XE3UP}
+    lFormatSettings := FormatSettings;
+  {$ELSE}
+    GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, lFormatSettings);
+  {$ENDIF}
 
   if (Trim(AValue) = '') or (Trim(AFormat) = '') then
   begin
