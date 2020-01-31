@@ -440,8 +440,12 @@ var
   Count: Integer;
 begin
   Count := Decr(FFRefCount);
+// Android generate this hint:
+// [DCC Hint] : H2593 Code has no effect. Compiler generated temporary variable is cleared instead
+  {$IFNDEF ANDROID}
   if Count <= 0 then
-    self.Free;
+    Self.Free;
+  {$ENDIF}
   Result := Count;
 end;
 
@@ -1170,7 +1174,11 @@ end;
 
 class function TJSONObject.ParseJSONValue(const Data: UTF8String): TJSONValue;
 begin
-  Result := ParseJSONValue(BytesOf(Data), 0, True);
+  {$IFDEF ANDROID}
+    Result := ParseJSONValue(BytesOf(string(Data)), 0, True);
+  {$ELSE}
+    Result := ParseJSONValue(BytesOf(Data), 0, True);
+  {$ENDIF}
 end;
 
 class function TJSONObject.ParseJSONValueUTF8(const Data: TBytes; const Offset: Integer; const Count: Integer): TJSONValue;
