@@ -11,7 +11,7 @@ uses
 type
   TComandoCodeInverter = class(TRpDataFlashCommand)
   protected
-    function DoGetDescricao: string; override;
+    function DoGetDescription: string; override;
     function DoExecute: Boolean; override;
     procedure DoRegisterParams; override;
   end;
@@ -307,7 +307,7 @@ begin
   Result := True;
 end;
 
-function TComandoCodeInverter.DoGetDescricao: string;
+function TComandoCodeInverter.DoGetDescription: string;
 begin
   Result := 'Comando de Teste declarado no código, diferente dos outros que é no componente. ' + sLineBreak
           + 'Este comando recebe uma palavra e retorna ela invertida.';

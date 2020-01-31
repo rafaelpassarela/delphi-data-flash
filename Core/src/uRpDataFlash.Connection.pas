@@ -264,7 +264,7 @@ begin
   FConector := TIdHTTP.Create(FOwner);
   Conector.ConnectTimeout := pConectionTimeout;
   Conector.ReadTimeout := pReadTimeout;
-  Conector.Request.ContentType := C_REST_CONTENT_TYPE;
+  Conector.Request.ContentType := C_REST_CONTENT_TYPE_DELPHI;
 end;
 
 function TRpDataFlashConnectionHelperREST.GetConector: TIdHTTP;

@@ -900,7 +900,7 @@ begin
       end;
     end else
     begin
-      if ARequestInfo.ContentType = C_REST_CONTENT_TYPE then
+      if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_DELPHI then
         AResponseInfo.ContentText := AValor
       else
       begin
@@ -916,7 +916,9 @@ begin
           if AResponseInfo.ContentEncoding = EmptyStr then
             AResponseInfo.ContentEncoding := 'iso-8859-1';
 
-          lIsXML := lResposta[1] = '<';
+          lIsXML := (lResposta[1] = '<')
+                and (ARequestInfo.ContentType <> C_REST_CONTENT_TYPE_JSON);
+
           if lIsXML then
           begin
             if Pos('<?xml ', lResposta) <= 0 then
@@ -1241,13 +1243,13 @@ begin
   lQuebra := TRpDataFlashProtocolBreaker.Create;
   try
     // quando vem do componente ja esta correto
-    if ARequestInfo.ContentType = C_REST_CONTENT_TYPE then
+    if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_DELPHI then
       lLinha := ARequestInfo.UnparsedParams
     else
       lLinha := TRpURLConverter.DecodeURL(ARequestInfo.UnparsedParams);
 
     // testa se é comando vindo de componente ou de outra fonte (browser, php, java...)
-    if ARequestInfo.ContentType = C_REST_CONTENT_TYPE then
+    if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_DELPHI then
       Result := lLinha
     else
     begin
@@ -1272,6 +1274,9 @@ begin
           or ((lComando.GetParams.Item[i].ParamType = tpInternal) and (lComando.GetParams.Item[i].Name = C_PARAM_INT_FORMAT_TYPE)) then
             lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Name];
         end;
+
+        if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_JSON then
+          lComando.GetParams.SerializationFormat := sfJSON;
 
         Result := lComando.GetParams.Serialize;
       end
@@ -2552,7 +2557,7 @@ begin
   CoInitialize(nil);
 
   // vem do componente
-  if ARequestInfo.ContentType = C_REST_CONTENT_TYPE then
+  if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_DELPHI then
   begin
     // reverter a criptografia
     try
@@ -2569,7 +2574,8 @@ begin
   end
   else
   begin
-    if Pos('INTERNAL_FORMATTYPE=2', AnsiUpperCase(ARequestInfo.QueryParams)) > 0 then
+    if (Pos('INTERNAL_FORMATTYPE=2', AnsiUpperCase(ARequestInfo.QueryParams)) > 0)
+    or (ARequestInfo.ContentType = C_REST_CONTENT_TYPE_JSON) then
       lType := sfJSON
     else
       lType := sfXML;

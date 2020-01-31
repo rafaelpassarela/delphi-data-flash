@@ -42,7 +42,8 @@ const
   C_GROUP_INTERNAL = '_internal_';
   C_GROUP_DATASET = '_dataset_provider_';
   C_REST_PARAM = '_rest_prm_http_';
-  C_REST_CONTENT_TYPE = 'application/delphi';
+  C_REST_CONTENT_TYPE_DELPHI = 'application/delphi';
+  C_REST_CONTENT_TYPE_JSON = 'application/json';
   C_FTP_DEFAULT_USER = 'tcpcomftpuser';
   C_FTP_DEFAULT_PWD  = '@ftpusertcpcom#';
   C_FTP_ID_MARK = 'ID';

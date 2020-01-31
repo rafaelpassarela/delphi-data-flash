@@ -329,7 +329,7 @@ type
     function GetCommand: string; virtual;
     function DoCallBack(var AParamsCallback : TRpDataFlashCommandParameterList) : Boolean; virtual;
     function DoExecute : Boolean; virtual; abstract;
-    function DoGetDescricao: string; virtual;
+    function DoGetDescription: string; virtual;
     function FindParametro(const AName: string): TRpDataFlashCommandParameter;
     function FindResult(const AName: string): TRpDataFlashCommandParameter;
     function GetProcessType : TRpDataFlashProcessType; virtual;
@@ -405,7 +405,8 @@ type
       out ACommandObject : IRpDataFlashCommandInterfaced;
       out ALifeCycle: TRpDataFlashLifeCycle;
       const AServerInstanceController : IServerInstanceController;
-      const ASessionInstanceController : ISessionInstanceController) : Boolean; overload;
+      const ASessionInstanceController : ISessionInstanceController;
+      const ASerializationFormat : TSerializationFormat = sfAuto) : Boolean; overload;
   end;
 
   TRpDataFlashSendCommand = class(TRpDataFlashCommand)
@@ -963,9 +964,14 @@ begin
   if AParams <> EmptyStr then
   begin
     if AParams[1] = '<' then
-      InternalLoadXML
-    else
-      InternalLoadJson
+    begin
+      InternalLoadXML;
+      SerializationFormat := sfXML;
+    end else
+    begin
+      InternalLoadJson;
+      SerializationFormat := sfJSON;
+    end;
   end
   else
     raise Exception.Create('Nenhum parâmetro foi recebido.');
@@ -1263,7 +1269,8 @@ begin
     ACommandObject,
     lLifeCycle,
     AServerInstanceController,
-    ASessionInstanceController);
+    ASessionInstanceController,
+    AParams.SerializationFormat);
 
   if ALoadParams and Assigned(ACommandObject) then
     ACommandObject.DoLoad(loSend, AParams);
@@ -1275,7 +1282,8 @@ class function TRpDataFlashCommand.LoadCommand(const ACommandClass: string;
   out ACommandObject: IRpDataFlashCommandInterfaced;
   out ALifeCycle: TRpDataFlashLifeCycle;
   const AServerInstanceController: IServerInstanceController;
-  const ASessionInstanceController: ISessionInstanceController): Boolean;
+  const ASessionInstanceController: ISessionInstanceController;
+  const ASerializationFormat : TSerializationFormat): Boolean;
 var
   lComandoClass: TRpDataFlashAbstractClass;
 begin
@@ -1302,6 +1310,7 @@ begin
 
         ACommandObject.ServerInstanceController := AServerInstanceController;
         ACommandObject.SessionInstanceController := ASessionInstanceController;
+        ACommandObject.GetParams.SerializationFormat := ASerializationFormat;
       end;
 
       if ALifeCycle = tlfSession then
@@ -1373,7 +1382,7 @@ begin
 //dummy
 end;
 
-function TRpDataFlashCommand.DoGetDescricao: string;
+function TRpDataFlashCommand.DoGetDescription: string;
 begin
   Result := R_DATAFLASH_CMD_NO_DESCRIPTION;
 end;
@@ -1544,7 +1553,7 @@ end;
 
 function TRpDataFlashCommand.GetDescription: string;
 begin
-  Result := DoGetDescricao;
+  Result := DoGetDescription;
 end;
 
 function TRpDataFlashCommand.GetExecutor: IRpPackageCommandExecutor;
