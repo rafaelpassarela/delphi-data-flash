@@ -1,14 +1,26 @@
 unit uRpDataFlash.ProxyGenerator;
 
-//{$I ..\..\Common\src\RpInc.inc}
+{$I ..\..\Common\src\RpInc.inc}
 
 interface
 
 uses
-  Classes, uRpDataFlash.Command, SysUtils, Contnrs, uRpDataFlash.Types,
-  uRpDataFlash.Components, uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
-  uRpDataFlash.GetCommandList, DBClient, DB, Forms, uRpDataFlash.ObjectReg,
-  uRpDataFlash.Utils, uRpResourceString;
+  {$IFDEF XE3UP}
+    System.Classes, System.SysUtils, Xml.XMLIntf, Xml.XMLDoc, System.Variants,
+    System.StrUtils, System.Math, Data.DB, Datasnap.DBClient,
+    {$IFDEF ANDROID}
+       System.Generics.Collections, Posix.Unistd,
+    {$ELSE}
+       System.Contnrs, Vcl.Forms,
+    {$ENDIF}
+  {$ELSE}
+    Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, Variants, StrUtils,
+    DBClient, DB, Forms, Math,
+  {$ENDIF}
+  uRpDataFlash.Command, uRpDataFlash.Types, uRpDataFlash.Components,
+  uRpDataFlash.CommandController, uRpDataFlash.DataSetProvider,
+  uRpDataFlash.GetCommandList, uRpDataFlash.ObjectReg, uRpDataFlash.Utils,
+  uRpResourceString;
 
 const
   C_DEFAULT_PROXY_NAME = 'uClassesProxyGenerator';
@@ -166,10 +178,6 @@ type
   end;
 
 implementation
-
-uses
-  StrUtils,
-  Math;
 
 function FormatParamLine(const pStartIdent : Byte; const pLine : string; const pDelimiter : Char) : string;
 var

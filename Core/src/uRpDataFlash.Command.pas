@@ -10,7 +10,7 @@ uses
     System.Classes, System.SysUtils, Xml.XMLIntf, Xml.XMLDoc, System.Variants,
     System.StrUtils,
     {$IFDEF ANDROID}
-
+       System.Generics.Collections, Posix.Unistd,
     {$ELSE}
        System.Contnrs,
     {$ENDIF}
@@ -242,7 +242,7 @@ type
 
   TRpDataFlashCommandParameterList = class(TPersistent)
   private
-    FParamList : TObjectList;
+    FParamList : {$IFDEF ANDROID} TList<TRpDataFlashCommandParameter> {$ELSE} TObjectList {$ENDIF};
     FCommand: string;
     FSerializationFormat: TSerializationFormat;
     FFileTransferSupport: IRpDataFlashFileTransferSupport;
@@ -576,9 +576,11 @@ type
     property Mnemonic : string read FMnemonic write FMnemonic;
   end;
 
-  TTcpClassRegister = class(TObjectList)
+  TTcpClassRegister = class({$IFDEF ANDROID} TList<TTcpClassRegisterItem> {$ELSE} TObjectList {$ENDIF})
   protected
+    {$IFNDEF ANDROID}
     function GetItem(const Index : Integer) : TTcpClassRegisterItem;
+    {$ENDIF}
   public
     class var TcpClassRegister: TTcpClassRegister;
     procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
@@ -586,7 +588,9 @@ type
       const ALifeCycle : TRpDataFlashLifeCycle = tlfInstance);
     function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
     function GetClass(const AClassName : string; out ALifeCycle : TRpDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
+    {$IFNDEF ANDROID}
     property Items[const Index: Integer]: TTcpClassRegisterItem read GetItem; default;
+    {$ENDIF}
   end;
 
   TCPClassRegistrer = class
@@ -984,7 +988,11 @@ end;
 
 constructor TRpDataFlashCommandParameterList.Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport);
 begin
-  FParamList := TObjectList.Create;
+  {$IFDEF ANDROID}
+    FParamList := TList<TRpDataFlashCommandParameter>.Create;
+  {$ELSE}
+    FParamList := TObjectList.Create;
+  {$ENDIF};
   FFileTransferSupport := AFileTransferSupport;
   AddNew( C_PARAM_INT_STATUS_PROC , EmptyStr, tpInternal, tvpInteger);
 end;
@@ -1901,10 +1909,12 @@ begin
     end;
 end;
 
+{$IFNDEF ANDROID}
 function TTcpClassRegister.GetItem(const Index : Integer) : TTcpClassRegisterItem;
 begin
   Result := TTcpClassRegisterItem(Self.Get(Index));
 end;
+{$ENDIF}
 
 procedure TTcpClassRegister.Registrar(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
@@ -2322,7 +2332,7 @@ end;
 function TRpFileProxy.Remove: Boolean;
 begin
   if (FileName <> '') and FileExists(FileName) then
-    Result := DeleteFile(PChar(FFileName))
+    Result := System.SysUtils.DeleteFile(PChar(FFileName))
   else
     Result := True;
 end;
