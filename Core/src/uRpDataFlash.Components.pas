@@ -322,6 +322,7 @@ type
     FBaseCommandPrefix: string;
     FNumeroConectados: Integer;
     FOnObjectRequest: TRpDataFlashOnObjectRequest;
+    FAuthEnable: Boolean;
     function EnviarCallBack(const AContext: TIdContext; const AMenssage : string) : Boolean;
     procedure NotificarConexaoCliente(const AConnectionItem : TRpDataFlashConnectionItem;
       const AEvento : TRpDataFlashOnClientConnection);
@@ -422,6 +423,7 @@ type
     property UseControllers : Boolean read GetUseControllers write SetUseControllers default True;
     property WithoutAuthCommands : string read FWithoutAuthCommands write FWithoutAuthCommands;
     property BaseCommandPrefix : string read FBaseCommandPrefix write FBaseCommandPrefix;
+    property AuthEnable : Boolean read FAuthEnable write FAuthEnable default False;
 
     property OnBeforeDataSetStartTransaction : TRpDataFlashOnStartTransactionEvent read FOnBeforeDataSetStartTransaction write FOnBeforeDataSetStartTransaction;
     property OnBeforeDataSetCommitTransaction : TRpDataFlashOnTransactionEvent read FOnBeforeDataSetCommitTransaction write FOnBeforeDataSetCommitTransaction;
@@ -874,11 +876,31 @@ var
   lProtocolo: TRpDataFlashProtocol;
   lResposta: string;
   lIsXML: Boolean;
-  lErro: Boolean;
 
-const
-  C_ERRO_JSON = '"exec_Exception":{"Tipo":2,"TipoValor":1,"Valor":""}';
-  C_ERRO_XML  = '<exec_Exception Tipo="2" TipoValor="1"></exec_Exception>';
+  function IsError : Boolean;
+  const
+    C_ERROR_LOAD_JSON = '{"Exception": {"Classe": ""';
+    C_ERROR_EXEC_JSON = '"exec_Exception":{"Tipo":2,"TipoValor":1,"BaseClass":"","Valor":""}';
+    C_ERROR_EXEC_APP_JSON = '"exec_Exception":""';
+    C_ERROR_LOAD_XML = '<Exception><Classe></Classe>';
+    C_ERROR_EXEC_XML = '<exec_Exception Tipo="2" TipoValor="1"></exec_Exception>';
+  begin
+    // 2 error types, before = onLoadCmd (Exception) and after = OnExecCmd (exec_Exception)
+    if Pos(C_PARAM_INT_EXCEPTION, lResposta) > 0 then
+    begin
+      if lIsXML then
+        Result := Pos(C_ERROR_EXEC_XML, lResposta) = 0
+      else
+        Result := (Pos(C_ERROR_EXEC_JSON, lResposta) = 0)
+              and (Pos(C_ERROR_EXEC_APP_JSON, lResposta) = 0)
+    end else
+    begin
+      if lIsXML then
+        Result := Pos(C_ERROR_LOAD_XML, lResposta) = 0
+      else
+        Result := Pos(C_ERROR_LOAD_JSON, lResposta) = 0
+    end;
+  end;
 
 begin
   if ARequestInfo = nil then
@@ -926,17 +948,15 @@ begin
               lResposta := '<?xml version="1.0" encoding="iso-8859-1"?>'
                          + lResposta;
             end;
-            lErro := Pos(C_ERRO_XML, lResposta) > 0;
           end
           else
           begin
             AResponseInfo.ContentType := 'application/json';
             AResponseInfo.CustomHeaders.Add('Access-Control-Allow-Origin: *');
-            lErro := Pos(C_ERRO_JSON, lResposta) > 0;
           end;
 
           // configura o código de retorno
-          if lErro then
+          if IsError then
             AResponseInfo.ResponseNo := 400
           else
             AResponseInfo.ResponseNo := 200;
@@ -1281,7 +1301,7 @@ begin
         Result := lComando.GetParams.Serialize;
       end
       else
-        raise ERpDataFlashException.Create('Comando não suportado: ' + sLineBreak + 'Comando: ''' + lNomeClasseComando + '''');
+        raise ERpDataFlashException.CreateFmt('Comando não suportado: Comando [%s].', [lNomeClasseComando]);
     end;
   finally
     FreeAndNil(lComandos);
@@ -2026,14 +2046,14 @@ begin
       lCarregado := (TRpDataFlashCommand.LoadCommand(AProtocol.Message, lComando, lParametros, Self, AItem));
 
     if not lCarregado then
-      raise ERpDataFlashException.CreateFmt('Comando não suportado: '#10#13'Comando: "%s".', [lParametros.Command]);
+      raise ERpDataFlashException.CreateFmt('Comando não suportado: Comando [%s].', [lParametros.Command]);
 
     lNomeComando := lComando.Command;
     lComando.RequestInfo := ARequestInfo;
     lComando.ResponseInfo := AResponseInfo;
 
     // se tem rotina de autenticacao e o comando recebido nao é para autenticar, aborta o processo
-    if Assigned(FOnAuthenticateClient) and (not AItem.Authenticated) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
+    if Assigned(FOnAuthenticateClient) and (FAuthEnable) and (not AItem.Authenticated) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
       raise ERpDataFlashUserNotFound.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
@@ -2147,6 +2167,7 @@ begin
   FControllers := TRpDataFlashCommandControllerList.Create(False);
   FProviders := TRpDataFlashProviderControllerList.Create(False);
   FUtilizarControllers := True;
+  FAuthEnable := False;
   FBaseCommandPrefix := 'TComando';
 end;
 

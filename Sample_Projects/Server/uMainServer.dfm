@@ -56,7 +56,7 @@ object FormMainServer: TFormMainServer
     Width = 100
     Height = 25
     Caption = 'Connect'
-    TabOrder = 2
+    TabOrder = 4
     OnClick = ButtonConectarClick
   end
   object ButtonDesconectar: TButton
@@ -66,7 +66,7 @@ object FormMainServer: TFormMainServer
     Height = 25
     Caption = 'Disconnect'
     Enabled = False
-    TabOrder = 3
+    TabOrder = 5
     OnClick = ButtonDesconectarClick
   end
   object MemoLog: TMemo
@@ -76,7 +76,7 @@ object FormMainServer: TFormMainServer
     Height = 132
     Anchors = [akLeft, akTop, akRight, akBottom]
     ScrollBars = ssVertical
-    TabOrder = 4
+    TabOrder = 6
   end
   object ButtonVerLog: TButton
     Left = 8
@@ -84,10 +84,22 @@ object FormMainServer: TFormMainServer
     Width = 70
     Height = 25
     Caption = 'Log'
-    TabOrder = 5
+    TabOrder = 3
     OnClick = ButtonVerLogClick
   end
+  object CheckBoxAuthCli: TCheckBox
+    Left = 211
+    Top = 42
+    Width = 80
+    Height = 17
+    Caption = 'Auth Client'
+    Checked = True
+    State = cbChecked
+    TabOrder = 2
+    OnClick = CheckBoxAuthCliClick
+  end
   object RpDataFlashServerConnectionTeste: TRpDataFlashServerConnection
+    ConfigREST.Enabled = True
     OnNewLog = RpDataFlashServerConnectionTesteNewLog
     OnClientConnection = RpDataFlashServerConnectionTesteClientConnection
     OnAuthenticateClient = RpDataFlashServerConnectionTesteAuthenticateClient
@@ -237,7 +249,7 @@ object FormMainServer: TFormMainServer
   end
   object ApplicationEvents1: TApplicationEvents
     OnException = ApplicationEvents1Exception
-    Left = 264
-    Top = 32
+    Left = 16
+    Top = 112
   end
 end

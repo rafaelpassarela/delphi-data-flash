@@ -16,6 +16,12 @@ type
     procedure DoRegisterParams; override;
   end;
 
+  TComandoFavIco = class(TRpDataFlashCommand)
+  protected
+    procedure DoRegisterParams; override;
+    function DoExecute: Boolean; override;
+  end;
+
   TFormMainServer = class(TForm)
     RpDataFlashServerConnectionTeste: TRpDataFlashServerConnection;
     LabelNomeServer: TLabel;
@@ -31,6 +37,7 @@ type
     DFCControllerManipulaTexto: TRpDataFlashCommandController;
     DFCControllerFiles: TRpDataFlashCommandController;
     ApplicationEvents1: TApplicationEvents;
+    CheckBoxAuthCli: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure ButtonConectarClick(Sender: TObject);
     procedure ButtonDesconectarClick(Sender: TObject);
@@ -56,6 +63,7 @@ type
     function DFCControllerFilesCommands0Execute(
       const AComando: IRpDataFlashCommandInterfaced): Boolean;
     procedure ApplicationEvents1Exception(Sender: TObject; E: Exception);
+    procedure CheckBoxAuthCliClick(Sender: TObject);
   private
     { Private declarations }
     FInternalLog: TStrings;
@@ -77,6 +85,11 @@ procedure TFormMainServer.ButtonVerLogClick(Sender: TObject);
 begin
   MemoLog.Lines.Assign( FInternalLog );
   FInternalLog.Clear;
+end;
+
+procedure TFormMainServer.CheckBoxAuthCliClick(Sender: TObject);
+begin
+  RpDataFlashServerConnectionTeste.AuthEnable := CheckBoxAuthCli.Checked;
 end;
 
 function TFormMainServer.DFCControllerFilesCommands0Execute(
@@ -239,9 +252,15 @@ procedure TFormMainServer.RpDataFlashServerConnectionTesteAuthenticateClient(
   Sender: TObject; const AConnectionItem: IAutenticationProvider;
   out AAutenticado: Boolean; out AErrorMessage: string);
 begin
-  AAutenticado := (AConnectionItem.UserName = 'TESTE') and (AConnectionItem.Password = '1234');
-  if not AAutenticado then
-    AErrorMessage := 'Usuário ou senha inválidos. Para login, utilize:'#10#13'Usuário = TESTE'#10#13'Senha = 1234';
+  if CheckBoxAuthCli.Checked then
+  begin
+    AAutenticado := (AConnectionItem.UserName = 'TESTE') and (AConnectionItem.Password = '1234');
+    if not AAutenticado then
+      AErrorMessage := 'Usuário ou senha inválidos. Para login, utilize:'#10#13'Usuário = TESTE'#10#13'Senha = 1234';
+  end else
+  begin
+    AAutenticado := True;
+  end;
 end;
 
 
@@ -300,6 +319,10 @@ var
 begin
   lInvertida := EmptyStr;
   lPalavra := Param['Palavra'].AsString;
+
+  if lPalavra = EmptyStr then
+    raise Exception.Create('Nenhuma palavra informada.');
+
   for i := 1 to Length(lPalavra) do
     lInvertida := lPalavra[i] + lInvertida;
 
@@ -320,7 +343,22 @@ begin
   NewResult('Invertida', tvpString);
 end;
 
+{ TComandoFavIco }
+
+function TComandoFavIco.DoExecute: Boolean;
+begin
+  ResultParam['icon'].AsString := 'NULL';
+  Result := True;
+end;
+
+procedure TComandoFavIco.DoRegisterParams;
+begin
+  inherited;
+  NewResult('icon', tvpString);
+end;
+
 initialization
-  TCPClassRegistrer.Registrate(TComandoCodeInverter, 'HARD_CODE');
+  TCPClassRegistrer.Registrate(TComandoCodeInverter, 'HARD_CODE', 'inverter');
+  TCPClassRegistrer.Registrate(TComandoFavIco, 'HARD_CODE', 'favicon.ico');
 
 end.

@@ -193,6 +193,7 @@ type
     procedure ToNode(const ANode : IXMLNode);
     procedure FromNode(const ANode : IXMLNode);
     function ToJson : string;
+    function ToApplicationJson : string;
 
     procedure Assign(const Source: TRpDataFlashCommandParameter); reintroduce;
   end;
@@ -235,6 +236,7 @@ type
     FCommand: string;
     FSerializationFormat: TSerializationFormat;
     FFileTransferSupport: IRpDataFlashFileTransferSupport;
+    FContentType: string;
     function GetParamByName(const AName: string; const AParamType : TRpDataFlashParamType): TRpDataFlashCommandParameter;
     function GetParamByIdx(const Index: Integer) : TRpDataFlashCommandParameter;
     function GetProcessingStatus: TRpDataFlashProcessingStatus;
@@ -243,8 +245,9 @@ type
   protected
     procedure ToNode(const ANode : IXMLNode); virtual;
     procedure FromNode(const ANode : IXMLNode); virtual;
-    function ToJson : string;
     procedure FromJson(const AJsonPair : TJSONPair); virtual;
+    function ToJson : string;
+    function ToApplicationJson : string;
   public
     constructor Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport); virtual;
     destructor Destroy; override;
@@ -276,6 +279,7 @@ type
     property ProcessingStatus : TRpDataFlashProcessingStatus read GetProcessingStatus write SetProcessingStatus;
     property Count : Integer read GetCount;
     property SerializationFormat : TSerializationFormat read FSerializationFormat write FSerializationFormat;
+    property ContentType : string read FContentType write FContentType;
   end;
 
   TRpDataFlashCommand = class(TInterfacedObject, IRpDataFlashCommandInterfaced)
@@ -739,6 +743,41 @@ begin
   end;
 end;
 
+function TRpDataFlashCommandParameter.ToApplicationJson: string;
+var
+  lValue : string;
+  lFmtString : string;
+begin
+  if VarIsNull(FValue) then
+    lValue := 'null'
+  else
+    lValue := StringReplace(FValue, '\', '\\', [rfReplaceAll]);
+
+  lFmtString := '"%s":';
+
+//-    tvpInteger: ;
+//-    tvpFloat: ;
+//-    tvpBoolean: ;
+//-    tvpBase: ;
+//-    tvpJSON: ;
+
+//    tvpString: ;
+//    tvpBase64: ;
+//    tvpDAO: ;
+//    tvpDateTime: ;
+//    tvpFile: ;
+//    tvpBinaryFile: ;
+
+  if FValueType in [tvpInteger, tvpFloat, tvpBoolean, tvpBase, tvpJSON] then
+    lFmtString := lFmtString + '%s'
+  else
+    lFmtString := lFmtString + '"%s"';
+
+  Result := Format(lFmtString, [
+    FName,
+    lValue ]);
+end;
+
 function TRpDataFlashCommandParameter.ToJson: string;
 var
   lFormatStr: string;
@@ -979,6 +1018,7 @@ end;
 
 constructor TRpDataFlashCommandParameterList.Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport);
 begin
+  FContentType := EmptyStr;
   FParamList := TObjectList.Create;
   FFileTransferSupport := AFileTransferSupport;
   AddNew( C_PARAM_INT_STATUS_PROC , EmptyStr, tpInternal, tvpInteger);
@@ -1131,18 +1171,47 @@ begin
   end;
 end;
 
+function TRpDataFlashCommandParameterList.ToApplicationJson: string;
+var
+  i: Integer;
+  lParametros: string;
+  lItem: TRpDataFlashCommandParameter;
+begin
+  lParametros := '';
+
+  // se tem erro, retorna somente ele
+  lParametros := InternalParam[C_PARAM_INT_EXCEPTION].AsString;
+  if lParametros <> EmptyStr then
+    lParametros := Format('"%s":"%s"', [C_PARAM_INT_EXCEPTION, lParametros])
+  else begin
+    for I := 0 to FParamList.Count - 1 do
+    begin
+      lItem := TRpDataFlashCommandParameter(FParamList[i]);
+      if (lItem.ParamType = tpOutput) or (lItem.Name = C_PARAM_INT_EXCEPTION) then
+      begin
+        if lParametros <> '' then
+          lParametros := lParametros + ',';
+
+        lParametros := lParametros + lItem.ToApplicationJson;
+      end;
+    end;
+  end;
+
+  Result := '{' +  lParametros + '}';
+end;
+
 function TRpDataFlashCommandParameterList.ToJson: string;
 var
-  I: Integer;
+  i: Integer;
   lParametros: string;
 begin
   lParametros := '';
-  for I := 0 to FParamList.Count - 1 do
+  for i := 0 to FParamList.Count - 1 do
   begin
     if lParametros <> '' then
       lParametros := lParametros + ',';
 
-    lParametros := lParametros + TRpDataFlashCommandParameter(FParamList[I]).ToJson;
+    lParametros := lParametros + TRpDataFlashCommandParameter(FParamList[i]).ToJson;
   end;
 
   Result := '"Parametros": {' + lParametros + '}';
@@ -1188,10 +1257,11 @@ begin
   // mantem como padrao o JSON
   if SerializationFormat in [sfAuto, sfJSON] then
   begin
-    Result := '{"Comando":"' + FCommand + '",';
-    Result := Result
-            + ToJson
-            + '}';
+//lComando.RequestInfo.ContentType
+    if FContentType = C_REST_CONTENT_TYPE_JSON then
+      Result := ToApplicationJson
+    else
+      Result := '{"Comando":"' + FCommand + '",' + ToJson + '}';
   end
   else
   begin
@@ -1397,6 +1467,9 @@ end;
 
 function TRpDataFlashCommand.DoGetSerializedParams: string;
 begin
+  if Assigned(FRequestInfo) then // and (FRequestInfo.ContentType = C_REST_CONTENT_TYPE_JSON) then
+    FParamList.ContentType := FRequestInfo.ContentType;
+
   Result := FParamList.Serialize;
 end;
 
