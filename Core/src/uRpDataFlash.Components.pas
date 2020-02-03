@@ -119,13 +119,13 @@ type
   private
     FInterfaceList : TInterfaceList;
     FHandler: TIdIOHandler;
-    FNomeCliente: string;
+    FClientName: string;
     FExecutor: IRpPackageCommandExecutor;
     FOwner: TRpDataFlashCustomConnection;
     FTcpClientPonte: TRpDataFlashCustomClientConnection;
     FQuebras : TRpDataFlashProtocolBreakerList;
     FOnCallBack: TRpDataFlashCallBackEvent;
-    FIdentificadorCliente: string;
+    FClientID: string;
     FUsername: string;
     FPassword: string;
     FAutenticado: Boolean;
@@ -142,15 +142,15 @@ type
     procedure AddInstance(const AInstance: IRpDataFlashCommandInterfaced);
     function Ip: string;
 
-    property NomeCliente : string read FNomeCliente write FNomeCliente;
-    property IdentificadorCliente : string read FIdentificadorCliente write FIdentificadorCliente;
+    property ClientName : string read FClientName write FClientName;
+    property ClientID : string read FClientID write FClientID;
     property Handler : TIdIOHandler read FHandler write FHandler;
     property Executor : IRpPackageCommandExecutor read FExecutor write FExecutor;
     property TcpClientPonte : TRpDataFlashCustomClientConnection read FTcpClientPonte;
     property Quebras : TRpDataFlashProtocolBreakerList read FQuebras;
     property Username : string read GetUserName write SetUsername;
     property Password : string read GetPassword write SetPassword;
-    property Autenticado : Boolean read GetAuthenticated write SetAuthenticated;
+    property Authenticated : Boolean read GetAuthenticated write SetAuthenticated;
     property OnCallBack : TRpDataFlashCallBackEvent read FOnCallBack write FOnCallBack;
   end;
 
@@ -2033,7 +2033,7 @@ begin
     lComando.ResponseInfo := AResponseInfo;
 
     // se tem rotina de autenticacao e o comando recebido nao é para autenticar, aborta o processo
-    if Assigned(FOnAuthenticateClient) and (not AItem.Autenticado) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
+    if Assigned(FOnAuthenticateClient) and (not AItem.Authenticated) and ComandoRequerAutenticacao(lNomeComando, lComando.GetParams) then
       raise ERpDataFlashUserNotFound.Create('Este servidor requer autenticação para execução de comandos.');
 
     lComando.Executor := AItem.Executor;
@@ -2486,8 +2486,8 @@ begin
   if lPermitir then
   begin
     lConexao := TRpDataFlashConnectionItem.Create(Self, AContext.Connection.IOHandler);
-    lConexao.IdentificadorCliente := IntToStr(AContext.Binding.Handle);
-    lConexao.NomeCliente := AContext.Binding.PeerIP;
+    lConexao.ClientID := IntToStr(AContext.Binding.Handle);
+    lConexao.ClientName := AContext.Binding.PeerIP;
     lConexao.OnCallBack := EnviarCallBack;
     AContext.Data := lConexao;
     Inc(FNumeroConectados);
@@ -2633,7 +2633,7 @@ begin
   FPassword := EmptyStr;
   FOwner := AOwner;
   FHandler := pHandler;
-  FNomeCliente := EmptyStr;
+  FClientName := EmptyStr;
   FInterfaceList := TInterfaceList.Create;
   FExecutor := nil;
 
@@ -2685,7 +2685,7 @@ end;
 
 function TRpDataFlashConnectionItem.Ip: string;
 begin
-  Result := FNomeCliente;
+  Result := FClientName;
 end;
 
 function TRpDataFlashConnectionItem.FindInstance(const ACommand: string): IRpDataFlashCommandInterfaced;

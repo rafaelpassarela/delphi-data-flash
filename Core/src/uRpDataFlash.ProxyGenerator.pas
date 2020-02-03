@@ -921,7 +921,7 @@ var
 
 begin
   lRegistrados := nil;
-  TCPClassRegistrer.Registrados(lRegistrados);
+  TCPClassRegistrer.RegisteredList(lRegistrados);
 
   // percorre todos os comandos registrados e envia para o grupo registrar
   for i := 0 to lRegistrados.Count - 1 do
@@ -1841,6 +1841,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TRpDataFlashComandoList, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrate(TRpDataFlashComandoList, C_GROUP_INTERNAL);
 
 end.

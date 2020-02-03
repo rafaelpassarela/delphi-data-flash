@@ -91,6 +91,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TRpDataFlashComandoHelper, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrate(TRpDataFlashComandoHelper, C_GROUP_INTERNAL);
 
 end.

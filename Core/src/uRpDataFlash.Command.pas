@@ -252,7 +252,7 @@ type
 
     procedure AddNew(const AParam : TRpDataFlashCommandParameter); overload;
     function AddNew(const AName : string; AValue : Variant; const AParamType : TRpDataFlashParamType;
-      const AValueType : TRpDataFlashParamValueType) : TRpDataFlashCommandParameter; overload;
+      const AValueType : TRpDataFlashParamValueType; const ABaseClassName : string = '') : TRpDataFlashCommandParameter; overload;
     function AddNew(const AName: string; const AParamType : TRpDataFlashParamType;
       const AValueType : TRpDataFlashParamValueClass) : TRpDataFlashParamValue; overload;
     function AddNew(const AName: string; const AParamType : TRpDataFlashParamType;
@@ -571,7 +571,7 @@ type
     function GetItem(const Index : Integer) : TTcpClassRegisterItem;
   public
     class var TcpClassRegister: TTcpClassRegister;
-    procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
+    procedure Registrate(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
       const ALifeCycle : TRpDataFlashLifeCycle = tlfInstance);
     function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
@@ -581,13 +581,13 @@ type
 
   TCPClassRegistrer = class
   public
-    class procedure Destruir;
-    class procedure Registrar(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
+    class procedure ReleaseRegistrer;
+    class procedure Registrate(const AClass : TRpDataFlashAbstractClass; const AGrupoProxy : string;
       const AMnemonico : string = ''; const APublico : Boolean = False;
       const ALifeCycle : TRpDataFlashLifeCycle = tlfInstance);
-    class procedure RegistrarDSProvider(const AClass : TRpDataFlashAbstractClass;
+    class procedure RegistrateDSProvider(const AClass : TRpDataFlashAbstractClass;
       const ALifeCycle : TRpDataFlashLifeCycle);
-    class procedure Registrados(out ARegistrados : TTcpClassRegister; const ASomentePublicos : Boolean = False);
+    class procedure RegisteredList(out ARegistrados : TTcpClassRegister; const ASomentePublicos : Boolean = False);
     class function GetClass(const AClassName : string) : TRpDataFlashAbstractClass; overload;
     class function GetClass(const AClassName : string; out ALifeCycle : TRpDataFlashLifeCycle) : TRpDataFlashAbstractClass; overload;
 //    class procedure Instanciar(const AClass : TRpDataFlashAbstractClass; const ANomeInstancia : string);
@@ -994,6 +994,20 @@ var
   lPair: TJSONPair;
   lName: string;
   lValueStr: string;
+  lBaseClass: string;
+
+  function ParseStringValue(const AValue : string) : string;
+  begin
+    Result := AValue;
+    if (Result <> '') then
+    begin
+      if Result[1] = '"' then
+        Delete(Result, 1, 1);
+
+      if Result[ Length(Result) ] = '"' then
+        Delete(Result, Length(Result), 1);
+    end;
+  end;
 
 begin
   try
@@ -1007,17 +1021,11 @@ begin
 
       lTipo := TRpDataFlashParamType(StrToInt(lValues.Get('Tipo').FieldValue));
       lTipoValor := TRpDataFlashParamValueType(StrToInt(lValues.Get('TipoValor').FieldValue));
-      lValueStr := lValues.Get('Valor').FieldValue;
-      if (lValueStr <> '') and (lValueStr[1] = '"') then
-        Delete(lValueStr, 1, 1);
-
-      if (lValueStr <> '') and (lValueStr[ Length(lValueStr) ] = '"') then
-        Delete(lValueStr, Length(lValueStr), 1);
-
+      lBaseClass := ParseStringValue(lValues.Get('BaseClass').FieldValue);
+      lValueStr := ParseStringValue(lValues.Get('Valor').FieldValue);
 // Já retorna sem a segunda bara
 //      lValueStr := StringReplace(lValueStr, '\\', '\', [rfReplaceAll]);
-
-      AddNew(lName, lValueStr, lTipo, lTipoValor);
+      AddNew(lName, lValueStr, lTipo, lTipoValor, lBaseClass);
     end;
   except
     raise Exception.Create('Erro carregando parâmetros JSON.');
@@ -1102,12 +1110,12 @@ begin
 end;
 
 function TRpDataFlashCommandParameterList.AddNew(const AName: string; AValue: Variant; const AParamType : TRpDataFlashParamType;
-  const AValueType : TRpDataFlashParamValueType) : TRpDataFlashCommandParameter;
+  const AValueType : TRpDataFlashParamValueType; const ABaseClassName : string) : TRpDataFlashCommandParameter;
 begin
   Result := FindByName(AName, AParamType);
   if not Assigned(Result) then
   begin
-    Result := TRpDataFlashCommandParameter.Create(Self, AName, AValue, AParamType, AValueType);
+    Result := TRpDataFlashCommandParameter.Create(Self, AName, AValue, AParamType, AValueType, ABaseClassName);
     AddNew(Result);
   end;
 
@@ -1805,7 +1813,7 @@ end;
 
 { TCPClassRegistrer }
 
-class procedure TCPClassRegistrer.Destruir;
+class procedure TCPClassRegistrer.ReleaseRegistrer;
 begin
   if TTcpClassRegister.TcpClassRegister <> nil then
     FreeAndNil(TTcpClassRegister.TcpClassRegister);
@@ -1822,7 +1830,7 @@ begin
   Result := TTcpClassRegister.TcpClassRegister.GetClass(AClassName, ALifeCycle);
 end;
 
-class procedure TCPClassRegistrer.Registrados(out ARegistrados: TTcpClassRegister;
+class procedure TCPClassRegistrer.RegisteredList(out ARegistrados: TTcpClassRegister;
   const ASomentePublicos : Boolean);
 var
   I: Integer;
@@ -1850,7 +1858,7 @@ begin
     end;
 end;
 
-class procedure TCPClassRegistrer.Registrar(const AClass : TRpDataFlashAbstractClass;
+class procedure TCPClassRegistrer.Registrate(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
   const ALifeCycle : TRpDataFlashLifeCycle);
 var
@@ -1863,15 +1871,15 @@ begin
   if lGrupoProxy = '' then
     lGrupoProxy := 'Default';
 
-  TTcpClassRegister.TcpClassRegister.Registrar(AClass, lGrupoProxy, AMnemonico, APublico, ALifeCycle);
+  TTcpClassRegister.TcpClassRegister.Registrate(AClass, lGrupoProxy, AMnemonico, APublico, ALifeCycle);
 end;
 
-class procedure TCPClassRegistrer.RegistrarDSProvider(const AClass: TRpDataFlashAbstractClass;
+class procedure TCPClassRegistrer.RegistrateDSProvider(const AClass: TRpDataFlashAbstractClass;
   const ALifeCycle : TRpDataFlashLifeCycle);
 begin
   if TTcpClassRegister.TcpClassRegister = nil then
     TTcpClassRegister.TcpClassRegister := TTcpClassRegister.Create;
-  TTcpClassRegister.TcpClassRegister.Registrar(AClass, C_GROUP_DATASET, '', False, ALifeCycle);
+  TTcpClassRegister.TcpClassRegister.Registrate(AClass, C_GROUP_DATASET, '', False, ALifeCycle);
 end;
 
 { TTcpClassRegister }
@@ -1904,7 +1912,7 @@ begin
   Result := TTcpClassRegisterItem(Self.Get(Index));
 end;
 
-procedure TTcpClassRegister.Registrar(const AClass : TRpDataFlashAbstractClass;
+procedure TTcpClassRegister.Registrate(const AClass : TRpDataFlashAbstractClass;
   const AGrupoProxy : string; const AMnemonico : string; const APublico : Boolean;
   const ALifeCycle : TRpDataFlashLifeCycle);
 var
@@ -2397,6 +2405,6 @@ end;
 initialization
 
 finalization
-  TCPClassRegistrer.Destruir;
+  TCPClassRegistrer.ReleaseRegistrer;
 
 end.

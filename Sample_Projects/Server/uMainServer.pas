@@ -321,6 +321,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TComandoCodeInverter, 'HARD_CODE');
+  TCPClassRegistrer.Registrate(TComandoCodeInverter, 'HARD_CODE');
 
 end.

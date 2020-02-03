@@ -64,6 +64,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TRpDataFlashPingCommand, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrate(TRpDataFlashPingCommand, C_GROUP_INTERNAL);
 
 end.

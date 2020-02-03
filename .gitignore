@@ -63,3 +63,4 @@ __history/
 !_Tools/ResourceList.dll
 !**/*.dll
 !**/*.exe
+Bin/Dcu/

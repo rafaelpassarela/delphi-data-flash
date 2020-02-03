@@ -136,6 +136,6 @@ begin
 end;
 
 initialization
-  TCPClassRegistrer.Registrar(TRpDataFlashComandoAutenticar, C_GROUP_INTERNAL);
+  TCPClassRegistrer.Registrate(TRpDataFlashComandoAutenticar, C_GROUP_INTERNAL);
 
 end.

@@ -502,7 +502,7 @@ var
   end;
 
 begin
-  TCPClassRegistrer.Registrados(lRegistro);
+  TCPClassRegistrer.RegisteredList(lRegistro);
   lGerados := EmptyStr;
   try
     for i := 0 to lRegistro.Count - 1 do
