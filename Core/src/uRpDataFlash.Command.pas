@@ -141,6 +141,7 @@ type
     FValueType: TRpDataFlashParamValueType;
     FFile: TRpFileProxy;
     FBaseClass: string;
+    function GetIsEmpty: Boolean;
     function GetAsString: string;
     function GetAsFloat: Double;
     function GetAsBoolean: Boolean;
@@ -186,6 +187,7 @@ type
     property AsJSONString : string read GetAsJSONString write SetAsJSONString;
     property AsBinaryFile: TRpFileProxy read GetAsBinaryFile;
     property AsObject : TBaseSerializableObject read GetAsObject;
+    property IsEmpty : Boolean read GetIsEmpty;
 
     procedure LoadFromFile(const AArquivo : string);
     procedure SaveToFile(const AArquivo : string);
@@ -269,6 +271,7 @@ type
 
     function Serialize : string;
     procedure Load(const AParams : string);
+    procedure ParseJSON(const AJSONString : string);
 
     property InternalParam[const AName : string] : TRpDataFlashCommandParameter index tpInternal read GetParamByName;
     property Param[const AName : string] : TRpDataFlashCommandParameter index tpInput read GetParamByName;
@@ -722,6 +725,13 @@ begin
   Result := FValue;
 end;
 
+function TRpDataFlashCommandParameter.GetIsEmpty: Boolean;
+begin
+  Result := (FValue = Null)
+         or (FValue = Unassigned)
+         or (VarToStrDef(FValue, EmptyStr) = EmptyStr);
+end;
+
 procedure TRpDataFlashCommandParameter.LoadFromFile(const AArquivo: string);
 var
   lRetornoStr: TStringStream;
@@ -1014,6 +1024,40 @@ begin
   end
   else
     raise Exception.Create('Nenhum parâmetro foi recebido.');
+end;
+
+procedure TRpDataFlashCommandParameterList.ParseJSON(const AJSONString: string);
+var
+  i: Integer;
+  lPair: TJSONPair;
+  lJsonObj: TJSONObject;
+  lParamItem: TRpDataFlashCommandParameter;
+begin
+  // percorre a lista de parametros, e verifica se existe um Json com o mesmo nome,
+  // se existir e este estiver vazio na lista de parametros, sera atualizado com o
+  // valor do Json
+  try
+    lJsonObj := TJSONObject.Create;
+    try
+      lJsonObj.Parse(BytesOf(AJSONString), 0);
+
+      for i := 0 to Self.Count - 1 do
+      begin
+        lParamItem := Self[i];
+        if (lParamItem.ParamType in [tpInput, tpInputNoReload]) and lParamItem.IsEmpty then
+        begin
+          lPair := lJsonObj.Get( lParamItem.Name );
+          if lPair <> nil then
+            lParamItem.AsVariant := lPair.JsonValue.Value;
+        end;
+      end;
+    finally
+      FreeAndNil(lJsonObj);
+    end;
+  except
+    on E:Exception do
+      raise Exception.Create('Erro ao carregar mensagem (J): ' + E.Message);
+  end;
 end;
 
 constructor TRpDataFlashCommandParameterList.Create(const AFileTransferSupport : IRpDataFlashFileTransferSupport);

@@ -1258,7 +1258,29 @@ var
     end;
   end;
 
+  procedure LoadPostJsonFromBody;
+  var
+    lStream: TStringStream;
+    lValue : string;
+  begin
+    lStream := TStringStream.Create;
+    try
+      if Assigned(ARequestInfo.PostStream) then
+      begin
+        ARequestInfo.PostStream.Position := 0;
+        lStream.LoadFromStream( ARequestInfo.PostStream );
+        lValue := Trim(lStream.DataString);
+        if lValue <> EmptyStr then
+          lComando.GetParams.ParseJSON(lValue);
+      end;
+    finally
+      if Assigned(lStream) then
+        FreeAndNil(lStream);
+    end;
+  end;
+
 begin
+{$MESSAGE 'REST InputReader'}
   lComandos := TStringList.Create;
   lQuebra := TRpDataFlashProtocolBreaker.Create;
   try
@@ -1294,6 +1316,9 @@ begin
           or ((lComando.GetParams.Item[i].ParamType = tpInternal) and (lComando.GetParams.Item[i].Name = C_PARAM_INT_FORMAT_TYPE)) then
             lComando.GetParams.Item[i].AsVariant := ARequestInfo.Params.Values[lComando.GetParams.Item[i].Name];
         end;
+
+        if ARequestInfo.Command = 'POST' then
+          LoadPostJsonFromBody;
 
         if ARequestInfo.ContentType = C_REST_CONTENT_TYPE_JSON then
           lComando.GetParams.SerializationFormat := sfJSON;
@@ -1400,6 +1425,7 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
   end;
 
 begin
+{$MESSAGE 'TCP/IP InputReader'}
   case FCommunicationType of
     ctText              : ReceberComoTexto;
     ctStream            : ReceberComoStringStream;
@@ -2005,11 +2031,6 @@ var
     end;
   end;
 
-  function GetNomeComando : string;
-  begin
-//    Result := copy(ARequestInfo.Document, LastDelimiter('/', ARequestInfo.Document) + 1, length(ARequestInfo.Document));
-  end;
-
 begin
   ASaida := EmptyStr;
   lNomeComando := EmptyStr;
@@ -2043,7 +2064,7 @@ begin
     end;
 
     if not lCarregado then
-      lCarregado := (TRpDataFlashCommand.LoadCommand(AProtocol.Message, lComando, lParametros, Self, AItem));
+      lCarregado := TRpDataFlashCommand.LoadCommand(AProtocol.Message, lComando, lParametros, Self, AItem);
 
     if not lCarregado then
       raise ERpDataFlashException.CreateFmt('Comando não suportado: Comando [%s].', [lParametros.Command]);
