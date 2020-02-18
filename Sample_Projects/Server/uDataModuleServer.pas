@@ -4,7 +4,8 @@ interface
 
 uses
   SysUtils, Classes, uRpDataFlash.Command, DB, Forms, Provider, DBClient,
-  uRpSystem, IBX.IBDatabase, IBX.IBSQL, IBX.IBCustomDataSet, IBX.IBQuery;
+  uRpSystem, IBX.IBDatabase, IBX.IBSQL, IBX.IBCustomDataSet, IBX.IBQuery,
+  uRpDataFlash.DataSet.Params;
 
 type
   TDataModuleServer = class(TDataModule, IRpPackageCommandExecutor, IInterface)
@@ -27,13 +28,15 @@ type
     function Commit(const ARetaining : Boolean) : Boolean;
     function Rollback(const ARetaining : Boolean) : Boolean;
     function StartTransaction : Boolean;
-    function Select(const ASelectSQL: string; out XMLData: string): Boolean;
-    function ExecuteSQL(const ASQL: string): Boolean;
-
+    function Select(const ASelectSQL: string; out XMLData: string): Boolean; overload;
+    function Select(const ADataSetParams: TRpDataFlashDataSetParams;
+      out XMLData: string): Boolean; overload;
+    function ExecuteSQL(const ASQL: string): Boolean; overload;
+    function ExecuteSQL(const ADataSetParams: TRpDataFlashDataSetParams): Boolean; overload;
+    // IInterface
     function _AddRef: Integer; stdcall;
     function _Release: Integer; stdcall;
     // ***** end - IRpPackageCommandExecutor ******
-
   end;
 
 var
@@ -105,20 +108,46 @@ begin
   end;
 end;
 
-function TDataModuleServer.ExecuteSQL(const ASQL: string): Boolean;
+function TDataModuleServer.ExecuteSQL(
+  const ADataSetParams: TRpDataFlashDataSetParams): Boolean;
 var
   lIbExec : TIBSQL;
+  i: Integer;
 begin
   lIbExec := TIBSQL.Create(Self);
   try
     lIbExec.Database := IBDatabaseServico;
     lIbExec.Transaction := IBTransactionServico;
-    lIbExec.SQL.Text := ASQL;
-    lIbExec.ExecQuery;
+    lIbExec.SQL.Text := ADataSetParams.SQL.Text;
 
+    if not lIbExec.Prepared then
+      lIbExec.Prepare;
+
+    for i := 0 to ADataSetParams.Count - 1 do
+    begin
+      if ADataSetParams[i].IsNull then
+        lIbExec.Params[i].Clear
+      else
+        lIbExec.Params[i].Value := ADataSetParams[i].Value;
+    end;
+
+    lIbExec.ExecQuery;
     Result := True;
   finally
     FreeAndNil(lIbExec);
+  end;
+end;
+
+function TDataModuleServer.ExecuteSQL(const ASQL: string): Boolean;
+var
+  lDSParam : TRpDataFlashDataSetParams;
+begin
+  lDSParam := TRpDataFlashDataSetParams.Create(ASQL);
+  try
+    Result := ExecuteSQL(lDSParam);
+  finally
+    if Assigned(lDSParam) then
+      FreeAndNil(lDSParam);
   end;
 end;
 
@@ -152,9 +181,24 @@ end;
 function TDataModuleServer.Select(const ASelectSQL: string;
   out XMLData: string): Boolean;
 var
+  lDSParam : TRpDataFlashDataSetParams;
+begin
+  lDSParam := TRpDataFlashDataSetParams.Create(ASelectSQL);
+  try
+    Result := Select(lDSParam, XMLData);
+  finally
+    if Assigned(lDSParam) then
+      FreeAndNil(lDSParam);
+  end;
+end;
+
+function TDataModuleServer.Select(
+  const ADataSetParams: TRpDataFlashDataSetParams;
+  out XMLData: string): Boolean;
+var
   lQry: TIBQuery;
   lProvider: TDataSetProvider;
-  lCds: TClientDataSet;  
+  lCds: TClientDataSet;
 begin
   lQry := TIBQuery.Create(Self);
   lProvider := TDataSetProvider.Create(Self);
@@ -163,7 +207,10 @@ begin
     // Query
     lQry.Database := IBDatabaseServico;
     lQry.Transaction := IBTransactionServico;
-    lQry.SQL.Text := ASelectSQL;
+    lQry.SQL.Text := ADataSetParams.SQL.Text;
+    if not lQry.Prepared then
+      lQry.Prepare;
+    lQry.Params.Assign( ADataSetParams );
 
     // Provider
     lProvider.DataSet := lQry;
@@ -174,7 +221,7 @@ begin
     lCds.Open;
 
     XMLData := lCds.XMLData;
-    
+
     Result := True;
   finally
     lCds.Close;

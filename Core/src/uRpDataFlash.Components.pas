@@ -1280,7 +1280,7 @@ var
   end;
 
 begin
-{$MESSAGE 'REST InputReader'}
+// {$MESSAGE 'REST InputReader'}
   lComandos := TStringList.Create;
   lQuebra := TRpDataFlashProtocolBreaker.Create;
   try
@@ -1425,7 +1425,7 @@ function TRpDataFlashCustomConnection.InternalReceber(const AHandler: TIdIOHandl
   end;
 
 begin
-{$MESSAGE 'TCP/IP InputReader'}
+// {$MESSAGE 'TCP/IP InputReader'}
   case FCommunicationType of
     ctText              : ReceberComoTexto;
     ctStream            : ReceberComoStringStream;

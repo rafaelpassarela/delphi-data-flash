@@ -317,7 +317,10 @@ var
   lInvertida: string;
 begin
   lInvertida := EmptyStr;
-  lPalavra := Param['Palavra'].AsString;
+  if Param['Palavra'].ValueType = tvpBase64 then
+    lPalavra := Param['Palavra'].AsBase64
+  else
+    lPalavra := Param['Palavra'].AsString;
 
   if lPalavra = EmptyStr then
     raise Exception.Create('Nenhuma palavra informada.');

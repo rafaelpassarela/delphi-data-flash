@@ -62,6 +62,7 @@ contains
   uRpDataFlash.ObjectReg in 'src\uRpDataFlash.ObjectReg.pas',
   uRpDataFlash.CommandHelper in 'src\uRpDataFlash.CommandHelper.pas',
   uRpDataFlash.Utils in 'src\uRpDataFlash.Utils.pas',
-  uRpDataFlash.EditorComandosProviderView in 'src\Editors\uRpDataFlash.EditorComandosProviderView.pas' {frmEditorComandosProvider};
+  uRpDataFlash.EditorComandosProviderView in 'src\Editors\uRpDataFlash.EditorComandosProviderView.pas' {frmEditorComandosProvider},
+  uRpDataFlash.DataSet.Params in 'src\uRpDataFlash.DataSet.Params.pas';
 
 end.

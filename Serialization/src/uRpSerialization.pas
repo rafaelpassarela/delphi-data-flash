@@ -569,7 +569,10 @@ begin
 
       lPair := FJSonObject.Get(lNodeName);
       try
-        lTmpObject := TJsonObject( lPair.JsonValue );
+        if Assigned(lPair) then
+          lTmpObject := TJsonObject( lPair.JsonValue )
+        else
+          lTmpObject := nil;
       except
         lTmpObject := nil;
       end;

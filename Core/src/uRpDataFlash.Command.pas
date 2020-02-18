@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, Contnrs, XMLIntf, XMLDoc, DB, uRpDataFlash.Types, IdContext,
   Variants, ActiveX, StrUtils, uRpAlgorithms, uRpJsonBase, uRpDataFlash.ConvertUtils,
-  uRpSerialization, Windows, IdCustomHttpServer, uRpResourceString;
+  uRpSerialization, Windows, IdCustomHttpServer, uRpResourceString,
+  uRpDataFlash.DataSet.Params;
 
 type
   TRpDataFlashCommandParameterList = class;
@@ -28,8 +29,10 @@ type
     function Commit(const ARetaining : Boolean) : Boolean;
     function Rollback(const ARetaining : Boolean) : Boolean;
     function StartTransaction : Boolean;
-    function Select(const ASelectSQL: string; out XMLData: string): Boolean;
-    function ExecuteSQL(const ASQL: string): Boolean;
+    function Select(const ASelectSQL: string; out XMLData: string): Boolean; overload;
+    function Select(const ADataSetParams: TRpDataFlashDataSetParams; out XMLData: string): Boolean; overload;
+    function ExecuteSQL(const ASQL: string): Boolean; overload;
+    function ExecuteSQL(const ADataSetParams: TRpDataFlashDataSetParams): Boolean; overload;
   end;
 
   TRpDataFlashCallBackEvent = function(const AContext: TIdContext; const AMessage : string) : Boolean of object;
@@ -198,6 +201,11 @@ type
     function ToApplicationJson : string;
 
     procedure Assign(const Source: TRpDataFlashCommandParameter); reintroduce;
+  end;
+
+  TRpDataFlashCommandParameterSetter = class(TRpDataFlashCommandParameter)
+  public
+    procedure SetValueType(const AValueType : TRpDataFlashParamValueType);
   end;
 
   TRpDataFlashParamValue = class(TRpDataFlashCommandParameter)
@@ -761,7 +769,8 @@ begin
   if VarIsNull(FValue) then
     lValue := 'null'
   else
-    lValue := StringReplace(FValue, '\', '\\', [rfReplaceAll]);
+    lValue := FValue;
+//    lValue := StringReplace(FValue, '\', '\\', [rfReplaceAll]);
 
   lFmtString := '"%s":';
 
@@ -1031,6 +1040,7 @@ var
   i: Integer;
   lPair: TJSONPair;
   lJsonObj: TJSONObject;
+  lValue: string;
   lParamItem: TRpDataFlashCommandParameter;
 begin
   // percorre a lista de parametros, e verifica se existe um Json com o mesmo nome,
@@ -1048,7 +1058,21 @@ begin
         begin
           lPair := lJsonObj.Get( lParamItem.Name );
           if lPair <> nil then
-            lParamItem.AsVariant := lPair.JsonValue.Value;
+          begin
+            // value = tem valor
+            lValue := lPair.JsonValue.Value;
+            if lValue = EmptyStr then
+            begin
+              lValue := lPair.JsonValue.ToString;
+              if (lValue <> EmptyStr) and (Copy(lValue, 1, 1) = '{') then
+              begin
+                lParamItem.AsBase64 := lValue;
+                TRpDataFlashCommandParameterSetter(lParamItem).SetValueType(tvpBase64);
+              end else
+                lParamItem.AsVariant := lValue;
+            end else
+              lParamItem.AsVariant := lValue;
+          end;
         end;
       end;
     finally
@@ -2517,6 +2541,14 @@ end;
 function TRpDataFlashBrowserCommand.GetBrowserPage: string;
 begin
   Result := '';
+end;
+
+{ TRpDataFlashCommandParameterSetter }
+
+procedure TRpDataFlashCommandParameterSetter.SetValueType(
+  const AValueType: TRpDataFlashParamValueType);
+begin
+  FValueType := AValueType;
 end;
 
 initialization
