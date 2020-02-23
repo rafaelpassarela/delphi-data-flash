@@ -29,7 +29,7 @@ package RpDataFlashCommD;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'DataFlash - Designtime Communication Package - Rafael Passarela'}
+{$DESCRIPTION 'DataFlash (32bit) - Designtime Communication Package - Rafael Passarela'}
 {$DESIGNONLY}
 {$IMPLICITBUILD OFF}
 
