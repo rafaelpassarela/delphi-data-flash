@@ -383,12 +383,27 @@ begin
 end;
 
 function TRpFieldsBase.VarIsNullEx(const Value: Variant): Boolean;
+var
+  lVarTp : Cardinal;
+  lVarIsString : Boolean;
 begin
-  Result := VarIsNull(Value) or (FValue = Unassigned);
+  lVarTp := VarType(Value);
+  Result := lVarTp in [varNull, varEmpty];
+
   if not Result then
-    Result := (Value = 'null')
-           or (Value = 'Null')
-           or (Value = 'NULL');
+  begin
+    lVarIsString := (lVarTp = varOleStr)
+                 or (lVarTp = varString)
+                 or (lVarTp = varUString);
+    if lVarIsString then
+    begin
+      Result := VarIsNull(Value) or (FValue = Unassigned);
+      if not Result then
+        Result := (Value = 'null')
+               or (Value = 'Null')
+               or (Value = 'NULL');
+    end;
+  end;
 end;
 
 { TJSONFieldNode }
