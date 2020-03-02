@@ -787,10 +787,24 @@ begin
 //    tvpFile: ;
 //    tvpBinaryFile: ;
 
-  if FValueType in [tvpInteger, tvpFloat, tvpBoolean, tvpBase, tvpJSON] then
-    lFmtString := lFmtString + '%s'
-  else
-    lFmtString := lFmtString + '"%s"';
+  case FValueType of
+    tvpBoolean:
+    begin
+      lFmtString := lFmtString + '%s';
+      // False -> false | True -> true
+      lValue := LowerCase(lValue);
+    end;
+    tvpInteger,
+    tvpFloat,
+    tvpBase,
+    tvpJSON: lFmtString := lFmtString + '%s';
+    tvpString,
+    tvpBase64,
+    tvpDAO,
+    tvpDateTime,
+    tvpFile,
+    tvpBinaryFile: lFmtString := lFmtString + '"%s"';
+  end;
 
   Result := Format(lFmtString, [
     FName,
