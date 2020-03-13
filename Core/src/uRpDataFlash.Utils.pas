@@ -41,14 +41,18 @@ class function TRpDataFlashUtils.GetLocalComputerName: string;
 var
   lStackWin : TIdStackWindows;
 begin
-  if _LocalName = EmptyStr then
-  begin
-    lStackWin := TIdStackWindows.Create;
-    try
-      _LocalName := lStackWin.HostByAddress(lStackWin.LocalAddress);
-    finally
-      lStackWin.Free;
+  try
+    if _LocalName = EmptyStr then
+    begin
+      lStackWin := TIdStackWindows.Create;
+      try
+        _LocalName := lStackWin.HostByAddress(lStackWin.LocalAddress);
+      finally
+        lStackWin.Free;
+      end;
     end;
+  except
+    _LocalName := EmptyStr;
   end;
 
   Result := _LocalName;
