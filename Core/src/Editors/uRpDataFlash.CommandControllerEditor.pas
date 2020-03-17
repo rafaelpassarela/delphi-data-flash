@@ -8,7 +8,7 @@ uses
 type
   TRpDataFlashComandControllerEditor = class(TComponentEditor)
   private
-    procedure EditarComandos;
+    procedure EditCommands;
   public
     function GetVerbCount: Integer; override;
     function GetVerb(Index: Integer): string; override;
@@ -27,23 +27,23 @@ uses
 
 { TRpDataFlashComandControllerEditor }
 
-procedure TRpDataFlashComandControllerEditor.EditarComandos;
+procedure TRpDataFlashComandControllerEditor.EditCommands;
 begin
-  (Component as TRpDataFlashCommandController).EditarComandos;
+  (Component as TRpDataFlashCommandController).EditCommands;
 end;
 
 procedure TRpDataFlashComandControllerEditor.ExecuteVerb(Index: Integer);
 begin
   inherited;
   case Index of
-    0 : EditarComandos;
+    0 : EditCommands;
   end;
 end;
 
 function TRpDataFlashComandControllerEditor.GetVerb(Index: Integer): string;
 begin
   case Index of
-    0 : Result := 'Editar Comandos';
+    0 : Result := 'Edit Commands';
     else
       raise Exception.Create('Índice ' + IntToStr(Index) + ' não suportado !');
   end;

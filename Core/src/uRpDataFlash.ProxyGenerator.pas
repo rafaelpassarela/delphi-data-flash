@@ -1718,8 +1718,8 @@ begin
   lParametro := TProxyParametroComandoItem.Create;
 
   lParametro.Nome := PParams.Name;
-  lParametro.TipoParametro := PParams.Tipo;
-  lParametro.TipoValor := PParams.TipoValor;
+  lParametro.TipoParametro := PParams.ParamType;
+  lParametro.TipoValor := PParams.ParamDataType;
   lParametro.BaseClass := PParams.BaseClass;
 
   Self.Add( lParametro );

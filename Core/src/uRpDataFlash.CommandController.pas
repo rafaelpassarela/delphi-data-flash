@@ -49,23 +49,23 @@ type
   TRpDataFlashBaseParametroItem = class(TCollectionItem)
   private
     FName: string;
-    FTipo: TRpDataFlashParamType;
-    FTipoValor: TRpDataFlashParamValueType;
+    FParamType: TRpDataFlashParamType;
+    FParamDataType: TRpDataFlashParamValueType;
     FBaseClass: string;
-    procedure SetNome(const Value: string);
+    procedure SetName(const Value: string);
   protected
     function GetDisplayName: string; override;
-    property Name : string read FName write SetNome;
-    property Tipo : TRpDataFlashParamType read FTipo write FTipo;
-    property TipoValor : TRpDataFlashParamValueType read FTipoValor write FTipoValor;
+    property Name : string read FName write SetName;
+    property ParamType : TRpDataFlashParamType read FParamType write FParamType;
+    property ParamDataType: TRpDataFlashParamValueType read FParamDataType write FParamDataType;
     property BaseClass : string read FBaseClass write FBaseClass;
   end;
 
   TRpDataFlashParametroItem = class(TRpDataFlashBaseParametroItem)
   published
     property Name;
-    property Tipo;
-    property TipoValor;
+    property ParamType;
+    property ParamDataType;
     property BaseClass;
   end;
 
@@ -74,7 +74,7 @@ type
 
   TRpDataFlashParametroValueItem = class(TRpDataFlashBaseParametroItem)
   private
-    FValor: Variant;
+    FValue: Variant;
     function GetAsInteger: Integer;
     function GetAsBoolean: Boolean;
     function GetAsDateTime: TDateTime;
@@ -98,9 +98,9 @@ type
     function IsNull : Boolean;
   published
     property Name;
-    property TipoValor;
+    property ParamDataType;
     property BaseClass;
-    property Valor : Variant read FValor write FValor;
+    property Value : Variant read FValue write FValue;
   end;
 
   TRpDataFlashParametrosValueCollection = class(TRpDataFlashParametrosCollection)
@@ -140,7 +140,7 @@ type
     FOnValidarParametros: TRpDataFlashOnValidarParametrosEvent;
   protected
     function GetDisplayName: string; override;
-    procedure SetNome(const Value: string); virtual;
+    procedure SetName(const Value: string); virtual;
   public
     function IsCsDesigning : Boolean;
 
@@ -148,7 +148,7 @@ type
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
 
-    property Name : string read FName write SetNome;
+    property Name : string read FName write SetName;
     property Description : string read FDescription write FDescription;
     property ProcessType : TRpDataFlashProcessType read FProcessType write FProcessType default prtRemote;
     property Params : TRpDataFlashParametrosCollection read FParams write FParams;
@@ -203,7 +203,7 @@ type
     function IsCsDesigning : Boolean;
     function Novo : TRpDataFlashCommandItemBase;
     function Iterator : TIteratorComand;
-    function Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
+    function Find(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
   end;
 
   TRpDataFlashCommandListClass = class of TRpDataFlashCommandList;
@@ -223,7 +223,7 @@ begin
   Result := TIteratorComand.Create(Self);
 end;
 
-function TRpDataFlashCommandList.Localizar(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
+function TRpDataFlashCommandList.Find(const ANome : string; out AObjComando : IRpDataFlashCommandInterfaced) : Boolean;
 var
   lEnum: TCollectionEnumerator;
   lItem: TRpDataFlashCommandItemBase;
@@ -324,7 +324,7 @@ begin
         and (TRpDataFlashCommandList(GetOwner).IsCsDesigning);
 end;
 
-procedure TRpDataFlashCommandItemBase.SetNome(const Value: string);
+procedure TRpDataFlashCommandItemBase.SetName(const Value: string);
 begin
   FName := TRpDataFlashValidations.NameValidation( Value );
 end;
@@ -395,7 +395,7 @@ begin
     while lEnum.MoveNext do
     begin
       lItem := TRpDataFlashParametroItem(lEnum.Current);
-      Params.AddNew(lItem.Name, EmptyStr, lItem.Tipo, lItem.TipoValor);
+      Params.AddNew(lItem.Name, EmptyStr, lItem.ParamType, lItem.ParamDataType);
     end;
   finally
     FreeAndNil(lEnum);
@@ -437,11 +437,11 @@ function TRpDataFlashBaseParametroItem.GetDisplayName: string;
 begin
   Result := Format('%s - %s / %s', [
     FName,
-    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamType), Ord(FTipo)),
-    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamValueType), Ord(FTipoValor)) ]);
+    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamType), Ord(FParamType)),
+    TRpStrings.EnumToStr(TypeInfo(TRpDataFlashParamValueType), Ord(FParamDataType)) ]);
 end;
 
-procedure TRpDataFlashBaseParametroItem.SetNome(const Value: string);
+procedure TRpDataFlashBaseParametroItem.SetName(const Value: string);
 begin
   FName := TRpDataFlashValidations.NameValidation( Value );
 end;
@@ -478,7 +478,7 @@ end;
 
 procedure TRpDataFlashParametrosValueCollection.SetTipoParametro(Item: TCollectionItem);
 begin
-  TRpDataFlashParametroValueItem(Item).Tipo := tpInput;
+  TRpDataFlashParametroValueItem(Item).ParamType := tpInput;
 end;
 
 function TRpDataFlashParametrosValueCollection.StrIndexToIntIndex(
@@ -505,20 +505,20 @@ end;
 procedure TRpDataFlashRetornosValueCollection.SetTipoParametro(
   Item: TCollectionItem);
 begin
-  TRpDataFlashParametroValueItem(Item).Tipo := tpOutput;
+  TRpDataFlashParametroValueItem(Item).ParamType := tpOutput;
 end;
 
 { TRpDataFlashParametroValueItem }
 
 function TRpDataFlashParametroValueItem.GetAsBase64: string;
 begin
-  Result := Algorithms.Base64DecompressedString( VarToStrDef(FValor, EmptyStr) );
+  Result := Algorithms.Base64DecompressedString( VarToStrDef(FValue, EmptyStr) );
 end;
 
 function TRpDataFlashParametroValueItem.GetAsBoolean: Boolean;
 begin
   try
-    Result := FValor;
+    Result := FValue;
   except
     Result := False;
   end;
@@ -527,7 +527,7 @@ end;
 function TRpDataFlashParametroValueItem.GetAsDateTime: TDateTime;
 begin
   try
-    Result := FValor;
+    Result := FValue;
   except
     Result := StrToDate('01/01/1900');
   end;
@@ -536,7 +536,7 @@ end;
 function TRpDataFlashParametroValueItem.GetAsFloat: Double;
 begin
   try
-    Result := FValor;
+    Result := FValue;
   except
     Result := 0;
   end;
@@ -545,7 +545,7 @@ end;
 function TRpDataFlashParametroValueItem.GetAsInteger: Integer;
 begin
   try
-    Result := FValor;
+    Result := FValue;
   except
     Result := 0;
   end;
@@ -554,7 +554,7 @@ end;
 function TRpDataFlashParametroValueItem.GetAsString: string;
 begin
   try
-    Result := VarToStrDef(FValor, '');
+    Result := VarToStrDef(FValue, '');
   except
     Result := '';
   end;
@@ -562,38 +562,38 @@ end;
 
 function TRpDataFlashParametroValueItem.IsNull: Boolean;
 begin
-  Result := (FValor = Null)
-         or (FValor = Unassigned);
+  Result := (FValue = Null)
+         or (FValue = Unassigned);
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsBase64(const Value: string);
 begin
-  FValor := Algorithms.Base64CompressedString(Value);
+  FValue := Algorithms.Base64CompressedString(Value);
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsBoolean(const Value: Boolean);
 begin
-  FValor := Value;
+  FValue := Value;
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsDateTime(const Value: TDateTime);
 begin
-  FValor := Value;
+  FValue := Value;
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsFloat(const Value: Double);
 begin
-  FValor := Value;
+  FValue := Value;
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsInteger(const Value: Integer);
 begin
-  FValor := Value;
+  FValue := Value;
 end;
 
 procedure TRpDataFlashParametroValueItem.SetAsString(const Value: string);
 begin
-  FValor := Value;
+  FValue := Value;
 end;
 
 end.

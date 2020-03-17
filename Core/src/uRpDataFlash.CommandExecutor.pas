@@ -90,13 +90,13 @@ begin
     for i := 0 to Params.Count - 1 do
     begin
       lParam := Params.ByIndex(i);
-      if lParam.TipoValor in [tvpBase, tvpBase64, tvpDAO, tvpFile] then
+      if lParam.ParamDataType in [tvpBase, tvpBase64, tvpDAO, tvpFile] then
       begin
-        lCmd.Params.AddParam(lParam.Name, ' ', lParam.TipoValor);
-        lCmd.Param[lParam.Name].AsBase64 := lParam.Valor;
+        lCmd.Params.AddParam(lParam.Name, ' ', lParam.ParamDataType);
+        lCmd.Param[lParam.Name].AsBase64 := lParam.Value;
       end
       else
-        lCmd.Params.AddParam(lParam.Name, lParam.Valor, lParam.TipoValor);
+        lCmd.Params.AddParam(lParam.Name, lParam.Value, lParam.ParamDataType);
     end;
 
     FConexaoCliente.Comunicar( lCmd );
@@ -108,14 +108,14 @@ begin
     for i := 0 to ResultParams.Count - 1 do
     begin
       lParam := ResultParams.ByIndex(i);
-      case lParam.TipoValor of
-        tvpInteger:  lParam.Valor := lCmd.ResultParam[lParam.Name].AsInteger;
-        tvpString:   lParam.Valor := lCmd.ResultParam[lParam.Name].AsString;
-        tvpBoolean:  lParam.Valor := lCmd.ResultParam[lParam.Name].AsBoolean;
-        tvpFloat:    lParam.Valor := lCmd.ResultParam[lParam.Name].AsFloat;
-        tvpBase64:   lParam.Valor := lCmd.ResultParam[lParam.Name].AsBase64;
-        tvpDateTime: lParam.Valor := lCmd.ResultParam[lParam.Name].AsDateTime;
-        tvpFile:     lParam.Valor := lCmd.ResultParam[lParam.Name].AsBase64;
+      case lParam.ParamDataType of
+        tvpInteger:  lParam.Value := lCmd.ResultParam[lParam.Name].AsInteger;
+        tvpString:   lParam.Value := lCmd.ResultParam[lParam.Name].AsString;
+        tvpBoolean:  lParam.Value := lCmd.ResultParam[lParam.Name].AsBoolean;
+        tvpFloat:    lParam.Value := lCmd.ResultParam[lParam.Name].AsFloat;
+        tvpBase64:   lParam.Value := lCmd.ResultParam[lParam.Name].AsBase64;
+        tvpDateTime: lParam.Value := lCmd.ResultParam[lParam.Name].AsDateTime;
+        tvpFile:     lParam.Value := lCmd.ResultParam[lParam.Name].AsBase64;
       end;
     end;
 

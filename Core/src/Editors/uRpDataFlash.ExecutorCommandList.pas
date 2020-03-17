@@ -61,7 +61,7 @@ var
     if Assigned(lParam) then
     begin
       lParam.Name := AParamXML.Nome;
-      lParam.TipoValor := AParamXML.TipoValor;
+      lParam.ParamDataType := AParamXML.TipoValor;
     end;
   end;
 
