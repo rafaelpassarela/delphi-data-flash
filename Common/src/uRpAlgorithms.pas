@@ -17,12 +17,18 @@ type
   public
     class procedure StreamCompression(const AInStream : TStream; const AOutStream : TStream);
     class procedure StreamDecompression(const AInStream : TStream; const AOutStream : TStream);
+
     class procedure Base64Decode(const ABase64String : string; const OutStream : TStream); overload;
     class procedure Base64Decode(const ABase64String : string; var OutString : string); overload;
+
     class procedure Base64Encode(const AInStream : TStream; var OutString : string); overload;
     class procedure Base64Encode(const AInString : string; var OutString : string); overload;
-    class function Base64CompressedString(const AString : string): string;
+
+    class function Base64CompressedString(const AString : string): string; overload;
+    class function Base64CompressedString(const AStream : TStream): string; overload;
+
     class function Base64DecompressedString(const AString : string): string;
+
     class function MD5FromFile(const AFileName : TFileName) : string;
     class function MD5FromString(const AString : string) : string;
   end;
@@ -39,6 +45,25 @@ begin
   lInputStream := TStringStream.Create(AString);
   lOutputStream := TStringStream.Create('');
   try
+    Algorithms.StreamCompression(lInputStream, lOutputStream);
+    Algorithms.Base64Encode(lOutputStream, Result);
+  finally
+    lInputStream.Free;
+    lOutputStream.Free;
+  end;
+end;
+
+class function Algorithms.Base64CompressedString(const AStream : TStream): string;
+var
+  lInputStream: TStringStream;
+  lOutputStream: TStringStream;
+begin
+  lInputStream := TStringStream.Create;
+  lOutputStream := TStringStream.Create('');
+  try
+    AStream.Position := 0;
+    lInputStream.CopyFrom(AStream, AStream.Size);
+
     Algorithms.StreamCompression(lInputStream, lOutputStream);
     Algorithms.Base64Encode(lOutputStream, Result);
   finally
