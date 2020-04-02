@@ -17,17 +17,20 @@ type
     function GetAsFloat: Double;
     function GetAsString: string;
     function GetAsInteger: Integer;
+    function GetAsInt64: Int64;
     function GetAsBoolean: Boolean;
     procedure SetValue(const Value: Variant);
     procedure SetAsDateTime(const Value: TDateTime);
     procedure SetAsFloat(const Value: Double);
     procedure SetAsString(const Value: string);
     procedure SetAsInteger(const Value: Integer);
+    procedure SetAsInt64(const Value: Int64);
     procedure SetAsBoolean(const Value: Boolean);
 
     property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
     property AsString: string read GetAsString write SetAsString;
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
+    property AsInt64 : Int64 read GetAsInt64 write SetAsInt64;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
     property AsFloat: Double read GetAsFloat write SetAsFloat;
     property Value : Variant read GetValue write SetValue;
@@ -41,11 +44,13 @@ type
     function GetAsFloat: Double; virtual;
     function GetAsString: string; virtual;
     function GetAsInteger: Integer; virtual;
+    function GetAsInt64: Int64; virtual;
     function GetAsBoolean: Boolean; virtual;
     procedure SetAsDateTime(const Value: TDateTime); virtual;
     procedure SetAsFloat(const Value: Double); virtual;
     procedure SetAsString(const Value: string); virtual;
     procedure SetAsInteger(const Value: Integer); virtual;
+    procedure SetAsInt64(const Value: Int64); virtual;
     procedure SetAsBoolean(const Value: Boolean); virtual;
   protected
     function VarIsNullEx(const Value : Variant) : Boolean;
@@ -62,6 +67,7 @@ type
     property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
     property AsString: string read GetAsString write SetAsString;
     property AsInteger: Integer read GetAsInteger write SetAsInteger;
+    property AsInt64: Int64 read GetAsInt64 write SetAsInt64;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
     property AsFloat: Double read GetAsFloat write SetAsFloat;
     property Value : Variant read GetValue write SetValue;
@@ -263,6 +269,21 @@ begin
   end;
 end;
 
+function TRpFieldsBase.GetAsInt64: Int64;
+var
+  lValue: Variant;
+begin
+  lValue := GetValue;
+  if VarIsNullEx(lValue) then
+    Result := 0
+  else
+    try
+      Result := lValue;
+    except
+      Result := 0;
+    end;
+end;
+
 function TRpFieldsBase.GetAsInteger: Integer;
 var
   lValue: Variant;
@@ -363,6 +384,11 @@ begin
 end;
 
 procedure TRpFieldsBase.SetAsFloat(const Value: Double);
+begin
+  SetValue(Value);
+end;
+
+procedure TRpFieldsBase.SetAsInt64(const Value: Int64);
 begin
   SetValue(Value);
 end;

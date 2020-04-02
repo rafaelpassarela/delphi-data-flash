@@ -334,16 +334,16 @@ object FormMainClient: TFormMainClient
     Params = <
       item
         Name = 'A'
-        TipoValor = tvpFloat
+        ParamDataType = tvpInteger
       end
       item
         Name = 'B'
-        TipoValor = tvpFloat
+        ParamDataType = tvpInteger
       end>
     ResultParams = <
       item
         Name = 'X'
-        TipoValor = tvpFloat
+        ParamDataType = tvpInteger
       end>
     Left = 720
     Top = 40

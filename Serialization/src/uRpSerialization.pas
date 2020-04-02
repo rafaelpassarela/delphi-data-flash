@@ -138,6 +138,7 @@ type
     procedure FromNode(const AFieldName : string; out AValue : Char); overload;
     procedure FromNode(const AFieldName : string; out AValue : Boolean); overload;
     procedure FromNode(const AFieldName : string; out AValue : Integer); overload;
+    procedure FromNode(const AFieldName : string; out AValue : Int64); overload;
     procedure FromNode(const AFieldName : string; out AValue : String; const ABase64 : Boolean = False); overload;
     procedure FromNode(const AFieldName : string; out AValue : TDateTime); overload;
     procedure FromNode(const AFieldName : string; out AValue : TTime); overload;
@@ -683,6 +684,15 @@ begin
       AItem.LoadFromString( AJSon.ToString );
     end;
   end;
+end;
+
+procedure TBaseSerializableObject.FromNode(const AFieldName: string; out AValue: Int64);
+var
+  lField : TRpFieldsBase;
+begin
+  lField := InternalGetField(AFieldName);
+  AValue := lField.AsInt64;
+  FreeAndNil(lField);
 end;
 
 procedure TBaseSerializableObject.FromNode(const AFieldName: string; const AFieldClass: TStrings);
