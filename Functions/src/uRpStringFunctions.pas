@@ -12,9 +12,9 @@ uses
     {$ELSE}
       Vcl.Graphics, Vcl.Controls, Winapi.Windows, Vcl.Forms,
     {$ENDIF}
-  System.Types, System.SysUtils, System.Classes;
+  System.Types, System.SysUtils, System.Classes, System.MaskUtils;
   {$ELSE}
-  Graphics, Types, Controls, SysUtils, Windows, Classes, Forms;
+  Graphics, Types, Controls, SysUtils, Windows, Classes, Forms, MaskUtils;
   {$ENDIF}
 
 type
@@ -43,6 +43,8 @@ type
     class function InsertWhereCondition(const ASQL, AWhereCondition : string) : string;
     class function StringReplaceWholeWord(const AText, ASearchText, AReplaceText: string;
       const AReplaceFlags: TReplaceFlags): String;
+
+    class function ApplyMask(const AMask : string; const AValue : string) : string;
   end;
 
 implementation
@@ -50,6 +52,21 @@ implementation
 { TRpStrings }
 
 {$IFNDEF ANDROID}
+class function TRpStrings.ApplyMask(const AMask, AValue: string): string;
+begin
+//  // Aplicando máscara do CPF
+//  ShowMessage(FormatMaskText('000\.000\.000\-00;0;', '51895752337'));
+//  // Aplicando máscara do CNPJ
+//  ShowMessage(FormatMaskText('00\.000\.000\/0000\-00;0;', '44732264000105'));
+//  // Aplicando máscara do CEP
+//  ShowMessage(FormatMaskText('00000\-000;0;', '99200000'));
+//  // Aplicando máscara dE TELEFONE
+//  ShowMessage(FormatMaskText('\(00\)000000009;0;', '11978563215'));
+//  ShowMessage(FormatMaskText('\(00\)000000009;0;', '5434491111'));
+
+  Result := FormatMaskText(AMask, AValue);
+end;
+
 class function TRpStrings.CharSize(Canvas: TCanvas): TPoint;
 var
   I: Integer;
