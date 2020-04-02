@@ -36,7 +36,8 @@ requires
   IndyProtocols,
   IndyCore,
   dbrtl,
-  RpEncryption;
+  RpEncryption,
+  dclie;
 
 contains
   uRpStringFunctions in 'src\uRpStringFunctions.pas',
@@ -46,6 +47,7 @@ contains
   uRpSystem in 'src\uRpSystem.pas',
   uRpDateTimeFunctions in 'src\uRpDateTimeFunctions.pas',
   uRpApplicationUtil in 'src\uRpApplicationUtil.pas',
-  uRpResourceString in 'src\uRpResourceString.pas';
+  uRpResourceString in 'src\uRpResourceString.pas',
+  uRpWebBrowserFunctions in 'src\uRpWebBrowserFunctions.pas';
 
 end.

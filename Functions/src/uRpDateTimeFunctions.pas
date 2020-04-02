@@ -7,7 +7,7 @@ interface
 uses
   {$IFDEF XE3UP}
   Vcl.Graphics, System.Types, Vcl.Controls, System.SysUtils, Winapi.Windows,
-  System.Classes, Vcl.Forms, System.DateUtils,
+  System.Classes, Vcl.Forms, System.DateUtils, System.TimeSpan,
   {$ELSE}
   TypInfo, Graphics, Types, Controls, SysUtils, Windows, Classes, Forms, DateUtils,
   {$ENDIF}
@@ -29,6 +29,10 @@ type
     class function EndDateOfWeekStr(const ADate : TDateTime) : string;
 
     class function StrToDateFmt(const AFormat, AValue : string; const ADefault : TDateTime) : TDateTime;
+
+    {$IFDEF XE3UP}
+    class function JavaScriptDateToDelphiDate(const AJsDateTime : Extended) : TDateTime;
+    {$ENDIF}
   end;
 
 implementation
@@ -296,6 +300,26 @@ class function TRpDateTime.EndDateOfWeekStr(const ADate: TDateTime): string;
 begin
   Result := FormatDateTime(R_DATE_FORMAT, TRpDateTime.EndDateOfWeek(ADate));
 end;
+
+{$IFDEF XE3UP}
+class function TRpDateTime.JavaScriptDateToDelphiDate(const AJsDateTime: Extended): TDateTime;
+const
+//  C_BASE_MILLISECONDS = 2209161599999; // milliseconds from 30/12/1899 00:00:00:000 to 31/12/1969 23:59:59:999
+  C_BASE_DATE = 25568.9999999884;      // Float representation of 31/12/1969 23:59:59:999
+var
+//  lBaseMS : Extended;
+  lBaseDate : TDateTime;
+begin
+  lBaseDate := C_BASE_DATE;
+  lBaseDate := IncMilliSecond(lBaseDate, Round(AJsDateTime * 1000));
+
+  // GMT-0300
+  Result := lBaseDate + TTimeZone.Local.GetUtcOffset(lBaseDate);
+
+// JavaScript actually uses the amount of milliseconds since 01.01.1970 at 00:00:00 o’clock.
+// var data = new Date(1585685537 * 1000)
+end;
+{$ENDIF}
 
 class function TRpDateTime.StartDateOfMonth(const ADate: TDateTime): TDate;
 var

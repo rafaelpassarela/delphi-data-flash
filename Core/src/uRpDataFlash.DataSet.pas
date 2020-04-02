@@ -10,6 +10,11 @@ uses
   Dialogs, Windows, uRpAlgorithms, uRpStringFunctions;
 
 type
+//  TClientDataSetHelper = class helper for TClientDataSet
+//  public
+//    class function FromXMLData(const AXmlData : string) : TClientDataSet;
+//  end;
+
   TRpDataFlashDataSet = class;
 
   TRpDataFlashDataSetFormatter = class(TComponent, IFormaterMaskValues)

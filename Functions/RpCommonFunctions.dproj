@@ -113,6 +113,7 @@ $(PostBuildEvent)]]></PostBuildEvent>
         <DCCReference Include="IndyCore.dcp"/>
         <DCCReference Include="dbrtl.dcp"/>
         <DCCReference Include="RpEncryption.dcp"/>
+        <DCCReference Include="dclie.dcp"/>
         <DCCReference Include="src\uRpStringFunctions.pas"/>
         <DCCReference Include="src\uRpWindowsFunctions.pas"/>
         <DCCReference Include="src\uRpMessageFunctions.pas"/>
@@ -121,6 +122,7 @@ $(PostBuildEvent)]]></PostBuildEvent>
         <DCCReference Include="src\uRpDateTimeFunctions.pas"/>
         <DCCReference Include="src\uRpApplicationUtil.pas"/>
         <DCCReference Include="src\uRpResourceString.pas"/>
+        <DCCReference Include="src\uRpWebBrowserFunctions.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -212,7 +214,12 @@ $(PostBuildEvent)]]></PostBuildEvent>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\RpCommonFunctions.rsm" Configuration="Debug" Class="DebugSymbols"/>
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\20.0\Bpl\RpCommonFunctions.bpl" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>RpCommonFunctions.bpl</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="OSX32">
                         <Operation>1</Operation>
